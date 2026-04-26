@@ -611,7 +611,7 @@ History browsing, filtering, and detail views fully functional. Users can naviga
   - Sort results by sessionDate ASC (chronological)
   - Return DTO with exerciseName + points array
   - Handle case where exercise never logged (return empty points or 404)
-- [ ] T080 [P] [US4] Create `backend/src/main/java/com/gymtracker/infrastructure/query/ProgressionQueryBuilder.java`:
+- [X] T080 [P] [US4] Create `backend/src/main/java/com/gymtracker/infrastructure/query/ProgressionQueryBuilder.java`:
   - Implement native SQL or JPQL query to efficiently fetch progression data without N+1
   - Query joins LoggedSession → ExerciseEntry → StrengthSet/CardioLap, filters by userId + exerciseName, groups by session, calculates aggregates
   - Return List<ProgressionPoint> projection with sessionId, sessionDate, metricType, metricValue
