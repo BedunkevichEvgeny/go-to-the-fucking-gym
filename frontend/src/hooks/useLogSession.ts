@@ -5,7 +5,7 @@ import type { LoggedSessionCreateRequest, LoggedSessionDetail } from '../types/a
 export function useLogSession() {
   const queryClient = useQueryClient();
 
-  return useMutation({
+  const mutation = useMutation({
     mutationFn: async (payload: LoggedSessionCreateRequest) => {
       const response = await api.post<LoggedSessionDetail>('/logged-sessions', payload);
       return response.data;
@@ -15,5 +15,10 @@ export function useLogSession() {
       void queryClient.invalidateQueries({ queryKey: ['history'] });
     },
   });
+
+  return {
+    ...mutation,
+    isLoading: mutation.isPending,
+  };
 }
 
