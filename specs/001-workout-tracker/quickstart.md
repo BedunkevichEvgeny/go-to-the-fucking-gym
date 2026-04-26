@@ -1,5 +1,7 @@
 # Quickstart: Workout Tracker
 
+**Repository**: `https://github.com/BedunkevichEvgeny/go-to-the-fucking-gym`
+
 ## Purpose
 This quickstart describes the planned development flow for implementing feature `001-workout-tracker` with Java 21 + Spring Boot 4.0.5 backend and React frontend.
 
