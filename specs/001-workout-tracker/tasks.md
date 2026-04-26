@@ -297,19 +297,19 @@ Program session logging fully functional end-to-end (backend + frontend). Feelin
 
 ### Unit Tests for User Story 2 (MANDATORY - Write First)
 
-- [ ] T039 [P] [US2] Create `backend/src/test/java/com/gymtracker/application/FreeSessionServiceTest.java`:
+- [X] T039 [P] [US2] Create `backend/src/test/java/com/gymtracker/application/FreeSessionServiceTest.java`:
   - Test `saveFreeSession(userId, request)` persists LoggedSession with sessionType=FREE, programSessionId=null
   - Test `saveFreeSession(userId, request)` accepts custom exercise names (not in library)
   - Test `saveFreeSession(userId, request)` accepts library exercise IDs
   - Test `saveFreeSession(userId, request)` supports both strength and cardio entries in same session
   - Test `saveFreeSession(userId, request)` validates at least 1 exercise required
   - Test `saveFreeSession(userId, request)` enforces user ownership
-- [ ] T040 [P] [US2] Create `backend/src/test/java/com/gymtracker/application/ExerciseLibraryServiceTest.java`:
+- [X] T040 [P] [US2] Create `backend/src/test/java/com/gymtracker/application/ExerciseLibraryServiceTest.java`:
   - Test `searchExerciseLibrary(query)` returns list of Exercise entities matching name (case-insensitive)
   - Test `searchExerciseLibrary(query)` returns active exercises only (isActive=true)
   - Test `createCustomExercise(userId, name)` stores custom exercise reference in ExerciseEntry (customExerciseName field)
   - Test `getTopExercises()` returns most-used exercises for UI suggestions
-- [ ] T041 [P] [US2] Create `backend/src/test/java/com/gymtracker/application/CardioValidatorTest.java`:
+- [X] T041 [P] [US2] Create `backend/src/test/java/com/gymtracker/application/CardioValidatorTest.java`:
   - Test `validateCardioLap(cardioLap)` requires durationSeconds >= 1
   - Test `validateCardioLap(cardioLap)` allows distanceValue=null
   - Test `validateCardioEntry(entry)` requires at least 1 lap
@@ -317,12 +317,12 @@ Program session logging fully functional end-to-end (backend + frontend). Feelin
 
 ### Integration Tests for User Story 2 (MANDATORY)
 
-- [ ] T042 [P] [US2] Create `backend/src/test/java/com/gymtracker/api/ExerciseLibraryControllerIT.java`:
+- [X] T042 [P] [US2] Create `backend/src/test/java/com/gymtracker/api/ExerciseLibraryControllerIT.java`:
   - Test GET /api/exercises?query=bench returns list of Exercise with matching name
   - Test GET /api/exercises returns top 50 exercises (for initial UI population) ordered by usage
   - Test response includes exercise name, category, type, description
   - Test only active exercises (isActive=true) returned
-- [ ] T043 [P] [US2] Create `backend/src/test/java/com/gymtracker/api/FreeSessionControllerIT.java`:
+- [X] T043 [P] [US2] Create `backend/src/test/java/com/gymtracker/api/FreeSessionControllerIT.java`:
   - Test POST /api/logged-sessions with sessionType=FREE, library exercise IDs, returns 201
   - Test POST /api/logged-sessions with sessionType=FREE, custom exercise names, returns 201
   - Test POST /api/logged-sessions with mixed library + custom exercises persists all correctly
@@ -334,7 +334,7 @@ Program session logging fully functional end-to-end (backend + frontend). Feelin
 
 ### Frontend Tests for User Story 2 (MANDATORY)
 
-- [ ] T044 [P] [US2] Create `frontend/src/features/free-session/__tests__/FreeSessionForm.test.tsx`:
+- [X] T044 [P] [US2] Create `frontend/src/features/free-session/__tests__/FreeSessionForm.test.tsx`:
   - Test form renders "Start Free Session" heading
   - Test form renders exercise search/add section
   - Test search input filters library exercises dynamically
@@ -348,11 +348,11 @@ Program session logging fully functional end-to-end (backend + frontend). Feelin
   - Test form validates: at least 1 exercise required
   - Test form validates: at least 1 set/lap per exercise required
   - Test form submit calls API with correct payload (sessionType=FREE, exerciseEntries, no programSessionId)
-- [ ] T045 [P] [US2] Create `frontend/src/hooks/__tests__/useExerciseLibrary.test.ts`:
+- [X] T045 [P] [US2] Create `frontend/src/hooks/__tests__/useExerciseLibrary.test.ts`:
   - Test `useExerciseLibrary(query)` hook queries GET /api/exercises?query=[query]
   - Test hook returns exercises list with name, category, type
   - Test hook debounces search to avoid excessive requests
-- [ ] T046 [P] [US2] Create `frontend/src/features/free-session/__tests__/ExerciseLibrarySearch.test.tsx`:
+- [X] T046 [P] [US2] Create `frontend/src/features/free-session/__tests__/ExerciseLibrarySearch.test.tsx`:
   - Test search input triggers useExerciseLibrary hook
   - Test displays search results as clickable list
   - Test results show exercise name + category (e.g., "Bench Press (Chest)")
