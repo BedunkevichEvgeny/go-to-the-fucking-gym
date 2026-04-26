@@ -1,0 +1,348 @@
+openapi: 3.0.3
+info:
+  title: Workout Tracker API
+  version: 0.1.0
+  description: API contract for workout logging, history browsing, progression tracking, and AI handoff metadata.
+servers:
+  - url: /api
+security:
+  - basicAuth: []
+paths:
+  /program-sessions/next:
+    get:
+      summary: Get next uncompleted program session for authenticated user
+      operationId: getNextProgramSession
+      responses:
+        '200':
+          description: Next program session found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProgramSessionView'
+        '204':
+          description: No active program or program completed
+
+  /logged-sessions:
+    post:
+      summary: Save a logged workout session (program or free)
+      operationId: createLoggedSession
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoggedSessionCreateRequest'
+      responses:
+        '201':
+          description: Session saved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoggedSessionDetail'
+        '400':
+          description: Validation failure
+        '403':
+          description: Program session modification forbidden or cross-user access
+
+  /logged-sessions/history:
+    get:
+      summary: Get paginated reverse-chronological session history
+      operationId: getSessionHistory
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+        - in: query
+          name: size
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - in: query
+          name: dateFrom
+          schema:
+            type: string
+            format: date
+        - in: query
+          name: dateTo
+          schema:
+            type: string
+            format: date
+        - in: query
+          name: exerciseName
+          schema:
+            type: string
+      responses:
+        '200':
+          description: History page
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionHistoryPage'
+
+  /logged-sessions/{sessionId}:
+    get:
+      summary: Get full details for a specific logged session
+      operationId: getLoggedSessionById
+      parameters:
+        - in: path
+          name: sessionId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Session details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoggedSessionDetail'
+        '404':
+          description: Not found
+
+  /progression/{exerciseName}:
+    get:
+      summary: Get progression points for an exercise across all sessions
+      operationId: getExerciseProgression
+      parameters:
+        - in: path
+          name: exerciseName
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Progression data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProgressionResponse'
+
+components:
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+
+  schemas:
+    ProgramSessionView:
+      type: object
+      required: [programSessionId, sequenceNumber, name, exercises]
+      properties:
+        programSessionId:
+          type: string
+          format: uuid
+        sequenceNumber:
+          type: integer
+          minimum: 1
+        name:
+          type: string
+        exercises:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProgramExerciseTargetView'
+
+    ProgramExerciseTargetView:
+      type: object
+      required: [exerciseName, exerciseType]
+      properties:
+        exerciseName:
+          type: string
+        exerciseType:
+          type: string
+          enum: [STRENGTH, BODYWEIGHT, CARDIO]
+        targetSets:
+          type: integer
+          nullable: true
+        targetReps:
+          type: integer
+          nullable: true
+        targetWeight:
+          type: number
+          format: double
+          nullable: true
+        targetWeightUnit:
+          type: string
+          enum: [KG, LBS]
+          nullable: true
+        targetDurationSeconds:
+          type: integer
+          nullable: true
+        targetDistance:
+          type: number
+          format: double
+          nullable: true
+        targetDistanceUnit:
+          type: string
+          enum: [KM, MI]
+          nullable: true
+
+    LoggedSessionCreateRequest:
+      type: object
+      required: [sessionType, sessionDate, exerciseEntries, feelings]
+      properties:
+        sessionType:
+          type: string
+          enum: [PROGRAM, FREE]
+        programSessionId:
+          type: string
+          format: uuid
+          nullable: true
+        sessionDate:
+          type: string
+          format: date
+        name:
+          type: string
+        notes:
+          type: string
+        totalDurationSeconds:
+          type: integer
+          minimum: 1
+        feelings:
+          $ref: '#/components/schemas/SessionFeelings'
+        exerciseEntries:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ExerciseEntryInput'
+
+    SessionFeelings:
+      type: object
+      required: [rating]
+      properties:
+        rating:
+          type: integer
+          minimum: 1
+          maximum: 10
+        comment:
+          type: string
+
+    ExerciseEntryInput:
+      type: object
+      required: [exerciseName, exerciseType]
+      properties:
+        exerciseName:
+          type: string
+        exerciseType:
+          type: string
+          enum: [STRENGTH, BODYWEIGHT, CARDIO]
+        sets:
+          type: array
+          items:
+            $ref: '#/components/schemas/StrengthSetInput'
+        cardioLaps:
+          type: array
+          items:
+            $ref: '#/components/schemas/CardioLapInput'
+
+    StrengthSetInput:
+      type: object
+      required: [reps, isBodyWeight]
+      properties:
+        reps:
+          type: integer
+          minimum: 1
+        isBodyWeight:
+          type: boolean
+        weightValue:
+          type: number
+          format: double
+          nullable: true
+        weightUnit:
+          type: string
+          enum: [KG, LBS]
+          nullable: true
+
+    CardioLapInput:
+      type: object
+      required: [durationSeconds]
+      properties:
+        durationSeconds:
+          type: integer
+          minimum: 1
+        distanceValue:
+          type: number
+          format: double
+          nullable: true
+        distanceUnit:
+          type: string
+          enum: [KM, MI]
+          nullable: true
+
+    SessionHistoryPage:
+      type: object
+      required: [items, page, size, totalItems]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/SessionHistoryItem'
+        page:
+          type: integer
+        size:
+          type: integer
+        totalItems:
+          type: integer
+
+    SessionHistoryItem:
+      type: object
+      required: [sessionId, sessionDate, sessionType, exerciseCount]
+      properties:
+        sessionId:
+          type: string
+          format: uuid
+        sessionDate:
+          type: string
+          format: date
+        sessionType:
+          type: string
+          enum: [PROGRAM, FREE]
+        exerciseCount:
+          type: integer
+        totalDurationSeconds:
+          type: integer
+          nullable: true
+
+    LoggedSessionDetail:
+      allOf:
+        - $ref: '#/components/schemas/LoggedSessionCreateRequest'
+        - type: object
+          required: [sessionId]
+          properties:
+            sessionId:
+              type: string
+              format: uuid
+
+    ProgressionResponse:
+      type: object
+      required: [exerciseName, points]
+      properties:
+        exerciseName:
+          type: string
+        points:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProgressionPoint'
+
+    ProgressionPoint:
+      type: object
+      required: [sessionId, sessionDate, metricType, metricValue]
+      properties:
+        sessionId:
+          type: string
+          format: uuid
+        sessionDate:
+          type: string
+          format: date
+        metricType:
+          type: string
+          enum: [WEIGHT, DURATION, DISTANCE]
+        metricValue:
+          type: number
+          format: double
+
