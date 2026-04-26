@@ -565,7 +565,7 @@ History browsing, filtering, and detail views fully functional. Users can naviga
 
 ### Unit Tests for User Story 4 (MANDATORY)
 
-- [ ] T074 [P] [US4] Create `backend/src/test/java/com/gymtracker/application/ProgressionServiceTest.java`:
+- [X] T074 [P] [US4] Create `backend/src/test/java/com/gymtracker/application/ProgressionServiceTest.java`:
   - Test `getExerciseProgression(userId, exerciseName)` returns list of ProgressionPoint sorted chronologically (oldest first)
   - Test each ProgressionPoint includes sessionId, sessionDate, metricType (WEIGHT/DURATION/DISTANCE), metricValue
   - Test `getExerciseProgression()` aggregates data from all sessions (program + free)
@@ -577,7 +577,7 @@ History browsing, filtering, and detail views fully functional. Users can naviga
 
 ### Integration Tests for User Story 4 (MANDATORY)
 
-- [ ] T075 [P] [US4] Create `backend/src/test/java/com/gymtracker/api/ProgressionControllerIT.java`:
+- [X] T075 [P] [US4] Create `backend/src/test/java/com/gymtracker/api/ProgressionControllerIT.java`:
   - Test GET /api/progression/{exerciseName} returns 200 + ProgressionResponse
   - Test response includes exerciseName + points array
   - Test points are sorted chronologically (oldest to newest)
@@ -587,7 +587,7 @@ History browsing, filtering, and detail views fully functional. Users can naviga
 
 ### Frontend Tests for User Story 4 (MANDATORY)
 
-- [ ] T076 [P] [US4] Create `frontend/src/features/progression/__tests__/ProgressionChart.test.tsx`:
+- [X] T076 [P] [US4] Create `frontend/src/features/progression/__tests__/ProgressionChart.test.tsx`:
   - Test chart renders with exercise name in title
   - Test chart displays data points in chronological order
   - Test chart renders Y-axis label based on metric type (Weight, Duration, Distance)
@@ -595,10 +595,10 @@ History browsing, filtering, and detail views fully functional. Users can naviga
   - Test chart shows message if only 1 data point ("Not enough data to show trend")
   - Test hovering data point shows tooltip with date, metricValue, session link
   - Test clicking data point navigates to session detail
-- [ ] T077 [P] [US4] Create `frontend/src/features/history/__tests__/ExerciseProgressionLink.test.tsx`:
+- [X] T077 [P] [US4] Create `frontend/src/features/history/__tests__/ExerciseProgressionLink.test.tsx`:
   - Test component renders "View Progression" link/button for exercise name
   - Test clicking link navigates to progression chart view
-- [ ] T078 [P] [US4] Create `frontend/src/hooks/__tests__/useExerciseProgression.test.ts`:
+- [X] T078 [P] [US4] Create `frontend/src/hooks/__tests__/useExerciseProgression.test.ts`:
   - Test `useExerciseProgression(exerciseName)` hook queries GET /api/progression/{exerciseName}
   - Test hook returns `{ data: ProgressionResponse, isLoading, error }`
 
