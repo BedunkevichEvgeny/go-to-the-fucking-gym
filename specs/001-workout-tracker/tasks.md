@@ -442,7 +442,7 @@ Both program and free session logging fully functional. Can be tested independen
 
 ### Integration Tests for User Story 3 (MANDATORY)
 
-- [ ] T058 [P] [US3] Create `backend/src/test/java/com/gymtracker/api/SessionHistoryControllerIT.java` (extend if started in US1, or create new):
+- [X] T058 [P] [US3] Create `backend/src/test/java/com/gymtracker/api/SessionHistoryControllerIT.java` (extend if started in US1, or create new):
   - Test GET /api/logged-sessions/history returns 200 + SessionHistoryPage
   - Test GET /api/logged-sessions/history returns sessions in reverse-chronological order (newest first)
   - Test GET /api/logged-sessions/history?page=0&size=5 respects pagination
@@ -451,7 +451,7 @@ Both program and free session logging fully functional. Can be tested independen
   - Test GET /api/logged-sessions/history combines dateFrom, dateTo, exerciseName filters when all provided
   - Test empty history returns SessionHistoryPage with items=[] and totalItems=0
   - Verify SessionHistoryItem includes: sessionId, sessionDate, sessionType, exerciseCount, totalDurationSeconds optional
-- [ ] T059 [P] [US3] Create `backend/src/test/java/com/gymtracker/api/SessionDetailControllerIT.java`:
+- [X] T059 [P] [US3] Create `backend/src/test/java/com/gymtracker/api/SessionDetailControllerIT.java`:
   - Test GET /api/logged-sessions/{sessionId} returns 200 + LoggedSessionDetail with all data
   - Test GET /api/logged-sessions/{sessionId} includes all exercise entries, sets/laps, feelings
   - Test GET /api/logged-sessions/{sessionId} returns 404 if session not found
@@ -460,7 +460,7 @@ Both program and free session logging fully functional. Can be tested independen
 
 ### Frontend Tests for User Story 3 (MANDATORY)
 
-- [ ] T060 [P] [US3] Create `frontend/src/features/history/__tests__/SessionHistoryPage.test.tsx`:
+- [X] T060 [P] [US3] Create `frontend/src/features/history/__tests__/SessionHistoryPage.test.tsx`:
   - Test page renders "Workout History" heading
   - Test page fetches sessions on mount
   - Test page displays list of sessions with date, session type badge (PROGRAM/FREE), exercise count
@@ -471,18 +471,18 @@ Both program and free session logging fully functional. Can be tested independen
   - Test filter section: date range picker (from/to) + exercise name search input
   - Test clicking filter button re-fetches sessions with new filters
   - Test clearing filters resets to all sessions
-- [ ] T061 [P] [US3] Create `frontend/src/features/history/__tests__/SessionDetailView.test.tsx`:
+- [X] T061 [P] [US3] Create `frontend/src/features/history/__tests__/SessionDetailView.test.tsx`:
   - Test detail view renders full session information: date, type, total duration
   - Test detail view renders all exercises with their sets/laps
   - For strength exercise: displays reps, weight, unit, isBodyWeight flag
   - For cardio exercise: displays duration, optional distance
   - Test detail view renders feelings: rating (1-10) displayed as stars or numeric value, comment text
   - Test detail view includes back button to history list
-- [ ] T062 [P] [US3] Create `frontend/src/hooks/__tests__/useSessionHistory.test.ts`:
+- [X] T062 [P] [US3] Create `frontend/src/hooks/__tests__/useSessionHistory.test.ts`:
   - Test `useSessionHistory(page, dateFrom, dateTo, exerciseName)` hook queries GET /api/logged-sessions/history
   - Test hook builds query params correctly
   - Test hook returns `{ data: SessionHistoryPage, isLoading, error }`
-- [ ] T063 [P] [US3] Create `frontend/src/hooks/__tests__/useSessionDetail.test.ts`:
+- [X] T063 [P] [US3] Create `frontend/src/hooks/__tests__/useSessionDetail.test.ts`:
   - Test `useSessionDetail(sessionId)` hook queries GET /api/logged-sessions/{sessionId}
   - Test hook returns `{ data: LoggedSessionDetail, isLoading, error }`
 
