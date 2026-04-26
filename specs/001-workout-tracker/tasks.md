@@ -25,11 +25,11 @@ description: "Dependency-ordered implementation tasks for Workout Tracker (001-w
 
 **Constraint**: Linear dependency - each task sets foundation for next phase
 
-- [ ] T001 Create project directory structure per plan.md: `backend/`, `frontend/`, `backend/src/main/java/com/gymtracker/{api,application,domain,infrastructure,ai}`, `backend/src/test/{unit,integration}`, `frontend/src/{components,pages,features,services,hooks}`, `frontend/tests/` in repository root
-- [ ] T002 Initialize Java 21 Spring Boot 4.0.5 backend with Maven/Gradle build file in `backend/pom.xml` (or Gradle equivalent) including: spring-boot-starter-web, spring-boot-starter-data-jpa, spring-boot-starter-validation, spring-boot-starter-security, com.langchain4j:langchain4j-azure-open-ai:1.13.1 (pinned version), postgresql:postgresql (driver), testcontainers:postgresql (testing)
-- [ ] T003 Initialize React 18 frontend with TypeScript 5.x in `frontend/package.json`: react, react-router-dom, @tanstack/react-query, recharts (or chart.js), typescript, vitest, @testing-library/react, axios
-- [ ] T004 [P] Create base linting configuration: `backend/.editorconfig`, `backend/checkstyle.xml`, `frontend/.eslintrc.json`, `frontend/.prettierrc.json`
-- [ ] T005 [P] Create local development documentation: `backend/LOCAL_DEV.md` (database setup, auth seed users), `frontend/LOCAL_DEV.md` (API base URL, HMR setup)
+- [X] T001 Create project directory structure per plan.md: `backend/`, `frontend/`, `backend/src/main/java/com/gymtracker/{api,application,domain,infrastructure,ai}`, `backend/src/test/{unit,integration}`, `frontend/src/{components,pages,features,services,hooks}`, `frontend/tests/` in repository root
+- [X] T002 Initialize Java 21 Spring Boot 4.0.5 backend with Maven/Gradle build file in `backend/pom.xml` (or Gradle equivalent) including: spring-boot-starter-web, spring-boot-starter-data-jpa, spring-boot-starter-validation, spring-boot-starter-security, com.langchain4j:langchain4j-azure-open-ai:1.13.1 (pinned version), postgresql:postgresql (driver), testcontainers:postgresql (testing)
+- [X] T003 Initialize React 18 frontend with TypeScript 5.x in `frontend/package.json`: react, react-router-dom, @tanstack/react-query, recharts (or chart.js), typescript, vitest, @testing-library/react, axios
+- [X] T004 [P] Create base linting configuration: `backend/.editorconfig`, `backend/checkstyle.xml`, `frontend/.eslintrc.json`, `frontend/.prettierrc.json`
+- [X] T005 [P] Create local development documentation: `backend/LOCAL_DEV.md` (database setup, auth seed users), `frontend/LOCAL_DEV.md` (API base URL, HMR setup)
 
 ---
 
@@ -41,14 +41,20 @@ description: "Dependency-ordered implementation tasks for Workout Tracker (001-w
 
 ### Data Model & Persistence Foundation
 
-- [ ] T006 [P] Create PostgreSQL schema migration file in `backend/src/main/resources/db/migration/V001__initial_schema.sql` with tables: `users`, `workout_programs`, `program_sessions`, `program_exercise_targets`, `logged_sessions`, `session_feelings`, `exercise_entries`, `strength_sets`, `cardio_laps`, `exercises` (library); include indexes per data-model.md (user_id, session_date desc, exercise_name_snapshot)
-- [ ] T007 [P] Create base JPA entity classes in `backend/src/main/java/com/gymtracker/domain/`:
+- [X] T006 [P] Create PostgreSQL schema migration file in `backend/src/main/resources/db/migration/V001__initial_schema.sql` with tables: `users`, `workout_programs`, `program_sessions`, `program_exercise_targets`, `logged_sessions`, `session_feelings`, `exercise_entries`, `strength_sets`, `cardio_laps`, `exercises` (library); include indexes per data-model.md (user_id, session_date desc, exercise_name_snapshot)
+- [X] T007 [P] Create base JPA entity classes in `backend/src/main/java/com/gymtracker/domain/`:
   - `User.java` (id UUID, preferredWeightUnit enum)
   - `WorkoutProgram.java` (id, userId, name, status enum, createdAt, completedAt)
   - `ProgramSession.java` (id, programId, sequenceNumber, name, isCompleted)
   - `ProgramExerciseTarget.java` (id, programSessionId, exerciseName, exerciseType enum, targets for sets/reps/weight/cardio)
+  - `LoggedSession.java` (id, userId, sessionType enum, programSessionId optional, sessionDate, name optional, notes optional, totalDurationSeconds, createdAt)
+  - `SessionFeelings.java` (sessionId PK/FK, rating 1-10, comment optional)
+  - `ExerciseEntry.java` (id, loggedSessionId, exerciseId optional, customExerciseName optional, exerciseNameSnapshot, exerciseType enum, sortOrder)
+  - `StrengthSet.java` (id, exerciseEntryId, setOrder, reps, weightValue optional, weightUnit enum optional, isBodyWeight, durationSeconds optional, restSeconds optional)
+  - `CardioLap.java` (id, exerciseEntryId, lapOrder, durationSeconds, distanceValue optional, distanceUnit enum optional)
+  - `Exercise.java` (id, name unique, category, type enum, description optional, isActive boolean)
   - Ensure all entities have @Entity, @Table, @Column annotations and Hibernate/JPA best practices
-- [ ] T008 [P] Create remaining JPA entities in `backend/src/main/java/com/gymtracker/domain/`:
+- [X] T008 [P] Create remaining JPA entities in `backend/src/main/java/com/gymtracker/domain/`:
   - `LoggedSession.java` (id, userId, sessionType enum, programSessionId optional, sessionDate, name optional, notes optional, totalDurationSeconds, createdAt)
   - `SessionFeelings.java` (sessionId PK/FK, rating 1-10, comment optional)
   - `ExerciseEntry.java` (id, loggedSessionId, exerciseId optional, customExerciseName optional, exerciseNameSnapshot, exerciseType enum, sortOrder)
@@ -56,35 +62,35 @@ description: "Dependency-ordered implementation tasks for Workout Tracker (001-w
   - `CardioLap.java` (id, exerciseEntryId, lapOrder, durationSeconds, distanceValue optional, distanceUnit enum optional)
   - `Exercise.java` (id, name unique, category, type enum, description optional, isActive boolean)
   - Include all JPA annotations and validation constraints from data-model.md
-- [ ] T009 Create JPA repositories in `backend/src/main/java/com/gymtracker/infrastructure/repository/`:
+- [X] T009 Create JPA repositories in `backend/src/main/java/com/gymtracker/infrastructure/repository/`:
   - `UserRepository extends JpaRepository<User, UUID>` with method `findById(UUID)`
   - `WorkoutProgramRepository extends JpaRepository<WorkoutProgram, UUID>` with methods `findActiveByUserId(UUID)`, `findById(UUID)`
   - `ProgramSessionRepository extends JpaRepository<ProgramSession, UUID>` with methods `findNextUncompletedByProgram(UUID)`, `findById(UUID)`
   - `LoggedSessionRepository extends JpaRepository<LoggedSession, UUID>` with methods `findByUserIdOrderBySessionDateDesc(UUID, Pageable)`, `findByUserIdAndExerciseName(UUID, String, Pageable)`, `findByUserIdAndSessionDateBetween(UUID, LocalDate, LocalDate, Pageable)`
   - `ExerciseRepository extends JpaRepository<Exercise, UUID>` with method `findByNameIgnoreCase(String)`
   - Implement custom @Query methods for filtering, pagination, and text search as required
-- [ ] T010 Create Spring Data Specification/Predicate helper for filtering in `backend/src/main/java/com/gymtracker/infrastructure/repository/SessionSpecifications.java` to support date range filter, exercise name search, and reverse-chronological sort per FR-016 and FR-017
+- [X] T010 Create Spring Data Specification/Predicate helper for filtering in `backend/src/main/java/com/gymtracker/infrastructure/repository/SessionSpecifications.java` to support date range filter, exercise name search, and reverse-chronological sort per FR-016 and FR-017
 
 ### Security & Authentication
 
-- [ ] T011 Configure Spring Security HTTP Basic Auth with in-memory user store in `backend/src/main/resources/application.properties` (or application.yml): define seed users (e.g., user1/password1, user2/password2) with ROLE_USER; configure basic auth header requirement
-- [ ] T012 Create Spring Security configuration class in `backend/src/main/java/com/gymtracker/infrastructure/config/SecurityConfig.java`: enable HTTP Basic Auth, disable CSRF for MVP, configure AuthenticationManager, ensure authenticated user context is available in all endpoints via SecurityContextHolder.getContext().getAuthentication()
-- [ ] T013 Create `AuthenticationService` in `backend/src/main/java/com/gymtracker/application/security/AuthenticationService.java` with method `getCurrentUserId(): UUID` that extracts user ID from Spring Security principal (map Spring username to UUID) and enforces strict per-user data isolation (all service methods validate authenticated user matches queried data)
+- [X] T011 Configure Spring Security HTTP Basic Auth with in-memory user store in `backend/src/main/resources/application.properties` (or application.yml): define seed users (e.g., user1/password1, user2/password2) with ROLE_USER; configure basic auth header requirement
+- [X] T012 Create Spring Security configuration class in `backend/src/main/java/com/gymtracker/infrastructure/config/SecurityConfig.java`: enable HTTP Basic Auth, disable CSRF for MVP, configure AuthenticationManager, ensure authenticated user context is available in all endpoints via SecurityContextHolder.getContext().getAuthentication()
+- [X] T013 Create `AuthenticationService` in `backend/src/main/java/com/gymtracker/application/security/AuthenticationService.java` with method `getCurrentUserId(): UUID` that extracts user ID from Spring Security principal (map Spring username to UUID) and enforces strict per-user data isolation (all service methods validate authenticated user matches queried data)
 
 ### Logging & Validation Framework
 
-- [ ] T014 [P] Configure SLF4J logging in `backend/src/main/resources/application.properties`: set log level to INFO for `com.gymtracker`, DEBUG for Spring core (development profile); ensure logs include request/response timing for performance monitoring
-- [ ] T015 [P] Create custom validation annotations in `backend/src/main/java/com/gymtracker/infrastructure/validation/`:
+- [X] T014 [P] Configure SLF4J logging in `backend/src/main/resources/application.properties`: set log level to INFO for `com.gymtracker`, DEBUG for Spring core (development profile); ensure logs include request/response timing for performance monitoring
+- [X] T015 [P] Create custom validation annotations in `backend/src/main/java/com/gymtracker/infrastructure/validation/`:
   - `@ValidSessionType` - ensures PROGRAM or FREE
   - `@ValidRating` - ensures 1-10 range
   - `@ValidExerciseType` - ensures STRENGTH, BODYWEIGHT, or CARDIO
   - `@ValidWeightUnit` - ensures KG or LBS
   - Each annotation includes corresponding ConstraintValidator implementation
-- [ ] T016 [P] Create global exception handler in `backend/src/main/java/com/gymtracker/api/exception/GlobalExceptionHandler.java` with @ControllerAdvice: handle ValidationException (400), UnauthorizedException (401), ForbiddenException (403), ResourceNotFoundException (404), all returning standardized error JSON with message + code
+- [X] T016 [P] Create global exception handler in `backend/src/main/java/com/gymtracker/api/exception/GlobalExceptionHandler.java` with @ControllerAdvice: handle ValidationException (400), UnauthorizedException (401), ForbiddenException (403), ResourceNotFoundException (404), all returning standardized error JSON with message + code
 
 ### Base API & Shared Utilities
 
-- [ ] T017 [P] Create DTO classes in `backend/src/main/java/com/gymtracker/api/dto/`:
+- [X] T017 [P] Create DTO classes in `backend/src/main/java/com/gymtracker/api/dto/`:
   - `ProgramSessionView` (programSessionId, sequenceNumber, name, exercises list)
   - `ProgramExerciseTargetView` (exerciseName, exerciseType, target sets/reps/weight/cardio fields)
   - `LoggedSessionCreateRequest` (sessionType, programSessionId optional, sessionDate, name optional, notes optional, totalDurationSeconds optional, feelings, exerciseEntries list)
@@ -98,13 +104,13 @@ description: "Dependency-ordered implementation tasks for Workout Tracker (001-w
   - `ProgressionResponse` (exerciseName, points array)
   - `ProgressionPoint` (sessionId, sessionDate, metricType enum WEIGHT/DURATION/DISTANCE, metricValue)
   - Use @Valid annotations and bean validation per contracts/workout-tracker-api.yaml
-- [ ] T018 [P] Create ModelMapper/DTO converter utility in `backend/src/main/java/com/gymtracker/infrastructure/mapper/DtoMapper.java` with methods:
+- [X] T018 [P] Create ModelMapper/DTO converter utility in `backend/src/main/java/com/gymtracker/infrastructure/mapper/DtoMapper.java` with methods:
   - `toDto(ProgramSession ps, List<ProgramExerciseTarget> targets): ProgramSessionView`
   - `toDomain(LoggedSessionCreateRequest req): LoggedSession` (validates user_id matches auth context)
   - `toDetailDto(LoggedSession ls): LoggedSessionDetail`
   - `toHistoryItem(LoggedSession ls): SessionHistoryItem`
   - `toProgressionPoint(LoggedSession ls, ExerciseEntry ee, StrengthSet ss or CardioLap cl): ProgressionPoint`
-- [ ] T019 Create base controller class in `backend/src/main/java/com/gymtracker/api/BaseController.java` that:
+- [X] T019 Create base controller class in `backend/src/main/java/com/gymtracker/api/BaseController.java` that:
   - Provides convenient method `extractUserId()` that calls AuthenticationService.getCurrentUserId()
   - Configures default @RequestMapping("/api")
   - Ensures all endpoints log request start/end with userId + operation for audit trail
@@ -127,18 +133,18 @@ All downstream user story tasks can now proceed. Shared domain model, security, 
 
 ### Unit Tests for User Story 1 (MANDATORY - Write First, Fail Before Implementation)
 
-- [ ] T020 [P] [US1] Create `backend/src/test/java/com/gymtracker/domain/ProgramSessionTest.java`: unit tests for ProgramSession entity:
+- [X] T020 [P] [US1] Create `backend/src/test/java/com/gymtracker/domain/ProgramSessionTest.java`: unit tests for ProgramSession entity:
   - Test creating program session with valid sequenceNumber, name, isCompleted=false
   - Test that exercises list is populated from ProgramExerciseTarget relationship
   - Test validation: sequenceNumber min 1, name 1-120 chars
   - Test state transition: isCompleted false → true
-- [ ] T021 [P] [US1] Create `backend/src/test/java/com/gymtracker/application/ProgramSessionServiceTest.java`: 
+- [X] T021 [P] [US1] Create `backend/src/test/java/com/gymtracker/application/ProgramSessionServiceTest.java`: 
   - Test `loadNextUncompletedSession(userId)` returns next uncompleted session in sequence
   - Test `loadNextUncompletedSession(userId)` returns null when program completed
   - Test `loadNextUncompletedSession(userId)` enforces user isolation (rejects cross-user access)
   - Test `markProgramSessionCompleted(sessionId, userId)` transitions to completed
   - Test `markProgramSessionCompleted(sessionId, userId)` throws ForbiddenException for wrong user
-- [ ] T022 [P] [US1] Create `backend/src/test/java/com/gymtracker/application/LoggedSessionServiceTest.java`:
+- [X] T022 [P] [US1] Create `backend/src/test/java/com/gymtracker/application/LoggedSessionServiceTest.java`:
   - Test `saveLoggedSession(userId, request)` persists LoggedSession with all exercise entries and sets
   - Test `saveLoggedSession(userId, request)` validates programSessionId matches next uncompleted session for PROGRAM type
   - Test `saveLoggedSession(userId, request)` saves SessionFeelings with rating 1-10 and optional comment
@@ -146,14 +152,14 @@ All downstream user story tasks can now proceed. Shared domain model, security, 
   - Test `saveLoggedSession(userId, request)` rejects exercise with 0 sets
   - Test `saveLoggedSession(userId, request)` accepts body-weight sets without weight value
   - Test `saveLoggedSession(userId, request)` enforces user ownership (request user_id must match auth)
-- [ ] T023 [P] [US1] Create `backend/src/test/java/com/gymtracker/application/SessionValidatorTest.java`:
+- [X] T023 [P] [US1] Create `backend/src/test/java/com/gymtracker/application/SessionValidatorTest.java`:
   - Test `validateProgramSessionNotModifiable(programSessionId, exerciseList)` rejects attempts to add/remove/reorder exercises in PROGRAM mode
   - Test `validateBodyweightSet(set)` allows weight=null when isBodyWeight=true
   - Test `validateBodyweightSet(set)` rejects weight=null when isBodyWeight=false
   - Test `validateSessionFeelings(feelings)` requires rating 1-10
   - Test `validateSessionFeelings(feelings)` allows null comment
   - Test `validateExerciseEntry(entry)` requires at least 1 set for strength entries, at least 1 lap for cardio
-- [ ] T024 [P] [US1] Create `backend/src/test/java/com/gymtracker/infrastructure/UserIsolationTest.java`:
+- [X] T024 [P] [US1] Create `backend/src/test/java/com/gymtracker/infrastructure/UserIsolationTest.java`:
   - Test user1 cannot access user2's logged sessions (throws ForbiddenException on read/write)
   - Test user1 cannot update another user's program session status
   - Test that authenticated user context is properly extracted and validated in all data access paths
@@ -206,31 +212,31 @@ All downstream user story tasks can now proceed. Shared domain model, security, 
 
 ### Implementation for User Story 1
 
-- [ ] T030 [P] [US1] Create `backend/src/main/java/com/gymtracker/application/ProgramSessionService.java`:
+- [X] T030 [P] [US1] Create `backend/src/main/java/com/gymtracker/application/ProgramSessionService.java`:
   - Implement `loadNextUncompletedSession(UUID userId): Optional<ProgramSessionView>` - queries WorkoutProgram.status=ACTIVE, finds next uncompleted ProgramSession by sequenceNumber, loads ProgramExerciseTargets, returns DTOified view
   - Implement `markProgramSessionCompleted(UUID sessionId, UUID userId): void` - validates session belongs to user's program, marks isCompleted=true, checks if all program sessions completed → marks program status=COMPLETED
   - All queries filtered by userId (injected from AuthenticationService)
   - Log method entry/exit with userId for audit trail
-- [ ] T031 [P] [US1] Create `backend/src/main/java/com/gymtracker/application/LoggedSessionService.java`:
+- [X] T031 [P] [US1] Create `backend/src/main/java/com/gymtracker/application/LoggedSessionService.java`:
   - Implement `saveLoggedSession(UUID userId, LoggedSessionCreateRequest request): LoggedSessionDetail` - validates request, creates LoggedSession + ExerciseEntry + StrengthSet/CardioLap + SessionFeelings records, persists to DB, returns DTO
   - Validate programSessionId for PROGRAM type (query next uncompleted, must match, must belong to user)
   - Call ProgramSessionService.markProgramSessionCompleted after successful save for PROGRAM type
   - Validate all exercise entries have at least 1 set (strength) or lap (cardio)
   - Log operation: "[userId] saved [sessionType] session with [exerciseCount] exercises"
-- [ ] T032 [P] [US1] Create `backend/src/main/java/com/gymtracker/application/SessionValidatorService.java`:
+- [X] T032 [P] [US1] Create `backend/src/main/java/com/gymtracker/application/SessionValidatorService.java`:
   - Implement `validateProgramSessionNotModifiable(UUID programSessionId, List<ExerciseEntry> entries): void` - fetch actual targets, verify entries match in count and exercise name, throw ForbiddenException if modified
   - Implement `validateBodyweightSet(StrengthSetInput set): void` - if isBodyWeight=true, reject if weight!=null (or warn); if isBodyWeight=false, require weight!=null
   - Implement `validateExerciseEntry(ExerciseEntryInput entry): void` - if STRENGTH/BODYWEIGHT, require sets.size()>=1; if CARDIO, require cardioLaps.size()>=1
   - Implement `validateSessionFeelings(SessionFeelings feelings): void` - require rating 1-10
   - Throw ValidationException with specific error messages for each violation
-- [ ] T033 [US1] Create `backend/src/main/java/com/gymtracker/api/SessionController.java` with endpoints:
+- [X] T033 [US1] Create `backend/src/main/java/com/gymtracker/api/SessionController.java` with endpoints:
   - `GET /program-sessions/next` - calls ProgramSessionService.loadNextUncompletedSession, returns 200 ProgramSessionView or 204 No Content
   - `POST /logged-sessions` - calls LoggedSessionService.saveLoggedSession, returns 201 LoggedSessionDetail or 400/403 on error
   - Extract userId from AuthenticationService in both endpoints
   - Implement proper error handling via GlobalExceptionHandler
   - Add @Valid annotations to request bodies to trigger bean validation
   - Log request/response via logging framework
-- [ ] T034 [US1] Create React page component in `frontend/src/pages/ProgramSessionPage.tsx`:
+- [X] T034 [US1] Create React page component in `frontend/src/pages/ProgramSessionPage.tsx`:
   - Fetch next program session on page load: `GET /api/program-sessions/next`
   - Display "No active program" empty state if 204 response
   - Render session name + sequence number as page header
@@ -240,7 +246,7 @@ All downstream user story tasks can now proceed. Shared domain model, security, 
   - Show success toast + navigate to history page on successful save
   - Show error toast with validation messages on 400/403 errors
   - Include back button to main menu
-- [ ] T035 [US1] Create React form component in `frontend/src/features/program-session/ProgramSessionForm.tsx`:
+- [X] T035 [US1] Create React form component in `frontend/src/features/program-session/ProgramSessionForm.tsx`:
   - Accept exercises array prop (with AI targets) + onSubmit callback
   - Render exercise list, each with:
     - Exercise name + AI target (e.g., "Bench Press — Target: 3 × 8 @ 70 kg")
@@ -254,17 +260,17 @@ All downstream user story tasks can now proceed. Shared domain model, security, 
   - Render submit button ("Save Session") + cancel button
   - Use React Hook Form for form state management
   - Validate form before submit, show error messages inline
-- [ ] T036 [US1] Create custom React hook in `frontend/src/hooks/useLogSession.ts`:
+- [X] T036 [US1] Create custom React hook in `frontend/src/hooks/useLogSession.ts`:
   - Wrap `useMutation` from TanStack Query
   - Define mutation function: POST `/api/logged-sessions` with LoggedSessionCreateRequest payload
   - Configure error handling, loading state
   - Return `{ mutate, isLoading, isError, error }`
-- [ ] T037 [US1] Create React hook in `frontend/src/hooks/useNextProgramSession.ts`:
+- [X] T037 [US1] Create React hook in `frontend/src/hooks/useNextProgramSession.ts`:
   - Wrap `useQuery` from TanStack Query
   - Query: GET `/api/program-sessions/next`
   - Handle 204 response as "no program" state
   - Return `{ data: ProgramSessionView | null, isLoading, error }`
-- [ ] T038 [US1] Add UI polish and consistent interaction patterns in ProgramSessionForm:
+- [X] T038 [US1] Add UI polish and consistent interaction patterns in ProgramSessionForm:
   - Visual feedback: disabled state on submit button while loading
   - Input validation feedback: show error icon + message under each invalid field
   - Consistent styling: use CSS-in-JS or Tailwind for spacing, colors, typography
@@ -354,27 +360,27 @@ Program session logging fully functional end-to-end (backend + frontend). Feelin
 
 ### Implementation for User Story 2
 
-- [ ] T047 [P] [US2] Create `backend/src/main/java/com/gymtracker/application/ExerciseLibraryService.java`:
+- [X] T047 [P] [US2] Create `backend/src/main/java/com/gymtracker/application/ExerciseLibraryService.java`:
   - Implement `searchExerciseLibrary(String query): List<ExerciseDTO>` - query Exercise table with name LIKE, filter isActive=true, return paginated results (top 20)
   - Implement `getTopExercises(): List<ExerciseDTO>` - query exercises ordered by frequency in recent sessions, return top 50
   - Implement `getExerciseById(UUID id): ExerciseDTO` - fetch single exercise by ID
   - Implement `validateExerciseExists(UUID id)` - throw ResourceNotFoundException if not found
   - Cache results for 1 hour to reduce DB load (optional but recommended)
-- [ ] T048 [P] [US2] Create `backend/src/main/java/com/gymtracker/application/FreeSessionService.java`:
+- [X] T048 [P] [US2] Create `backend/src/main/java/com/gymtracker/application/FreeSessionService.java`:
   - Implement `saveFreeSession(UUID userId, LoggedSessionCreateRequest request): LoggedSessionDetail` - similar to saveLoggedSession but validates sessionType=FREE, programSessionId=null, accepts custom exercise names, persists ExerciseEntry with customExerciseName field
   - Validate at least 1 exercise entry required
   - Validate each exercise has at least 1 set (strength) or lap (cardio)
   - Support mixed exercise types in single session
-- [ ] T049 [US2] Extend `backend/src/main/java/com/gymtracker/api/SessionController.java`:
+- [X] T049 [US2] Extend `backend/src/main/java/com/gymtracker/api/SessionController.java`:
   - Extend POST /api/logged-sessions endpoint logic to handle both PROGRAM and FREE session types via a router/factory pattern or conditional dispatch
   - Add GET /api/exercises?query={query} endpoint - calls ExerciseLibraryService.searchExerciseLibrary, returns 200 + list of ExerciseDTO
   - Add optional GET /api/exercises endpoint (no query param) to return top exercises
-- [ ] T050 [US2] Create React page component in `frontend/src/pages/FreeSessionPage.tsx`:
+- [X] T050 [US2] Create React page component in `frontend/src/pages/FreeSessionPage.tsx`:
   - Display "Start Free Session" heading
   - Render `<FreeSessionForm />` component
   - On successful save, show toast + navigate to history page
   - Include back button to main menu
-- [ ] T051 [US2] Create React form component in `frontend/src/features/free-session/FreeSessionForm.tsx`:
+- [X] T051 [US2] Create React form component in `frontend/src/features/free-session/FreeSessionForm.tsx`:
   - Render exercise search/library section at top
   - Render exercise list with add/remove buttons
   - For each exercise: support exercise-specific input form (strength sets or cardio laps)
@@ -383,21 +389,21 @@ Program session logging fully functional end-to-end (backend + frontend). Feelin
   - Render submit button ("Save Session") + cancel button
   - Use React Hook Form for form state
   - Validate form before submit
-- [ ] T052 [US2] Create React component in `frontend/src/features/free-session/ExerciseLibrarySearch.tsx`:
+- [X] T052 [US2] Create React component in `frontend/src/features/free-session/ExerciseLibrarySearch.tsx`:
   - Render search input for exercise library
   - Call useExerciseLibrary hook with search query (debounced)
   - Display search results as clickable list
   - Allow clicking result to add exercise to form
   - Show "Type to search or enter custom exercise name" placeholder
-- [ ] T053 [US2] Create custom React hook in `frontend/src/hooks/useExerciseLibrary.ts`:
+- [X] T053 [US2] Create custom React hook in `frontend/src/hooks/useExerciseLibrary.ts`:
   - Use TanStack Query `useQuery` to fetch exercises: GET /api/exercises?query=[query]
   - Debounce query changes (300ms)
   - Return `{ data: Exercise[], isLoading, error }`
-- [ ] T054 [US2] Create custom React hook in `frontend/src/hooks/useLogFreeSession.ts`:
+- [X] T054 [US2] Create custom React hook in `frontend/src/hooks/useLogFreeSession.ts`:
   - Similar to useLogSession but specialized for FREE session type
   - Ensure programSessionId is not sent or is null
   - Return `{ mutate, isLoading, isError, error }`
-- [ ] T055 [US2] Add reusable form components for consistent UX:
+- [X] T055 [US2] Add reusable form components for consistent UX:
   - Create `frontend/src/components/SetInputRow.tsx` - input row for single set (reps, weight, unit, isBodyWeight toggle, remove button)
   - Create `frontend/src/components/CardioLapInputRow.tsx` - input row for single cardio lap (duration, distance, unit, remove button)
   - Use in both ProgramSessionForm and FreeSessionForm for UX consistency per PUX-002 requirement
@@ -482,22 +488,22 @@ Both program and free session logging fully functional. Can be tested independen
 
 ### Implementation for User Story 3
 
-- [ ] T064 [P] [US3] Create `backend/src/main/java/com/gymtracker/application/SessionHistoryService.java`:
+- [X] T064 [P] [US3] Create `backend/src/main/java/com/gymtracker/application/SessionHistoryService.java`:
   - Implement `getSessionHistory(UUID userId, int page, int size, LocalDate dateFrom, LocalDate dateTo, String exerciseName): SessionHistoryPageDTO` - queries LoggedSession by userId, applies filters, sorts by sessionDate DESC, paginates, returns DTO with metadata
   - Implement `filterByDateRange(UUID userId, LocalDate from, LocalDate to): Specification` - creates JPA Specification for date filtering
   - Implement `filterByExerciseName(UUID userId, String name): Specification` - creates JPA Specification for exercise name search (text index on ExerciseEntry.exerciseNameSnapshot)
   - Calculate exerciseCount from ExerciseEntry rows per LoggedSession
   - Combine all filter specifications with Specification.and()
   - Log queries and result counts for performance monitoring
-- [ ] T065 [P] [US3] Create `backend/src/main/java/com/gymtracker/application/SessionDetailService.java`:
+- [X] T065 [P] [US3] Create `backend/src/main/java/com/gymtracker/application/SessionDetailService.java`:
   - Implement `getSessionDetails(UUID userId, UUID sessionId): LoggedSessionDetailDTO` - fetches LoggedSession, validates user ownership, loads nested ExerciseEntry + StrengthSet/CardioLap + SessionFeelings, maps to detail DTO
   - Implement `validateSessionOwnership(UUID userId, UUID sessionId): void` - throw ForbiddenException if mismatch
   - Eager load related entities to avoid N+1 queries (use JOIN FETCH or explicit queries)
-- [ ] T066 [US3] Extend `backend/src/main/java/com/gymtracker/api/SessionController.java`:
+- [X] T066 [US3] Extend `backend/src/main/java/com/gymtracker/api/SessionController.java`:
   - Add GET /api/logged-sessions/history endpoint - parse query params (page, size, dateFrom, dateTo, exerciseName), call SessionHistoryService, return 200 + SessionHistoryPageDTO
   - Add GET /api/logged-sessions/{sessionId} endpoint - extract userId from auth, call SessionDetailService, return 200 + LoggedSessionDetailDTO or 404/403
   - Add proper error handling and logging
-- [ ] T067 [US3] Create React page component in `frontend/src/pages/SessionHistoryPage.tsx`:
+- [X] T067 [US3] Create React page component in `frontend/src/pages/SessionHistoryPage.tsx`:
   - Render "Workout History" heading
   - Render filter section: date range picker (from/to dates) + exercise name search input + filter button
   - Render session list (call useSessionHistory hook with filter params)
@@ -506,13 +512,13 @@ Both program and free session logging fully functional. Can be tested independen
   - Render empty state if no sessions
   - Render pagination controls (Previous/Next buttons) if applicable
   - Include back button to main menu
-- [ ] T068 [US3] Create React component in `frontend/src/features/history/SessionHistoryList.tsx`:
+- [X] T068 [US3] Create React component in `frontend/src/features/history/SessionHistoryList.tsx`:
   - Accept sessions array, isLoading flag, onSessionClick callback
   - Render list of SessionHistoryItem cards
   - Each card displays: date (formatted), session type badge (PROGRAM/FREE), exercise count, total duration
   - Card is clickable and calls onSessionClick(sessionId)
   - Show loading skeleton while loading
-- [ ] T069 [US3] Create React component in `frontend/src/features/history/SessionDetailView.tsx`:
+- [X] T069 [US3] Create React component in `frontend/src/features/history/SessionDetailView.tsx`:
   - Accept sessionId prop
   - Call useSessionDetail hook to fetch full session data
   - Render session metadata: date, type, total duration, optional name/notes
@@ -521,22 +527,22 @@ Both program and free session logging fully functional. Can be tested independen
     - Cardio: laps table with columns (Lap #, Duration, Distance, Unit)
   - Render feelings section: rating displayed as star rating or numeric value, comment text
   - Include back button to history list
-- [ ] T070 [US3] Create React component in `frontend/src/features/history/SessionFilterSection.tsx`:
+- [X] T070 [US3] Create React component in `frontend/src/features/history/SessionFilterSection.tsx`:
   - Render date range picker (from/to dates, accept locale date format)
   - Render exercise name search input (with autocomplete/suggestions optional)
   - Render filter button to apply filters
   - Render clear button to reset all filters
   - Accept onChange callback to update parent state
-- [ ] T071 [US3] Create custom React hook in `frontend/src/hooks/useSessionHistory.ts`:
+- [X] T071 [US3] Create custom React hook in `frontend/src/hooks/useSessionHistory.ts`:
   - Use TanStack Query `useQuery` to fetch GET /api/logged-sessions/history
   - Accept params: page, size, dateFrom, dateTo, exerciseName
   - Build query params correctly (date format, URL encoding)
   - Return `{ data: SessionHistoryPage, isLoading, error, refetch }`
-- [ ] T072 [US3] Create custom React hook in `frontend/src/hooks/useSessionDetail.ts`:
+- [X] T072 [US3] Create custom React hook in `frontend/src/hooks/useSessionDetail.ts`:
   - Use TanStack Query `useQuery` to fetch GET /api/logged-sessions/{sessionId}
   - Accept sessionId param
   - Return `{ data: LoggedSessionDetail, isLoading, error }`
-- [ ] T073 [US3] Create shared utility components:
+- [X] T073 [US3] Create shared utility components:
   - Create `frontend/src/components/DateRangePicker.tsx` - component for selecting date range (from/to)
   - Create `frontend/src/components/SessionTypeBadge.tsx` - component to display PROGRAM/FREE badge with different styling
   - Create `frontend/src/components/ExerciseTable.tsx` - reusable table component for displaying exercise sets/laps
@@ -598,7 +604,7 @@ History browsing, filtering, and detail views fully functional. Users can naviga
 
 ### Implementation for User Story 4
 
-- [ ] T079 [P] [US4] Create `backend/src/main/java/com/gymtracker/application/ProgressionService.java`:
+- [X] T079 [P] [US4] Create `backend/src/main/java/com/gymtracker/application/ProgressionService.java`:
   - Implement `getExerciseProgression(UUID userId, String exerciseName): ProgressionResponseDTO` - queries LoggedSession + ExerciseEntry + StrengthSet/CardioLap where exerciseNameSnapshot matches (case-insensitive), groups by LoggedSession, calculates metric value per session:
     - For strength: max weight per session (or average, decide based on UX preference) — metricType=WEIGHT
     - For cardio: sum of duration per session — metricType=DURATION; or sum of distance if distance entries exist — metricType=DISTANCE
@@ -609,16 +615,16 @@ History browsing, filtering, and detail views fully functional. Users can naviga
   - Implement native SQL or JPQL query to efficiently fetch progression data without N+1
   - Query joins LoggedSession → ExerciseEntry → StrengthSet/CardioLap, filters by userId + exerciseName, groups by session, calculates aggregates
   - Return List<ProgressionPoint> projection with sessionId, sessionDate, metricType, metricValue
-- [ ] T081 [US4] Extend `backend/src/main/java/com/gymtracker/api/SessionController.java`:
+- [X] T081 [US4] Extend `backend/src/main/java/com/gymtracker/api/SessionController.java`:
   - Add GET /api/progression/{exerciseName} endpoint - URL-decode exerciseName, call ProgressionService, return 200 + ProgressionResponseDTO
   - Add error handling for invalid exercise names
-- [ ] T082 [US4] Create React page component in `frontend/src/pages/ProgressionChartPage.tsx`:
+- [X] T082 [US4] Create React page component in `frontend/src/pages/ProgressionChartPage.tsx`:
   - Accept exerciseName as URL param (from history detail view or direct navigation)
   - Call useExerciseProgression hook to fetch data
   - Render page with exercise name as heading
   - Render `<ProgressionChart data={progression.points} />` component
   - Include back button to history
-- [ ] T083 [US4] Create React component in `frontend/src/features/progression/ProgressionChart.tsx`:
+- [X] T083 [US4] Create React component in `frontend/src/features/progression/ProgressionChart.tsx`:
   - Accept progressionPoints array prop
   - Use Recharts or Chart.js to render line/area chart
   - X-axis: sessionDate (formatted)
@@ -629,14 +635,14 @@ History browsing, filtering, and detail views fully functional. Users can naviga
   - Render tooltip on hover: date, metricValue, link to view session
   - Render data point markers
   - Optional: show trend line or average line
-- [ ] T084 [US4] Create React component in `frontend/src/features/history/ExerciseProgressionLink.tsx`:
+- [X] T084 [US4] Create React component in `frontend/src/features/history/ExerciseProgressionLink.tsx`:
   - Accept exerciseName prop, onViewProgression callback
   - Render "View Progression" button/link
   - On click, navigate to progression chart page with exerciseName param
-- [ ] T085 [US4] Extend `frontend/src/features/history/SessionDetailView.tsx`:
+- [X] T085 [US4] Extend `frontend/src/features/history/SessionDetailView.tsx`:
   - For each exercise in detail view, add "View Progression" link/button
   - Clicking link navigates to ProgressionChartPage with exerciseName param
-- [ ] T086 [US4] Create custom React hook in `frontend/src/hooks/useExerciseProgression.ts`:
+- [X] T086 [US4] Create custom React hook in `frontend/src/hooks/useExerciseProgression.ts`:
   - Use TanStack Query `useQuery` to fetch GET /api/progression/{exerciseName}
   - URL-encode exerciseName properly
   - Return `{ data: ProgressionResponse, isLoading, error }`
@@ -1008,5 +1014,4 @@ Each developer can work independently on their assigned stories after Phase 2 co
 **Est. Parallel Delivery** (3 devs): 1-2 weeks + Phase 2 synchronization
 
 ---
-
 
