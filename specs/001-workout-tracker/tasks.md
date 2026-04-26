@@ -427,7 +427,7 @@ Both program and free session logging fully functional. Can be tested independen
 
 ### Unit Tests for User Story 3 (MANDATORY)
 
-- [ ] T056 [P] [US3] Create `backend/src/test/java/com/gymtracker/application/SessionHistoryServiceTest.java`:
+- [X] T056 [P] [US3] Create `backend/src/test/java/com/gymtracker/application/SessionHistoryServiceTest.java`:
   - Test `getSessionHistory(userId, page, size)` returns sessions in reverse-chronological order
   - Test `getSessionHistory()` returns SessionHistoryPage with totalItems, items array, pagination metadata
   - Test `getSessionHistory(userId, pageIndex, pageSize)` with pageSize limits result (e.g., size=10 returns max 10 items)
@@ -435,7 +435,7 @@ Both program and free session logging fully functional. Can be tested independen
   - Test `filterByDateRange(userId, dateFrom, dateTo)` returns only sessions within date range (inclusive)
   - Test `filterByExerciseName(userId, exerciseName)` returns only sessions containing exercise (searches ExerciseEntry.exerciseNameSnapshot)
   - Test filter methods combine (dateRange + exerciseName both applied)
-- [ ] T057 [P] [US3] Create `backend/src/test/java/com/gymtracker/application/SessionDetailServiceTest.java`:
+- [X] T057 [P] [US3] Create `backend/src/test/java/com/gymtracker/application/SessionDetailServiceTest.java`:
   - Test `getSessionDetails(userId, sessionId)` returns LoggedSessionDetail with all exercise entries, sets/laps, feelings
   - Test `getSessionDetails()` validates user ownership (throws ForbiddenException if wrong user)
   - Test `getSessionDetails()` throws ResourceNotFoundException if session not found
