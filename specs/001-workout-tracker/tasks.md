@@ -166,14 +166,14 @@ All downstream user story tasks can now proceed. Shared domain model, security, 
 
 ### Integration Tests for User Story 1 (MANDATORY)
 
-- [ ] T025 [P] [US1] Create `backend/src/test/java/com/gymtracker/api/ProgramSessionControllerIT.java` (Spring Boot integration test with @SpringBootTest + @DataJpaTest):
+- [X] T025 [P] [US1] Create `backend/src/test/java/com/gymtracker/api/ProgramSessionControllerIT.java` (Spring Boot integration test with @SpringBootTest + @DataJpaTest):
   - Test GET /api/program-sessions/next returns 200 + ProgramSessionView with 3 exercises and targets
   - Test GET /api/program-sessions/next returns 204 No Content when no active program
   - Test GET /api/program-sessions/next returns 204 when program completed
   - Test HTTP Basic Auth: unauthenticated request returns 401
   - Test cross-user isolation: user1 cannot see user2's program (even if both have programs)
   - Use Testcontainers to spin up PostgreSQL, seed test data via repository
-- [ ] T026 [P] [US1] Create `backend/src/test/java/com/gymtracker/api/LoggedSessionControllerIT.java`:
+- [X] T026 [P] [US1] Create `backend/src/test/java/com/gymtracker/api/LoggedSessionControllerIT.java`:
   - Test POST /api/logged-sessions with valid PROGRAM request returns 201 + LoggedSessionDetail with sessionId
   - Test POST /api/logged-sessions persists all exercise entries, sets, and feelings to database
   - Test POST /api/logged-sessions with exercise entry containing 0 sets returns 400 (validation error)
@@ -184,14 +184,14 @@ All downstream user story tasks can now proceed. Shared domain model, security, 
   - Verify completed program transitions to COMPLETED status in WorkoutProgram
   - Use HTTP Basic Auth header with seed user credentials
   - Verify response schema matches contracts/workout-tracker-api.yaml
-- [ ] T027 [P] [US1] Create `backend/src/test/java/com/gymtracker/api/SessionHistoryControllerIT.java` (sufficient for now; can also be part of US3 integration):
+- [X] T027 [P] [US1] Create `backend/src/test/java/com/gymtracker/api/SessionHistoryControllerIT.java` (sufficient for now; can also be part of US3 integration):
   - Test GET /api/logged-sessions/history returns 200 + SessionHistoryPage with created session
   - Verify session appears in reverse-chronological order
   - Verify response schema matches SessionHistoryPage contract
 
 ### Frontend Tests for User Story 1 (MANDATORY)
 
-- [ ] T028 [P] [US1] Create `frontend/src/features/program-session/__tests__/ProgramSessionForm.test.tsx`:
+- [X] T028 [P] [US1] Create `frontend/src/features/program-session/__tests__/ProgramSessionForm.test.tsx`:
   - Test form renders "Next Program Session: Session 1 — Upper Body"
   - Test form displays 3 exercises with AI targets (e.g., "Target: 3 × 8 @ 70 kg")
   - Test form renders input fields for actual performance (sets, reps, weight, unit)
@@ -203,7 +203,7 @@ All downstream user story tasks can now proceed. Shared domain model, security, 
   - Test form validates: rating required before save
   - Test form submit calls API endpoint with correct payload structure
   - Test form shows loading state and success message after save
-- [ ] T029 [P] [US1] Create `frontend/src/hooks/__tests__/useLogSession.test.ts` (custom hook for session mutation):
+- [X] T029 [P] [US1] Create `frontend/src/hooks/__tests__/useLogSession.test.ts` (custom hook for session mutation):
   - Test `useLogSession` hook returns `mutate(data)` and `isLoading` state
   - Test `mutate(data)` calls POST /api/logged-sessions with payload
   - Test `mutate(data)` returns session ID on success
@@ -1014,4 +1014,5 @@ Each developer can work independently on their assigned stories after Phase 2 co
 **Est. Parallel Delivery** (3 devs): 1-2 weeks + Phase 2 synchronization
 
 ---
+
 
