@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.chtrembl.petstore</groupId>
+    <artifactId>petstore-parent</artifactId>
+    <version>0.0.2</version>
+    <packaging>pom</packaging>
+    <name>petstore-parent</name>
+    <description>Aggregator POM for PetStore multi-module project</description>
+
+    <modules>
+        <module>petstore/petstoreapp</module>
+        <module>petstore/petstoreorderservice</module>
+        <module>petstore/petstorepetservice</module>
+        <module>petstore/petstoreproductservice</module>
+        <module>petstore/pureorderitemsreserver</module>
+    </modules>
+</project>
+
