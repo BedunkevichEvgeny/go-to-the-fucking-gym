@@ -1,5 +1,6 @@
 # Implementation Plan: Workout Tracker
 
+**Repository**: `https://github.com/BedunkevichEvgeny/go-to-the-fucking-gym`
 **Branch**: `001-workout-tracker` | **Date**: 2026-04-26 | **Spec**: `specs/001-workout-tracker/spec.md`
 **Input**: Feature specification from `specs/001-workout-tracker/spec.md`
 
