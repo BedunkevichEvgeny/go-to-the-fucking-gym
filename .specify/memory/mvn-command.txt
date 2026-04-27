@@ -1,0 +1,7 @@
+
+CommandType     Name                                               Version    Source                                                                                                                         
+-----------     ----                                               -------    ------                                                                                                                         
+Application     mvn.cmd                                            0.0.0.0    C:\Program Files\Maven\bin\mvn.cmd                                                                                             
+
+
+

@@ -1,0 +1,7 @@
+
+CommandType     Name                                               Version    Source                                                                                                                         
+-----------     ----                                               -------    ------                                                                                                                         
+ExternalScript  npm.ps1                                                       C:\Program Files\nodejs\npm.ps1                                                                                                
+
+
+
