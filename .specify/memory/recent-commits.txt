@@ -1,0 +1,6 @@
+36c8b34 chore(spec): mark T058-T063 complete
+e2675b5 test(us3): add session history/detail integration coverage
+47b6b34 chore(spec): mark US3 unit test tasks T056-T057 complete
+34db4e3 test(backend): add US3 session history/detail service coverage
+b100707 chore(spec): mark US2 test tasks T039-T046 complete
+c782f35 test(frontend): stabilize US2 free-session hook/form tests

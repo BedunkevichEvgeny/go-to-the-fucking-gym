@@ -1,0 +1,7 @@
+
+CommandType     Name                                               Version    Source                                                                                                                         
+-----------     ----                                               -------    ------                                                                                                                         
+Application     vitest.cmd                                         0.0.0.0    C:\Users\Yauhen_Bedunkevich\Epam\personal\go-to-the-fucking-gym\frontend\node_modules\.bin\vitest.cmd                          
+
+
+

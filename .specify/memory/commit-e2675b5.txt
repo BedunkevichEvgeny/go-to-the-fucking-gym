@@ -1,0 +1,14 @@
+e2675b58977ed0bbda15eb007dd79d78154211f4 test(us3): add session history/detail integration coverage
+backend/src/main/java/com/gymtracker/infrastructure/repository/LoggedSessionRepository.java
+backend/src/test/java/com/gymtracker/api/ExerciseLibraryControllerIT.java
+backend/src/test/java/com/gymtracker/api/FreeSessionControllerIT.java
+backend/src/test/java/com/gymtracker/api/SessionDetailControllerIT.java
+backend/src/test/java/com/gymtracker/api/SessionHistoryControllerIT.java
+backend/src/test/java/com/gymtracker/application/CardioValidatorTest.java
+backend/src/test/java/com/gymtracker/application/ExerciseLibraryServiceTest.java
+backend/src/test/java/com/gymtracker/application/FreeSessionServiceTest.java
+frontend/src/features/free-session/__tests__/ExerciseLibrarySearch.test.tsx
+frontend/src/features/history/__tests__/SessionDetailView.test.tsx
+frontend/src/features/history/__tests__/SessionHistoryPage.test.tsx
+frontend/src/hooks/__tests__/useSessionDetail.test.ts
+frontend/src/hooks/__tests__/useSessionHistory.test.ts
