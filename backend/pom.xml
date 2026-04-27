@@ -22,6 +22,7 @@
         <maven.compiler.release>${java.version}</maven.compiler.release>
         <testcontainers.version>1.21.3</testcontainers.version>
         <langchain4j.version>1.13.1</langchain4j.version>
+        <langchain4j.azure.version>1.13.1-beta23</langchain4j.azure.version>
     </properties>
 
     <dependencyManagement>
@@ -69,7 +70,7 @@
         <dependency>
             <groupId>dev.langchain4j</groupId>
             <artifactId>langchain4j-azure-open-ai-spring-boot-starter</artifactId>
-            <version>${langchain4j.version}</version>
+            <version>${langchain4j.azure.version}</version>
         </dependency>
         <dependency>
             <groupId>org.postgresql</groupId>

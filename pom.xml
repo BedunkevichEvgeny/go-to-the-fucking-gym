@@ -4,19 +4,15 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.chtrembl.petstore</groupId>
-    <artifactId>petstore-parent</artifactId>
-    <version>0.0.2</version>
+    <groupId>com.gymtracker</groupId>
+    <artifactId>gymtracker-parent</artifactId>
+    <version>0.0.1</version>
     <packaging>pom</packaging>
-    <name>petstore-parent</name>
-    <description>Aggregator POM for PetStore multi-module project</description>
+    <name>workout-tracker</name>
+    <description>Aggregator POM</description>
 
     <modules>
-        <module>petstore/petstoreapp</module>
-        <module>petstore/petstoreorderservice</module>
-        <module>petstore/petstorepetservice</module>
-        <module>petstore/petstoreproductservice</module>
-        <module>petstore/pureorderitemsreserver</module>
+        <module>backend</module>
     </modules>
 </project>
 
