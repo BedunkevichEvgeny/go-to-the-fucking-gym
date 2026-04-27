@@ -21,11 +21,12 @@ public class AuthenticationService {
         if (authentication == null || authentication.getName() == null) {
             throw new UnauthorizedException("No authenticated user present");
         }
-        SecurityUsersProperties.UserDefinition userDefinition = securityUsersProperties.getUsers().get(authentication.getName());
+        SecurityUsersProperties.UserDefinition userDefinition = securityUsersProperties.definitions().get(authentication.getName());
         if (userDefinition == null || userDefinition.getId() == null) {
             throw new UnauthorizedException("Authenticated user is not mapped to a workout tracker account");
         }
         return userDefinition.getId();
     }
 }
+
 
