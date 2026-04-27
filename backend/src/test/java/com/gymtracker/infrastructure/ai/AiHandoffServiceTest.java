@@ -23,13 +23,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.core.task.TaskExecutor;
 
 @ExtendWith(MockitoExtension.class)
 class AiHandoffServiceTest {
@@ -43,22 +42,9 @@ class AiHandoffServiceTest {
     @Mock
     private UserRepository userRepository;
 
-    private TaskExecutor asyncExecutor;
-    private TaskExecutor sameThreadExecutor;
-
-    @BeforeEach
-    void setUp() {
-        asyncExecutor = command -> {
-            Thread thread = new Thread(command);
-            thread.setDaemon(true);
-            thread.start();
-        };
-        sameThreadExecutor = Runnable::run;
-    }
-
     @Test
     void enqueueSessionForAiAnalysisQueuesProgramSessionWithoutBlockingCaller() throws Exception {
-        AiHandoffService service = new AiHandoffService(processor, programExerciseTargetRepository, userRepository, asyncExecutor);
+        AiHandoffService service = new AiHandoffService(processor, programExerciseTargetRepository, userRepository);
         LoggedSession session = programSession();
         UUID userId = UUID.randomUUID();
 
@@ -68,11 +54,17 @@ class AiHandoffServiceTest {
 
         CountDownLatch started = new CountDownLatch(1);
         CountDownLatch finished = new CountDownLatch(1);
-        when(processor.process(any(SessionSummaryDto.class))).thenAnswer(invocation -> {
+        when(processor.processAsync(any(SessionSummaryDTO.class))).thenAnswer(invocation -> {
             started.countDown();
-            Thread.sleep(200);
-            finished.countDown();
-            return "ok";
+            return CompletableFuture.supplyAsync(() -> {
+                try {
+                    Thread.sleep(200);
+                } catch (InterruptedException interruptedException) {
+                    Thread.currentThread().interrupt();
+                }
+                finished.countDown();
+                return "ok";
+            });
         });
 
         long start = System.nanoTime();
@@ -82,12 +74,12 @@ class AiHandoffServiceTest {
         assertThat(elapsedMillis).isLessThan(100);
         assertThat(started.await(1, TimeUnit.SECONDS)).isTrue();
         assertThat(finished.await(2, TimeUnit.SECONDS)).isTrue();
-        verify(processor).process(any(SessionSummaryDto.class));
+        verify(processor).processAsync(any(SessionSummaryDTO.class));
     }
 
     @Test
     void buildSessionSummaryIncludesActualVsTargetFeelingsAndUserPreferences() {
-        AiHandoffService service = new AiHandoffService(processor, programExerciseTargetRepository, userRepository, sameThreadExecutor);
+        AiHandoffService service = new AiHandoffService(processor, programExerciseTargetRepository, userRepository);
         LoggedSession session = programSession();
         UUID userId = UUID.randomUUID();
 
@@ -106,13 +98,13 @@ class AiHandoffServiceTest {
                 .preferredWeightUnit(WeightUnit.KG)
                 .build()));
 
-        SessionSummaryDto summary = service.buildSessionSummary(userId, session);
+        SessionSummaryDTO summary = service.buildSessionSummary(userId, session);
 
         assertThat(summary.metadata().preferredWeightUnit()).isEqualTo("KG");
         assertThat(summary.feelings().rating()).isEqualTo(7);
         assertThat(summary.exercises()).hasSize(1);
 
-        SessionSummaryDto.ExerciseSummary exercise = summary.exercises().getFirst();
+        SessionSummaryDTO.ExerciseSummary exercise = summary.exercises().getFirst();
         assertThat(exercise.exerciseName()).isEqualTo("Bench Press");
         assertThat(exercise.actual().setCount()).isEqualTo(1);
         assertThat(exercise.actual().totalReps()).isEqualTo(8);
@@ -125,20 +117,21 @@ class AiHandoffServiceTest {
 
     @Test
     void enqueueSessionForAiAnalysisHandlesProcessorErrorsGracefully() {
-        AiHandoffService service = new AiHandoffService(processor, programExerciseTargetRepository, userRepository, sameThreadExecutor);
+        AiHandoffService service = new AiHandoffService(processor, programExerciseTargetRepository, userRepository);
         LoggedSession session = programSession();
 
         when(programExerciseTargetRepository.findByProgramSession_IdOrderBySortOrderAsc(session.getProgramSessionId()))
                 .thenReturn(List.of());
         when(userRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
-        when(processor.process(any(SessionSummaryDto.class))).thenThrow(new IllegalStateException("boom"));
+        when(processor.processAsync(any(SessionSummaryDTO.class)))
+                .thenReturn(CompletableFuture.failedFuture(new IllegalStateException("boom")));
 
         assertThatCode(() -> service.enqueueSessionForAiAnalysis(UUID.randomUUID(), session)).doesNotThrowAnyException();
     }
 
     @Test
     void enqueueSessionForAiAnalysisSkipsFreeSessions() {
-        AiHandoffService service = new AiHandoffService(processor, programExerciseTargetRepository, userRepository, sameThreadExecutor);
+        AiHandoffService service = new AiHandoffService(processor, programExerciseTargetRepository, userRepository);
         LoggedSession freeSession = LoggedSession.builder()
                 .id(UUID.randomUUID())
                 .sessionType(SessionType.FREE)
@@ -148,7 +141,7 @@ class AiHandoffServiceTest {
 
         service.enqueueSessionForAiAnalysis(UUID.randomUUID(), freeSession);
 
-        verify(processor, never()).process(any(SessionSummaryDto.class));
+        verify(processor, never()).processAsync(any(SessionSummaryDTO.class));
     }
 
     private LoggedSession programSession() {
@@ -173,4 +166,6 @@ class AiHandoffServiceTest {
                 .build();
     }
 }
+
+
 

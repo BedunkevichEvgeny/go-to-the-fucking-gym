@@ -32,7 +32,7 @@ class AzureOpenAiIntegrationIT {
 
     @Test
     void workflowAcceptsSessionSummaryAndBuildsPromptWithSessionData() {
-        SessionSummaryDto summary = sampleSummary();
+        SessionSummaryDTO summary = sampleSummary();
 
         String prompt = processor.buildPrompt(summary);
         String response = processor.process(summary);
@@ -47,27 +47,28 @@ class AzureOpenAiIntegrationIT {
 
     @Test
     void workflowReturnsCapturedResponseWithinTimeoutBudget() {
-        SessionSummaryDto summary = sampleSummary();
+        SessionSummaryDTO summary = sampleSummary();
 
         String response = assertTimeoutPreemptively(Duration.ofSeconds(30), () -> processor.process(summary));
 
         assertThat(response).isNotBlank();
     }
 
-    private SessionSummaryDto sampleSummary() {
-        return new SessionSummaryDto(
+    private SessionSummaryDTO sampleSummary() {
+        return new SessionSummaryDTO(
                 UUID.fromString("11111111-1111-1111-1111-111111111111"),
                 UUID.randomUUID(),
                 SessionType.PROGRAM,
                 LocalDate.of(2026, 4, 27),
                 1800,
-                new SessionSummaryDto.FeelingsSummary(8, "Solid session"),
-                new SessionSummaryDto.UserPreferences("KG"),
-                List.of(new SessionSummaryDto.ExerciseSummary(
+                new SessionSummaryDTO.FeelingsSummary(8, "Solid session"),
+                new SessionSummaryDTO.UserPreferences("KG"),
+                List.of(new SessionSummaryDTO.ExerciseSummary(
                         "Bench Press",
                         ExerciseType.STRENGTH,
-                        new SessionSummaryDto.ActualPerformance(3, 24, new BigDecimal("80"), null, null),
-                        new SessionSummaryDto.TargetPerformance(3, 8, new BigDecimal("82.5"), null, null))));
+                        new SessionSummaryDTO.ActualPerformance(3, 24, new BigDecimal("80"), null, null),
+                        new SessionSummaryDTO.TargetPerformance(3, 8, new BigDecimal("82.5"), null, null))));
     }
 }
+
 
