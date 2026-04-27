@@ -5,6 +5,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.gymtracker.domain.ProgramStatus;
 import com.gymtracker.infrastructure.repository.ProgramSessionRepository;
 import com.gymtracker.infrastructure.repository.WorkoutProgramRepository;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.OffsetDateTime;
 import java.util.Base64;
@@ -12,21 +16,15 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.annotation.DirtiesContext;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class ProgramSessionControllerIT {
 
-    @Autowired
-    private TestRestTemplate restTemplate;
+    @LocalServerPort
+    private int port;
 
     @Autowired
     private WorkoutProgramRepository workoutProgramRepository;
@@ -35,24 +33,24 @@ class ProgramSessionControllerIT {
     private ProgramSessionRepository programSessionRepository;
 
     @Test
-    void getNextProgramSessionReturnsSessionWithTargets() {
-        ResponseEntity<String> response = getWithBasicAuth("/api/program-sessions/next", "user1", "password1");
+    void getNextProgramSessionReturnsSessionWithTargets() throws Exception {
+        HttpResponse<String> response = getWithBasicAuth("/api/program-sessions/next", "user1", "password1");
 
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(response.getBody()).contains("\"name\":\"Upper Body\"");
-        assertThat(response.getBody()).contains("\"exerciseName\":\"Bench Press\"");
-        assertThat(response.getBody()).contains("\"exercises\"");
+        assertThat(response.statusCode()).isEqualTo(200);
+        assertThat(response.body()).contains("\"name\":\"Upper Body\"");
+        assertThat(response.body()).contains("\"exerciseName\":\"Bench Press\"");
+        assertThat(response.body()).contains("\"exercises\"");
     }
 
     @Test
-    void getNextProgramSessionReturnsNoContentWhenNoActiveProgram() {
-        ResponseEntity<String> response = getWithBasicAuth("/api/program-sessions/next", "user2", "password2");
+    void getNextProgramSessionReturnsNoContentWhenNoActiveProgram() throws Exception {
+        HttpResponse<String> response = getWithBasicAuth("/api/program-sessions/next", "user2", "password2");
 
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+        assertThat(response.statusCode()).isEqualTo(204);
     }
 
     @Test
-    void getNextProgramSessionReturnsNoContentWhenProgramCompleted() {
+    void getNextProgramSessionReturnsNoContentWhenProgramCompleted() throws Exception {
         var program = workoutProgramRepository
                 .findFirstByUserIdAndStatus(
                         java.util.UUID.fromString("11111111-1111-1111-1111-111111111111"),
@@ -65,40 +63,46 @@ class ProgramSessionControllerIT {
         program.setCompletedAt(OffsetDateTime.now());
         workoutProgramRepository.save(program);
 
-        ResponseEntity<String> response = getWithBasicAuth("/api/program-sessions/next", "user1", "password1");
+        HttpResponse<String> response = getWithBasicAuth("/api/program-sessions/next", "user1", "password1");
 
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+        assertThat(response.statusCode()).isEqualTo(204);
     }
 
     @Test
-    void getNextProgramSessionRequiresAuthentication() {
-        ResponseEntity<String> response = restTemplate.exchange(
-                "/api/program-sessions/next",
-                HttpMethod.GET,
-                new HttpEntity<>(new HttpHeaders()),
-                String.class);
+    void getNextProgramSessionRequiresAuthentication() throws Exception {
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(baseUrl("/api/program-sessions/next")))
+                .GET()
+                .build();
 
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+        HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
+
+        assertThat(response.statusCode()).isEqualTo(401);
     }
 
     @Test
-    void getNextProgramSessionEnforcesCrossUserIsolation() {
-        ResponseEntity<String> response = getWithBasicAuth("/api/program-sessions/next", "user2", "password2");
+    void getNextProgramSessionEnforcesCrossUserIsolation() throws Exception {
+        HttpResponse<String> response = getWithBasicAuth("/api/program-sessions/next", "user2", "password2");
 
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
-        assertThat(response.getBody()).isNullOrEmpty();
+        assertThat(response.statusCode()).isEqualTo(204);
     }
 
-    private ResponseEntity<String> getWithBasicAuth(String path, String username, String password) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.set(HttpHeaders.AUTHORIZATION, basicAuth(username, password));
-        headers.setAccept(java.util.List.of(MediaType.APPLICATION_JSON));
-        return restTemplate.exchange(path, HttpMethod.GET, new HttpEntity<>(headers), String.class);
+    private HttpResponse<String> getWithBasicAuth(String path, String username, String password) throws Exception {
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(baseUrl(path)))
+                .header("Authorization", basicAuth(username, password))
+                .header("Accept", "application/json")
+                .GET()
+                .build();
+        return HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
     }
 
     private String basicAuth(String username, String password) {
         String value = username + ":" + password;
         return "Basic " + Base64.getEncoder().encodeToString(value.getBytes(StandardCharsets.UTF_8));
     }
-}
 
+    private String baseUrl(String path) {
+        return "http://localhost:" + port + path;
+    }
+}
