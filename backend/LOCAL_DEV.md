@@ -38,4 +38,6 @@ Optional environment variables for the async handoff integration:
 - `AZURE_OPENAI_ENDPOINT`
 - `AZURE_OPENAI_API_KEY`
 - `AZURE_OPENAI_DEPLOYMENT`
+- `AI_HANDOFF_TIMEOUT_SECONDS` (default `30`)
+- `AI_HANDOFF_MAX_ATTEMPTS` (default `3`)
 
