@@ -1,3 +1,4 @@
+import type { FormEvent } from 'react';
 import { useState } from 'react';
 import { CardioLapInputRow } from '../../components/CardioLapInputRow';
 import { SetInputRow } from '../../components/SetInputRow';
@@ -29,7 +30,7 @@ export function FreeSessionForm({ onSubmit, isSaving }: FreeSessionFormProps) {
     ]);
   };
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     await onSubmit({
       sessionType: 'FREE',
@@ -129,4 +130,5 @@ export function FreeSessionForm({ onSubmit, isSaving }: FreeSessionFormProps) {
     </form>
   );
 }
+
 

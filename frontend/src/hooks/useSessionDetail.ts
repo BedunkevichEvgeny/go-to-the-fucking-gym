@@ -3,7 +3,7 @@ import { api } from '../services/api';
 import type { LoggedSessionDetail } from '../types/api';
 
 export function useSessionDetail(sessionId: string | undefined) {
-  return useQuery({
+  return useQuery<LoggedSessionDetail>({
     enabled: Boolean(sessionId),
     queryKey: ['session-detail', sessionId],
     queryFn: async () => {
@@ -12,4 +12,5 @@ export function useSessionDetail(sessionId: string | undefined) {
     },
   });
 }
+
 

@@ -3,7 +3,7 @@ import { api } from '../services/api';
 import type { ProgressionResponse } from '../types/api';
 
 export function useExerciseProgression(exerciseName: string | undefined) {
-  return useQuery({
+  return useQuery<ProgressionResponse>({
     enabled: Boolean(exerciseName),
     queryKey: ['progression', exerciseName],
     queryFn: async () => {
@@ -12,4 +12,5 @@ export function useExerciseProgression(exerciseName: string | undefined) {
     },
   });
 }
+
 
