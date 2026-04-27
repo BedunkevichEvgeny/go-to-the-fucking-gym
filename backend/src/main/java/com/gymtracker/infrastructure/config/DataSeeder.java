@@ -41,7 +41,7 @@ public class DataSeeder implements ApplicationRunner {
     @Override
     @Transactional
     public void run(ApplicationArguments args) {
-        for (Map.Entry<String, SecurityUsersProperties.UserDefinition> entry : securityUsersProperties.getUsers().entrySet()) {
+        for (Map.Entry<String, SecurityUsersProperties.UserDefinition> entry : securityUsersProperties.definitions().entrySet()) {
             SecurityUsersProperties.UserDefinition definition = entry.getValue();
             userRepository.findById(definition.getId()).orElseGet(() -> userRepository.save(User.builder()
                     .id(definition.getId())
@@ -59,7 +59,7 @@ public class DataSeeder implements ApplicationRunner {
             ));
         }
 
-        SecurityUsersProperties.UserDefinition user1 = securityUsersProperties.getUsers().get("user1");
+        SecurityUsersProperties.UserDefinition user1 = securityUsersProperties.definitions().get("user1");
         if (user1 != null && workoutProgramRepository.findFirstByUserIdAndStatus(user1.getId(), ProgramStatus.ACTIVE).isEmpty()) {
             WorkoutProgram program = WorkoutProgram.builder()
                     .userId(user1.getId())
@@ -84,4 +84,5 @@ public class DataSeeder implements ApplicationRunner {
         }
     }
 }
+
 
