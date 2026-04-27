@@ -8,6 +8,7 @@ import com.gymtracker.infrastructure.repository.ExerciseRepository;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,7 +34,7 @@ public class ExerciseLibraryService {
 
     @Transactional(readOnly = true)
     public List<ExerciseDto> getTopExercises() {
-        return exerciseRepository.findTop50ByActiveTrueOrderByNameAsc()
+        return exerciseRepository.findTopActiveExercisesByUsage(PageRequest.of(0, 50))
                 .stream()
                 .map(dtoMapper::toExerciseDto)
                 .toList();
