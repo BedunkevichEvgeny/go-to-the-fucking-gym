@@ -722,14 +722,14 @@ Session data now enqueued for AI analysis. Non-blocking, < 500ms p95. Async pipe
 
 ### Performance & Load Testing
 
-- [ ] T096 [P] Create `backend/src/test/java/com/gymtracker/performance/PerformanceTest.java`:
+- [X] T096 [P] Create `backend/src/test/java/com/gymtracker/performance/PerformanceTest.java`:
   - Test session save latency (p95 <= 1.5s) with realistic payload: 3 exercises, 3 sets each, feelings
   - Test history list query (p95 <= 2s) with 2 years of data (~500 sessions)
   - Test progression chart query (p95 <= 2s) with 50+ data points
   - Use JMH or SimpleTimer for benchmarking
   - Seed realistic data (SQL script or test fixtures)
   - Document results and highlight any p95 violations
-- [ ] T097 [P] Create performance test script in `backend/docs/performance-validation.md`:
+- [X] T097 [P] Create performance test script in `backend/docs/performance-validation.md`:
   - Document how to run performance tests locally
   - Include expected p95 targets from plan.md
   - Include sample data seed instructions
@@ -737,7 +737,7 @@ Session data now enqueued for AI analysis. Non-blocking, < 500ms p95. Async pipe
 
 ### End-to-End Integration Test
 
-- [ ] T098 Create `backend/src/test/java/com/gymtracker/e2e/WorkoutTrackerE2ETest.java`:
+- [X] T098 Create `backend/src/test/java/com/gymtracker/e2e/WorkoutTrackerE2ETest.java`:
   - Complete user journey: login → get program session → save program session → view history → view progression → save free session → verify all data consistent
   - Use Testcontainers (PostgreSQL)
   - Seed test data via repository
@@ -746,7 +746,7 @@ Session data now enqueued for AI analysis. Non-blocking, < 500ms p95. Async pipe
 
 ### Frontend End-to-End Test (Optional but recommended)
 
-- [ ] T099 Create `frontend/tests/e2e.test.ts` (or Playwright/Cypress config):
+- [X] T099 Create `frontend/tests/e2e.test.ts` (or Playwright/Cypress config):
   - Test full user flow: navigate to app → login (HTTP Basic Auth via header or form) → open program session → fill form → save → view history → click session detail → view progression
   - Mock API responses or use test backend
   - Verify UI renders correctly at each step
@@ -755,7 +755,7 @@ Session data now enqueued for AI analysis. Non-blocking, < 500ms p95. Async pipe
 
 ### Security & User Isolation Validation
 
-- [ ] T100 Create `backend/src/test/java/com/gymtracker/security/UserIsolationE2ETest.java`:
+- [X] T100 Create `backend/src/test/java/com/gymtracker/security/UserIsolationE2ETest.java`:
   - Test user1 cannot access user2's sessions via direct ID (403)
   - Test user1 cannot filter history by user2's exercise patterns
   - Test API rejects requests without authentication (401)
@@ -764,38 +764,38 @@ Session data now enqueued for AI analysis. Non-blocking, < 500ms p95. Async pipe
 
 ### Documentation & Cleanup
 
-- [ ] T101 [P] Update `backend/LOCAL_DEV.md`:
-  - Document PostgreSQL setup (Docker or local)
-  - Document seed users for HTTP Basic Auth
-  - Document running backend locally (mvn spring-boot:run or gradle bootRun)
-  - Document running tests (mvn test, gradle test)
-  - Document running performance tests
-  - Add troubleshooting section
-- [ ] T102 [P] Update `frontend/LOCAL_DEV.md`:
-  - Document npm install + npm run dev
-  - Document test running (npm run test)
-  - Document API base URL configuration
-  - Add troubleshooting section
-- [ ] T103 [P] Create `docs/API_USAGE.md`:
-  - Copy contract from contracts/workout-tracker-api.yaml
-  - Add examples for each endpoint (curl, JavaScript fetch, etc.)
-  - Document authentication method (HTTP Basic Auth)
-  - Document error responses
-- [ ] T104 [P] Create `docs/DATABASE_SCHEMA.md`:
-  - Document entity relationships
-  - Document indexes
-  - Include entity-relationship diagram (text format or link)
-  - Document query performance considerations
-- [ ] T105 [P] Create `docs/FEATURE_WALKTHROUGH.md`:
-  - Step-by-step guide for using all 4 user stories
-  - Screenshots or descriptions of each screen
-  - Example data + expected outcomes
-  - Troubleshooting tips
-- [ ] T106 Create `DEPLOYMENT.md` at repository root:
-  - Document Docker build for backend (Dockerfile)
-  - Document environment variables required (Azure credentials, DB connection, etc.)
-  - Document database migration strategy (Flyway/Liquibase)
-  - Document scaling considerations
+- [X] T101 [P] Update `backend/LOCAL_DEV.md`:
+   - Document PostgreSQL setup (Docker or local)
+   - Document seed users for HTTP Basic Auth
+   - Document running backend locally (mvn spring-boot:run or gradle bootRun)
+   - Document running tests (mvn test, gradle test)
+   - Document running performance tests
+   - Add troubleshooting section
+- [X] T102 [P] Update `frontend/LOCAL_DEV.md`:
+   - Document npm install + npm run dev
+   - Document test running (npm run test)
+   - Document API base URL configuration
+   - Add troubleshooting section
+- [X] T103 [P] Create `docs/API_USAGE.md`:
+   - Copy contract from contracts/workout-tracker-api.yaml
+   - Add examples for each endpoint (curl, JavaScript fetch, etc.)
+   - Document authentication method (HTTP Basic Auth)
+   - Document error responses
+- [X] T104 [P] Create `docs/DATABASE_SCHEMA.md`:
+   - Document entity relationships
+   - Document indexes
+   - Include entity-relationship diagram (text format or link)
+   - Document query performance considerations
+- [X] T105 [P] Create `docs/FEATURE_WALKTHROUGH.md`:
+   - Step-by-step guide for using all 4 user stories
+   - Screenshots or descriptions of each screen
+   - Example data + expected outcomes
+   - Troubleshooting tips
+- [X] T106 Create `DEPLOYMENT.md` at repository root:
+   - Document Docker build for backend (Dockerfile)
+   - Document environment variables required (Azure credentials, DB connection, etc.)
+   - Document database migration strategy (Flyway/Liquibase)
+   - Document scaling considerations
 
 ### Code Quality & Refactoring
 
