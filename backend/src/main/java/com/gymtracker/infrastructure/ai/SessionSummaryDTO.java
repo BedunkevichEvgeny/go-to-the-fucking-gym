@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
-public record SessionSummaryDto(
+public record SessionSummaryDTO(
         UUID userId,
         UUID sessionId,
         SessionType sessionType,
@@ -17,6 +17,10 @@ public record SessionSummaryDto(
         UserPreferences metadata,
         List<ExerciseSummary> exercises
 ) {
+
+    public String toPromptPayload() {
+        return "sessionId=" + sessionId + ",sessionType=" + sessionType + ",sessionDate=" + sessionDate;
+    }
 
     public record FeelingsSummary(
             Integer rating,
