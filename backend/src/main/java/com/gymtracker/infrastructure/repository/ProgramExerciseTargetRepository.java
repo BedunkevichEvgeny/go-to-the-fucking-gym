@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ProgramExerciseTargetRepository extends JpaRepository<ProgramExerciseTarget, UUID> {
 
-    List<ProgramExerciseTarget> findByProgramSessionIdOrderBySortOrderAsc(UUID programSessionId);
+    List<ProgramExerciseTarget> findByProgramSession_IdOrderBySortOrderAsc(UUID programSessionId);
 }
+
 

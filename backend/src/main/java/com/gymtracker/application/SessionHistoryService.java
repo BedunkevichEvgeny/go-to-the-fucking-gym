@@ -1,6 +1,7 @@
 package com.gymtracker.application;
 
 import com.gymtracker.api.dto.SessionHistoryPage;
+import com.gymtracker.domain.LoggedSession;
 import com.gymtracker.infrastructure.mapper.DtoMapper;
 import com.gymtracker.infrastructure.repository.LoggedSessionRepository;
 import com.gymtracker.infrastructure.repository.SessionSpecifications;
@@ -29,7 +30,7 @@ public class SessionHistoryService {
 
     @Transactional(readOnly = true)
     public SessionHistoryPage getSessionHistory(UUID userId, int page, int size, LocalDate dateFrom, LocalDate dateTo, String exerciseName) {
-        Specification specification = Specification.where(SessionSpecifications.forUser(userId))
+        Specification<LoggedSession> specification = Specification.where(SessionSpecifications.forUser(userId))
                 .and(SessionSpecifications.dateFrom(dateFrom))
                 .and(SessionSpecifications.dateTo(dateTo))
                 .and(SessionSpecifications.exerciseNameContains(exerciseName));
@@ -42,4 +43,5 @@ public class SessionHistoryService {
                 resultPage.getTotalElements());
     }
 }
+
 
