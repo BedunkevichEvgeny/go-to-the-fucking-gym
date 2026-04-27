@@ -108,6 +108,7 @@ class LoggedSessionServiceTest {
         assertThat(saved.getExerciseEntries().getLast().getCardioLaps()).hasSize(1);
         assertThat(saved.getFeelings().getRating()).isEqualTo(7);
         verify(programSessionService).markProgramSessionCompleted(programSessionId, userId);
+        verify(aiHandoffService).enqueueSessionForAiAnalysis(userId, saved);
     }
 
     @Test
@@ -261,4 +262,5 @@ class LoggedSessionServiceTest {
                 List.of(new CardioLapInput(durationSeconds, null, null)));
     }
 }
+
 
