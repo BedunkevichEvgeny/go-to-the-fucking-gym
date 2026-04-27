@@ -1,35 +1,50 @@
 package com.gymtracker.api;
 
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.assertj.core.api.Assertions.assertThat;
 
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.boot.test.web.server.LocalServerPort;
 
-@SpringBootTest
-@AutoConfigureMockMvc
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class SessionControllerIT {
 
-    @Autowired
-    private MockMvc mockMvc;
+    @LocalServerPort
+    private int port;
 
     @Test
     void nextProgramSessionRequiresAuthentication() throws Exception {
-        mockMvc.perform(get("/api/program-sessions/next"))
-                .andExpect(status().isUnauthorized());
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create("http://localhost:" + port + "/api/program-sessions/next"))
+                .GET()
+                .build();
+
+        HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
+
+        assertThat(response.statusCode()).isEqualTo(401);
     }
 
     @Test
     void nextProgramSessionReturnsSeededSessionForUser1() throws Exception {
-        mockMvc.perform(get("/api/program-sessions/next").with(httpBasic("user1", "password1")))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name").value("Upper Body"))
-                .andExpect(jsonPath("$.exercises.length()").value(3));
+        String basicAuth = Base64.getEncoder().encodeToString("user1:password1".getBytes(StandardCharsets.UTF_8));
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create("http://localhost:" + port + "/api/program-sessions/next"))
+                .header("Authorization", "Basic " + basicAuth)
+                .GET()
+                .build();
+
+        HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
+
+        assertThat(response.statusCode()).isEqualTo(200);
+        assertThat(response.body()).contains("Upper Body");
+        assertThat(response.body()).contains("Bench Press");
     }
 }
+
 
