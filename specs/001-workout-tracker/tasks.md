@@ -658,7 +658,7 @@ Full feature scope now includes logging (program + free) + history + progression
 
 ### Unit Tests for AI Handoff (MANDATORY)
 
-- [ ] T087 [P] Create `backend/src/test/java/com/gymtracker/infrastructure/ai/AiHandoffServiceTest.java`:
+- [X] T087 [P] Create `backend/src/test/java/com/gymtracker/infrastructure/ai/AiHandoffServiceTest.java`:
   - Test `enqueueSessionForAiAnalysis(UUID userId, LoggedSession session)` queues session summary to async handler
   - Test async queue returns immediately (non-blocking, p95 <= 500ms)
   - Test session summary includes: exerciseEntries with actual vs. target comparison (if program session), sessionFeelings, user preferences
@@ -667,7 +667,7 @@ Full feature scope now includes logging (program + free) + history + progression
 
 ### Integration Tests for AI Handoff (MANDATORY)
 
-- [ ] T088 [P] Create `backend/src/test/java/com/gymtracker/infrastructure/ai/AzureOpenAiIntegrationIT.java`:
+- [X] T088 [P] Create `backend/src/test/java/com/gymtracker/infrastructure/ai/AzureOpenAiIntegrationIT.java`:
   - Test Azure OpenAI client initialization with AZURE_OPENAI_* environment variables
   - Test LangChain4j workflow accepts session summary DTO
   - Test workflow calls Azure OpenAI with session data in prompt
@@ -677,7 +677,7 @@ Full feature scope now includes logging (program + free) + history + progression
 
 ### Implementation for AI Handoff
 
-- [ ] T089 Create `backend/src/main/java/com/gymtracker/infrastructure/ai/AiHandoffService.java`:
+- [X] T089 Create `backend/src/main/java/com/gymtracker/infrastructure/ai/AiHandoffService.java`:
   - Implement `enqueueSessionForAiAnalysis(UUID userId, LoggedSession session): void` - creates SessionSummaryDTO, submits to async queue (Spring TaskExecutor or dedicated queue), returns immediately
   - Implement `buildSessionSummary(LoggedSession session): SessionSummaryDTO` - extracts exercise entries, actual performance, feelings, formats for AI consumption
   - For program sessions: include target vs. actual comparison
