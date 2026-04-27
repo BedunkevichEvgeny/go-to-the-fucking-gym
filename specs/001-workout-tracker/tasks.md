@@ -684,29 +684,29 @@ Full feature scope now includes logging (program + free) + history + progression
   - For free sessions: include exercise list + performance
   - Catch and log errors to prevent throwing exceptions to request thread
   - Ensure queue is non-blocking (use @Async or ExecutorService with async submission)
-- [ ] T090 Create `backend/src/main/java/com/gymtracker/infrastructure/ai/LangChainSessionProcessor.java`:
+- [X] T090 Create `backend/src/main/java/com/gymtracker/infrastructure/ai/LangChainSessionProcessor.java`:
   - Implement LangChain4j integration: accept SessionSummaryDTO, construct prompt with session data
   - Use Azure LangChain Spring Boot starter 1.13.1 to configure LangChain4j + Azure OpenAI
   - Implement workflow: prompt construction → Azure OpenAI call → log response
   - Handle transient failures (retry logic optional but recommended)
   - Ensure execution completes within timeout (30s recommended)
-- [ ] T091 Configure Spring Boot dependency for Azure LangChain in `backend/pom.xml`:
+- [X] T091 Configure Spring Boot dependency for Azure LangChain in `backend/pom.xml`:
   - Add dependency: `<artifactId>azure-open-ai-langchain4j-spring-boot-starter</artifactId>` version `1.13.1`
   - Ensure compatible Spring Boot 4.0.5 version
   - Add Azure OpenAI SDK dependencies if not transitively included
-- [ ] T092 Configure Azure OpenAI properties in `backend/src/main/resources/application.properties`:
+- [X] T092 Configure Azure OpenAI properties in `backend/src/main/resources/application.properties`:
   - Add `azure.openai.endpoint=${AZURE_OPENAI_ENDPOINT:http://localhost:8080}`
   - Add `azure.openai.api-key=${AZURE_OPENAI_API_KEY:fake-key}`
   - Add `azure.openai.deployment=${AZURE_OPENAI_DEPLOYMENT:gpt-35-turbo}`
   - Document expected environment variables in LOCAL_DEV.md + deployment guide
-- [ ] T093 Extend `backend/src/main/java/com/gymtracker/application/LoggedSessionService.java`:
+- [X] T093 Extend `backend/src/main/java/com/gymtracker/application/LoggedSessionService.java`:
   - After successfully saving LoggedSession (in saveLoggedSession method), call `aiHandoffService.enqueueSessionForAiAnalysis(userId, savedSession)` asynchronously
   - Ensure save operation completes and returns to client before async queue processes
   - Log enqueueing event
-- [ ] T094 Create dto in `backend/src/main/java/com/gymtracker/infrastructure/ai/SessionSummaryDTO.java`:
+- [X] T094 Create dto in `backend/src/main/java/com/gymtracker/infrastructure/ai/SessionSummaryDTO.java`:
   - Fields: userId, sessionId, sessionType, sessionDate, exercises (with actual/target for program), totalDuration, feelings (rating + comment), metadata (user preferences)
   - Implement serialization for LangChain prompt construction
-- [ ] T095 Configure Spring async executor in `backend/src/main/java/com/gymtracker/infrastructure/config/AsyncConfig.java`:
+- [X] T095 Configure Spring async executor in `backend/src/main/java/com/gymtracker/infrastructure/config/AsyncConfig.java`:
   - Define `@Bean TaskExecutor aiTaskExecutor()` with thread pool (corePoolSize=2, maxPoolSize=5, queueCapacity=100)
   - Configure exception handling (log failures without throwing)
   - Apply @Async("aiTaskExecutor") to async handoff methods
