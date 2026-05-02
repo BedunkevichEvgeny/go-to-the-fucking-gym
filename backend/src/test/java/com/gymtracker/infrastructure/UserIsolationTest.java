@@ -2,6 +2,7 @@ package com.gymtracker.infrastructure;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import com.gymtracker.api.exception.ForbiddenException;
@@ -21,6 +22,7 @@ import com.gymtracker.infrastructure.repository.ProgramExerciseTargetRepository;
 import com.gymtracker.infrastructure.repository.ProgramSessionRepository;
 import com.gymtracker.infrastructure.repository.WorkoutProgramRepository;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.TypedQuery;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -60,6 +62,13 @@ class UserIsolationTest {
 
     @BeforeEach
     void setUp() {
+        // Configure EntityManager mock to return empty results for queries
+        TypedQuery<?> mockQuery = org.mockito.Mockito.mock(TypedQuery.class);
+        when(mockQuery.setParameter(any(String.class), any())).thenReturn(mockQuery);
+        when(mockQuery.setMaxResults(any(Integer.class))).thenReturn(mockQuery);
+        when(mockQuery.getResultList()).thenReturn(List.of());
+        when(entityManager.createQuery(any(String.class), any(Class.class))).thenReturn((TypedQuery<?>) (Object) mockQuery);
+
         sessionDetailService = new SessionDetailService(loggedSessionRepository, dtoMapper);
         programSessionService = new ProgramSessionService(
                 workoutProgramRepository,
