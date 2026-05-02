@@ -1,6 +1,7 @@
 package com.gymtracker.application;
 
 import com.gymtracker.api.dto.SessionHistoryPage;
+import com.gymtracker.api.exception.ValidationException;
 import com.gymtracker.domain.LoggedSession;
 import com.gymtracker.infrastructure.mapper.DtoMapper;
 import com.gymtracker.infrastructure.repository.LoggedSessionRepository;
@@ -18,6 +19,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class SessionHistoryService {
 
+    private static final int MAX_PAGE_SIZE = 100;
+
     private static final Logger log = LoggerFactory.getLogger(SessionHistoryService.class);
 
     private final LoggedSessionRepository loggedSessionRepository;
@@ -30,6 +33,12 @@ public class SessionHistoryService {
 
     @Transactional(readOnly = true)
     public SessionHistoryPage getSessionHistory(UUID userId, int page, int size, LocalDate dateFrom, LocalDate dateTo, String exerciseName) {
+        if (page < 0) {
+            throw new ValidationException("Page must be greater than or equal to 0");
+        }
+        if (size < 1 || size > MAX_PAGE_SIZE) {
+            throw new ValidationException("Size must be between 1 and 100");
+        }
         Specification<LoggedSession> specification = Specification.where(SessionSpecifications.forUser(userId))
                 .and(SessionSpecifications.dateFrom(dateFrom))
                 .and(SessionSpecifications.dateTo(dateTo))

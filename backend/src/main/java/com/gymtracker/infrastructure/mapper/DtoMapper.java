@@ -1,7 +1,7 @@
 package com.gymtracker.infrastructure.mapper;
 
 import com.gymtracker.api.dto.CardioLapView;
-import com.gymtracker.api.dto.ExerciseDto;
+import com.gymtracker.api.dto.ExerciseView;
 import com.gymtracker.api.dto.ExerciseEntryView;
 import com.gymtracker.api.dto.LoggedSessionDetail;
 import com.gymtracker.api.dto.ProgramExerciseTargetView;
@@ -101,8 +101,8 @@ public class DtoMapper {
         return new ProgressionPoint(sessionId, sessionDate, metricType, metricValue);
     }
 
-    public ExerciseDto toExerciseDto(Exercise exercise) {
-        return new ExerciseDto(exercise.getId(), exercise.getName(), exercise.getCategory(), exercise.getType(), exercise.getDescription());
+    public ExerciseView toExerciseView(Exercise exercise) {
+        return new ExerciseView(exercise.getId(), exercise.getName(), exercise.getCategory(), exercise.getType(), exercise.getDescription());
     }
 }
 

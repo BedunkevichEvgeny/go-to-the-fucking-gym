@@ -1,6 +1,6 @@
 package com.gymtracker.api;
 
-import com.gymtracker.api.dto.ExerciseDto;
+import com.gymtracker.api.dto.ExerciseView;
 import com.gymtracker.api.dto.LoggedSessionCreateRequest;
 import com.gymtracker.api.dto.LoggedSessionDetail;
 import com.gymtracker.api.dto.ProgramSessionView;
@@ -16,6 +16,8 @@ import com.gymtracker.application.SessionHistoryService;
 import com.gymtracker.application.security.AuthenticationService;
 import com.gymtracker.domain.SessionType;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
@@ -30,9 +32,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.validation.annotation.Validated;
 
 @RestController
 @RequestMapping("/api")
+@Validated
 public class SessionController extends BaseController {
 
     private final ProgramSessionService programSessionService;
@@ -82,10 +86,10 @@ public class SessionController extends BaseController {
                 : loggedSessionService.saveLoggedSession(userId, request);
     }
 
-    @GetMapping("/logged-sessions/history")
+    @GetMapping({"/logged-sessions", "/logged-sessions/history"})
     public SessionHistoryPage getHistory(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "0") @Min(0) int page,
+            @RequestParam(defaultValue = "20") @Min(1) @Max(100) int size,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateFrom,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateTo,
             @RequestParam(required = false) String exerciseName
@@ -100,7 +104,7 @@ public class SessionController extends BaseController {
     }
 
     @GetMapping("/exercises")
-    public List<ExerciseDto> getExercises(@RequestParam(required = false) String query) {
+    public List<ExerciseView> getExercises(@RequestParam(required = false) String query) {
         return (query == null || query.isBlank())
                 ? exerciseLibraryService.getTopExercises()
                 : exerciseLibraryService.searchExerciseLibrary(query);

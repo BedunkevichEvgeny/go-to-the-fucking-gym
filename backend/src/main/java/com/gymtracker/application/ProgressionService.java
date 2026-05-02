@@ -2,6 +2,7 @@ package com.gymtracker.application;
 
 import com.gymtracker.api.dto.ProgressionPoint;
 import com.gymtracker.api.dto.ProgressionResponse;
+import com.gymtracker.api.exception.ValidationException;
 import com.gymtracker.infrastructure.query.ProgressionQueryBuilder;
 import java.util.List;
 import java.util.UUID;
@@ -19,8 +20,14 @@ public class ProgressionService {
 
     @Transactional(readOnly = true)
     public ProgressionResponse getExerciseProgression(UUID userId, String exerciseName) {
-        List<ProgressionPoint> points = progressionQueryBuilder.fetchProgressionPoints(userId, exerciseName);
-        return new ProgressionResponse(exerciseName, points);
+        if (exerciseName == null || exerciseName.isBlank()) {
+            throw new ValidationException("Exercise name is required for progression");
+        }
+        String normalizedExerciseName = exerciseName.trim();
+        List<ProgressionPoint> points = progressionQueryBuilder.fetchProgressionPoints(
+                userId,
+                normalizedExerciseName);
+        return new ProgressionResponse(normalizedExerciseName, points);
     }
 }
 

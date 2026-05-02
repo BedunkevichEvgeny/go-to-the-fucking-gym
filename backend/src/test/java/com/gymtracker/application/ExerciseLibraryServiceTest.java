@@ -6,7 +6,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.gymtracker.api.dto.ExerciseDto;
+import com.gymtracker.api.dto.ExerciseView;
 import com.gymtracker.api.exception.ResourceNotFoundException;
 import com.gymtracker.domain.Exercise;
 import com.gymtracker.domain.ExerciseType;
@@ -47,13 +47,13 @@ class ExerciseLibraryServiceTest {
                 .type(ExerciseType.STRENGTH)
                 .active(true)
                 .build();
-        ExerciseDto benchDto = new ExerciseDto(bench.getId(), bench.getName(), bench.getCategory(), bench.getType(), null);
+        ExerciseView benchDto = new ExerciseView(bench.getId(), bench.getName(), bench.getCategory(), bench.getType(), null);
 
         when(exerciseRepository.findTop20ByActiveTrueAndNameContainingIgnoreCaseOrderByNameAsc("bench"))
                 .thenReturn(List.of(bench));
-        when(dtoMapper.toExerciseDto(bench)).thenReturn(benchDto);
+        when(dtoMapper.toExerciseView(bench)).thenReturn(benchDto);
 
-        List<ExerciseDto> results = service.searchExerciseLibrary("bench");
+        List<ExerciseView> results = service.searchExerciseLibrary("bench");
 
         assertThat(results).containsExactly(benchDto);
         verify(exerciseRepository).findTop20ByActiveTrueAndNameContainingIgnoreCaseOrderByNameAsc("bench");
@@ -63,14 +63,14 @@ class ExerciseLibraryServiceTest {
     void getTopExercisesReturnsMostUsedExercisesForSuggestions() {
         Exercise bench = Exercise.builder().id(UUID.randomUUID()).name("Bench Press").category("Chest").type(ExerciseType.STRENGTH).active(true).build();
         Exercise deadlift = Exercise.builder().id(UUID.randomUUID()).name("Deadlift").category("Back").type(ExerciseType.STRENGTH).active(true).build();
-        ExerciseDto benchDto = new ExerciseDto(bench.getId(), bench.getName(), bench.getCategory(), bench.getType(), null);
-        ExerciseDto deadliftDto = new ExerciseDto(deadlift.getId(), deadlift.getName(), deadlift.getCategory(), deadlift.getType(), null);
+        ExerciseView benchDto = new ExerciseView(bench.getId(), bench.getName(), bench.getCategory(), bench.getType(), null);
+        ExerciseView deadliftDto = new ExerciseView(deadlift.getId(), deadlift.getName(), deadlift.getCategory(), deadlift.getType(), null);
 
         when(exerciseRepository.findTopActiveExercisesByUsage(PageRequest.of(0, 50))).thenReturn(List.of(bench, deadlift));
-        when(dtoMapper.toExerciseDto(bench)).thenReturn(benchDto);
-        when(dtoMapper.toExerciseDto(deadlift)).thenReturn(deadliftDto);
+        when(dtoMapper.toExerciseView(bench)).thenReturn(benchDto);
+        when(dtoMapper.toExerciseView(deadlift)).thenReturn(deadliftDto);
 
-        List<ExerciseDto> results = service.getTopExercises();
+        List<ExerciseView> results = service.getTopExercises();
 
         assertThat(results).containsExactly(benchDto, deadliftDto);
     }
