@@ -1,0 +1,3 @@
+e69b88b T056 wire onboarding acceptance flow and tracker refresh
+frontend/src/pages/ProfileGoalOnboardingPage.tsx
+specs/002-profile-goal-onboarding/tasks.md

@@ -517,6 +517,13 @@ pg_restore -U postgres -d gymtracker /backups/gymtracker-20260427.dump
 | `AI_HANDOFF_TIMEOUT_SECONDS` | `30` | Timeout for AI processing |
 | `AI_HANDOFF_MAX_ATTEMPTS` | `3` | Retry attempts for AI handoff |
 
+### Feature 002 Rollout Notes (Profile Goal Onboarding)
+
+- Keep `AZURE_OPENAI_ENDPOINT`, `AZURE_OPENAI_API_KEY`, and `AZURE_OPENAI_DEPLOYMENT` configured in all environments where onboarding proposal generation is enabled.
+- Flyway migration `V002__profile_goal_onboarding.sql` creates onboarding attempt/proposal/feedback/activation tables and must run before backend pods start serving traffic.
+- Existing feature-001 tables are unchanged by `V002`; rollback should be handled as a forward-fix migration instead of deleting applied migration history.
+- During canary rollout, validate acceptance flow with one test user and confirm `/api/program-sessions/next` returns data from the activated program after onboarding acceptance.
+
 ### Secrets Management
 
 **Azure Key Vault** (Recommended):

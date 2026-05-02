@@ -120,7 +120,7 @@
 
 ### Implementation for User Story 3
 
-- [ ] T051 [US3] Implement acceptance transaction and 001 entity activation mapping in `backend/src/main/java/com/gymtracker/application/ProgramActivationService.java`
+- [X] T051 [US3] Implement acceptance transaction and 001 entity activation mapping in `backend/src/main/java/com/gymtracker/application/ProgramActivationService.java`
 - [X] T052 [US3] Implement accept proposal endpoint and response contract mapping in `backend/src/main/java/com/gymtracker/api/ProfileGoalOnboardingController.java`
 - [X] T053 [US3] Integrate activation record persistence and active-program deactivation policy in `backend/src/main/java/com/gymtracker/application/AcceptedProgramActivationService.java`
 - [X] T054 [US3] Update program-session retrieval compatibility mapping for activated plans in `backend/src/main/java/com/gymtracker/application/ProgramSessionService.java`
@@ -135,12 +135,12 @@
 
 **Purpose**: Finish non-critical quality, performance, docs, and broader hardening after core functional slices are complete.
 
-- [ ] T057 Add onboarding latency instrumentation and p95 threshold assertions in `backend/src/test/java/com/gymtracker/infrastructure/ai/OnboardingLatencyIT.java`
-- [ ] T058 [P] Add minimal smoke placeholder scenario for onboarding flow in `specs/002-profile-goal-onboarding/quickstart.md`
-- [ ] T059 [P] Add rollout/ops notes for new env vars and migration behavior in `DEPLOYMENT.md`
-- [ ] T060 [P] Add docs polish for onboarding UX walkthrough in `docs/FEATURE_WALKTHROUGH.md`
-- [ ] T061 Run backend/frontend lint and targeted refactoring cleanup in `backend/pom.xml`
-- [ ] T062 Run full 001+002 regression matrix and record final results in `docs/TEST_COVERAGE.md`
+- [X] T057 Add onboarding latency instrumentation and p95 threshold assertions in `backend/src/test/java/com/gymtracker/infrastructure/ai/OnboardingLatencyIT.java`
+- [X] T058 [P] Add minimal smoke placeholder scenario for onboarding flow in `specs/002-profile-goal-onboarding/quickstart.md`
+- [X] T059 [P] Add rollout/ops notes for new env vars and migration behavior in `DEPLOYMENT.md`
+- [X] T060 [P] Add docs polish for onboarding UX walkthrough in `docs/FEATURE_WALKTHROUGH.md`
+- [X] T061 Run backend/frontend lint and targeted refactoring cleanup in `backend/pom.xml`
+- [X] T062 Run full 001+002 regression matrix and record final results in `docs/TEST_COVERAGE.md`
 
 ---
 

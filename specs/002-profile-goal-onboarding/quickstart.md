@@ -43,3 +43,11 @@ These map to backend application properties:
 ## Smoke Tests
 Smoke setup stays intentionally minimal in this plan. Final smoke scenarios/commands will be added by user direction during implementation and task breakdown.
 
+### Placeholder Smoke Scenario (T058)
+1. Authenticate as a brand-new user with no active program.
+2. `POST /api/profile-goals/onboarding` with valid profile-goal payload and confirm `proposalId` is returned.
+3. `POST /api/profile-goals/proposals/{proposalId}/accept` and confirm `activatedProgramId` is returned.
+4. `GET /api/program-sessions/next` and confirm the next session resolves from the activated onboarding program.
+
+Expected placeholder result: onboarding create + accept + 001 next-session compatibility path completes without endpoint contract errors.
+

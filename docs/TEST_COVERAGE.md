@@ -55,3 +55,37 @@ Matrix source: `specs/001-workout-tracker/spec.md` (Test Coverage Requirements t
 - Spec matrix mapping verification: PASS
 - >=80% target for domain+application where possible: PARTIAL PASS (`application` meets target, `domain` does not)
 
+---
+
+# Regression Matrix Verification (T062)
+
+Date: 2026-05-02
+Features: `specs/001-workout-tracker` + `specs/002-profile-goal-onboarding`
+
+## Commands Executed
+
+- Backend compile validation: `mvn -DskipTests compile`
+- Backend targeted tests: `mvn -Dtest=ProgramActivationServiceTest,OnboardingLatencyIT test`
+- Backend full regression: `mvn test`
+- Backend lint: `mvn -DskipTests -Dcheckstyle.skip=false checkstyle:check`
+- Frontend lint: `npm run lint`
+- Frontend regression tests: `npm run test`
+
+## Result Matrix
+
+| Area | Command | Result | Notes |
+|---|---|---|---|
+| Backend compile | `mvn -DskipTests compile` | PASS | Main sources compile successfully after T051 changes. |
+| Backend targeted tests | `mvn -Dtest=ProgramActivationServiceTest,OnboardingLatencyIT test` | FAIL | Blocked at test-compile due existing `UserIsolationTest` missing `MockitoSettings` / `Strictness` symbols. |
+| Backend full regression | `mvn test` | FAIL | Same blocker as above during `testCompile`, before test execution. |
+| Backend lint | `mvn -DskipTests -Dcheckstyle.skip=false checkstyle:check` | FAIL | Baseline project has 1162 checkstyle violations (not introduced by this task). |
+| Frontend lint | `npm run lint` | FAIL | Existing lint errors in `src/features/profile-goals/__tests__/OnboardingAcceptance.test.tsx` and `src/hooks/useProfileGoalProposalReview.ts`. |
+| Frontend full tests | `npm run test` | FAIL (partial) | 14/15 suites pass; onboarding acceptance suite fails due bad import path in `OnboardingAcceptance.test.tsx`. |
+
+## Blockers Requiring Follow-up
+
+- Backend test compilation blocker in `backend/src/test/java/com/gymtracker/infrastructure/UserIsolationTest.java`.
+- Frontend onboarding acceptance test import path mismatch in `frontend/src/features/profile-goals/__tests__/OnboardingAcceptance.test.tsx`.
+- Existing frontend lint debt in `frontend/src/features/profile-goals/__tests__/OnboardingAcceptance.test.tsx` and `frontend/src/hooks/useProfileGoalProposalReview.ts`.
+- Existing backend-wide checkstyle debt (1162 violations) if strict lint gating is required.
+
