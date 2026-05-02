@@ -56,7 +56,7 @@
 
 ### Implementation for User Story 1
 
-- [ ] T019 [US1] Implement onboarding validation service for age/weight/goal rules in `backend/src/main/java/com/gymtracker/application/OnboardingValidationService.java`
+- [X] T019 [US1] Implement onboarding validation service for age/weight/goal rules in `backend/src/main/java/com/gymtracker/application/OnboardingValidationService.java`
 - [ ] T020 [US1] Implement initial proposal generation orchestration in `backend/src/main/java/com/gymtracker/application/PlanProposalService.java`
 - [ ] T021 [US1] Implement onboarding AI generation client with LangChain4j + Azure OpenAI in `backend/src/main/java/com/gymtracker/infrastructure/ai/OnboardingPlanGenerator.java`
 - [ ] T022 [US1] Implement create/current/access-gate onboarding endpoints in `backend/src/main/java/com/gymtracker/api/ProfileGoalOnboardingController.java`
