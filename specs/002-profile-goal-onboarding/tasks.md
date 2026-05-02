@@ -109,7 +109,7 @@
 - [X] T040 [P] [US3] Add accepted proposal activation unit tests in `backend/src/test/java/com/gymtracker/application/ProgramActivationServiceTest.java`
 - [X] T041 [P] [US3] Add active program replacement preservation unit tests in `backend/src/test/java/com/gymtracker/application/ProgramReplacementPolicyTest.java`
 - [X] T042 [P] [US3] Add proposal acceptance integration tests in `backend/src/test/java/com/gymtracker/api/ProfileGoalsAcceptanceControllerIT.java`
-- [ ] T043 [P] [US3] Add 001 next-session compatibility integration test after activation in `backend/src/test/java/com/gymtracker/api/ProgramSessionControllerIT.java`
+- [X] T043 [P] [US3] Add 001 next-session compatibility integration test after activation in `backend/src/test/java/com/gymtracker/api/ProgramSessionControllerIT.java`
 - [ ] T044 [P] [US3] Add history/progression unaffected integration test after replacement in `backend/src/test/java/com/gymtracker/api/SessionHistoryControllerIT.java`
 - [X] T045 [P] [US3] Add onboarding acceptance frontend integration test in `frontend/src/features/profile-goals/__tests__/OnboardingAcceptance.test.tsx`
 - [ ] T046 [P] [US3] Add explicit API compatibility assertions between 002 onboarding and 001 tracker contracts in `backend/src/test/java/com/gymtracker/api/OnboardingContractCompatibilityIT.java`
