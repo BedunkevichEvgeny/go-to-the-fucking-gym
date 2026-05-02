@@ -20,6 +20,7 @@ import com.gymtracker.infrastructure.repository.LoggedSessionRepository;
 import com.gymtracker.infrastructure.repository.ProgramExerciseTargetRepository;
 import com.gymtracker.infrastructure.repository.ProgramSessionRepository;
 import com.gymtracker.infrastructure.repository.WorkoutProgramRepository;
+import jakarta.persistence.EntityManager;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -51,6 +52,9 @@ class UserIsolationTest {
     @Mock
     private ProgramExerciseTargetRepository programExerciseTargetRepository;
 
+    @Mock
+    private EntityManager entityManager;
+
     private SessionDetailService sessionDetailService;
     private ProgramSessionService programSessionService;
 
@@ -61,7 +65,8 @@ class UserIsolationTest {
                 workoutProgramRepository,
                 programSessionRepository,
                 programExerciseTargetRepository,
-                new DtoMapper());
+                new DtoMapper(),
+                entityManager);
     }
 
     @AfterEach
