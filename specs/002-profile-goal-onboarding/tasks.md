@@ -105,23 +105,23 @@
 
 ### Tests for User Story 3 (MANDATORY)
 
-- [ ] T039 [P] [US3] Add proposal-to-001 mapping unit tests in `backend/src/test/java/com/gymtracker/application/ProgramMapperCompatibilityTest.java`
-- [ ] T040 [P] [US3] Add accepted proposal activation unit tests in `backend/src/test/java/com/gymtracker/application/ProgramActivationServiceTest.java`
-- [ ] T041 [P] [US3] Add active program replacement preservation unit tests in `backend/src/test/java/com/gymtracker/application/ProgramReplacementPolicyTest.java`
-- [ ] T042 [P] [US3] Add proposal acceptance integration tests in `backend/src/test/java/com/gymtracker/api/ProfileGoalsAcceptanceControllerIT.java`
+- [X] T039 [P] [US3] Add proposal-to-001 mapping unit tests in `backend/src/test/java/com/gymtracker/application/ProgramMapperCompatibilityTest.java`
+- [X] T040 [P] [US3] Add accepted proposal activation unit tests in `backend/src/test/java/com/gymtracker/application/ProgramActivationServiceTest.java`
+- [X] T041 [P] [US3] Add active program replacement preservation unit tests in `backend/src/test/java/com/gymtracker/application/ProgramReplacementPolicyTest.java`
+- [X] T042 [P] [US3] Add proposal acceptance integration tests in `backend/src/test/java/com/gymtracker/api/ProfileGoalsAcceptanceControllerIT.java`
 - [ ] T043 [P] [US3] Add 001 next-session compatibility integration test after activation in `backend/src/test/java/com/gymtracker/api/ProgramSessionControllerIT.java`
 - [ ] T044 [P] [US3] Add history/progression unaffected integration test after replacement in `backend/src/test/java/com/gymtracker/api/SessionHistoryControllerIT.java`
-- [ ] T045 [P] [US3] Add onboarding acceptance frontend integration test in `frontend/src/features/profile-goals/__tests__/OnboardingAcceptance.test.tsx`
+- [X] T045 [P] [US3] Add onboarding acceptance frontend integration test in `frontend/src/features/profile-goals/__tests__/OnboardingAcceptance.test.tsx`
 - [ ] T046 [P] [US3] Add explicit API compatibility assertions between 002 onboarding and 001 tracker contracts in `backend/src/test/java/com/gymtracker/api/OnboardingContractCompatibilityIT.java`
 - [ ] T047 [P] [US3] Add IC-006 regression integration test for users without onboarding metadata using 001 flows in `backend/src/test/java/com/gymtracker/api/OnboardingContractCompatibilityIT.java`
-- [ ] T048 [P] [US3] Add FR-013 onboarding ownership unit tests for attempts/proposals/feedback/accept authorization policy in `backend/src/test/java/com/gymtracker/application/OnboardingAuthorizationPolicyTest.java`
-- [ ] T049 [P] [US3] Add FR-013 cross-user denial integration tests for attempts/proposals/feedback/accept endpoints in `backend/src/test/java/com/gymtracker/api/ProfileGoalOnboardingAuthorizationIT.java`
-- [ ] T050 [P] [US3] Add NFR-003 accept/activate p95<=3s integration performance test in `backend/src/test/java/com/gymtracker/api/ProfileGoalsAcceptancePerformanceIT.java`
+- [X] T048 [P] [US3] Add FR-013 onboarding ownership unit tests for attempts/proposals/feedback/accept authorization policy in `backend/src/test/java/com/gymtracker/application/OnboardingAuthorizationPolicyTest.java`
+- [X] T049 [P] [US3] Add FR-013 cross-user denial integration tests for attempts/proposals/feedback/accept endpoints in `backend/src/test/java/com/gymtracker/api/ProfileGoalOnboardingAuthorizationIT.java`
+- [X] T050 [P] [US3] Add NFR-003 accept/activate p95<=3s integration performance test in `backend/src/test/java/com/gymtracker/api/ProfileGoalsAcceptancePerformanceIT.java`
 
 ### Implementation for User Story 3
 
 - [ ] T051 [US3] Implement acceptance transaction and 001 entity activation mapping in `backend/src/main/java/com/gymtracker/application/ProgramActivationService.java`
-- [ ] T052 [US3] Implement accept proposal endpoint and response contract mapping in `backend/src/main/java/com/gymtracker/api/ProfileGoalOnboardingController.java`
+- [X] T052 [US3] Implement accept proposal endpoint and response contract mapping in `backend/src/main/java/com/gymtracker/api/ProfileGoalOnboardingController.java`
 - [X] T053 [US3] Integrate activation record persistence and active-program deactivation policy in `backend/src/main/java/com/gymtracker/application/AcceptedProgramActivationService.java`
 - [X] T054 [US3] Update program-session retrieval compatibility mapping for activated plans in `backend/src/main/java/com/gymtracker/application/ProgramSessionService.java`
 - [X] T055 [US3] Implement frontend accept action and post-accept navigation to tracker in `frontend/src/features/profile-goals/ProposalAcceptanceActions.tsx`
