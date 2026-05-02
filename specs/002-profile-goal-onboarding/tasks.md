@@ -81,7 +81,7 @@
 
 - [X] T029 [P] [US2] Add proposal revision unit tests for versioning and linkage in `backend/src/test/java/com/gymtracker/application/ProposalRevisionServiceTest.java`
 - [X] T030 [P] [US2] Add proposal feedback policy unit tests in `backend/src/test/java/com/gymtracker/application/ProposalFeedbackPolicyTest.java`
-- [ ] T031 [P] [US2] Add reject-and-revise integration tests in `backend/src/test/java/com/gymtracker/api/PlanConversationControllerIT.java`
+- [X] T031 [P] [US2] Add reject-and-revise integration tests in `backend/src/test/java/com/gymtracker/api/PlanConversationControllerIT.java`
 - [ ] T032 [P] [US2] Add frontend reject/feedback/revise interaction tests in `frontend/src/features/profile-goals/__tests__/ProposalReviewFlow.test.tsx`
 
 ### Implementation for User Story 2
