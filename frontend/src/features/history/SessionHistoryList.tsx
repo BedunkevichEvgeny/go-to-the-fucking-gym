@@ -1,8 +1,11 @@
 import { SessionTypeBadge } from '../../components/SessionTypeBadge';
 import type { SessionHistoryItem } from '../../types/api';
 
+/** Props for rendering selectable workout history cards. */
 interface SessionHistoryListProps {
+  /** Sessions displayed in reverse-chronological order. */
   sessions: SessionHistoryItem[];
+  /** Called when a session card is selected. */
   onSelectSession: (sessionId: string) => void;
 }
 

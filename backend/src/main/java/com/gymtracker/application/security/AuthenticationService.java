@@ -16,6 +16,12 @@ public class AuthenticationService {
         this.securityUsersProperties = securityUsersProperties;
     }
 
+    /**
+     * Resolves the authenticated application's user identifier from Spring Security context.
+     *
+     * @return mapped user UUID for the current principal
+     * @throws UnauthorizedException when no principal exists or mapping is missing
+     */
     public UUID getCurrentUserId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || authentication.getName() == null) {

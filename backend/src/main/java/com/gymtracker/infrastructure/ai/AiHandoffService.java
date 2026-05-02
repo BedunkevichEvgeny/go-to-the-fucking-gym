@@ -37,6 +37,12 @@ public class AiHandoffService {
         this.userRepository = userRepository;
     }
 
+    /**
+     * Enqueues a saved program session for asynchronous AI analysis.
+     *
+     * @param userId authenticated user identifier
+     * @param session saved session entity
+     */
     public void enqueueSessionForAiAnalysis(UUID userId, LoggedSession session) {
         if (session == null || session.getSessionType() != SessionType.PROGRAM) {
             return;
@@ -56,6 +62,13 @@ public class AiHandoffService {
         }
     }
 
+    /**
+     * Builds an AI-ready summary payload from a saved session.
+     *
+     * @param userId authenticated user identifier
+     * @param session saved session entity
+     * @return structured summary used by the AI processor prompt workflow
+     */
     public SessionSummaryDTO buildSessionSummary(UUID userId, LoggedSession session) {
         Map<String, ProgramExerciseTarget> targetsByExercise = loadTargetsByExercise(session);
         List<SessionSummaryDTO.ExerciseSummary> exerciseSummaries = session.getExerciseEntries().stream()

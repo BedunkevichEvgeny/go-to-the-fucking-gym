@@ -1,7 +1,9 @@
 import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import type { ProgressionPoint } from '../../types/api';
 
+/** Props for rendering exercise progression chart data. */
 interface ProgressionChartProps {
+  /** Ordered progression points returned by the backend progression endpoint. */
   points: ProgressionPoint[];
 }
 

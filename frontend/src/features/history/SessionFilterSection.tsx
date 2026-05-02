@@ -1,10 +1,16 @@
 import { DateRangePicker } from '../../components/DateRangePicker';
 
+/** Props for history list filter controls. */
 interface SessionFilterSectionProps {
+  /** Current inclusive start date filter. */
   dateFrom: string;
+  /** Current inclusive end date filter. */
   dateTo: string;
+  /** Current exercise-name search term filter. */
   exerciseName: string;
+  /** Called when any filter field changes. */
   onChange: (next: { dateFrom: string; dateTo: string; exerciseName: string }) => void;
+  /** Resets all filters to their default values. */
   onClear: () => void;
 }
 

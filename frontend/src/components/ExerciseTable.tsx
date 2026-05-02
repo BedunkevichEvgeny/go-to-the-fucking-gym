@@ -1,6 +1,8 @@
 import type { ExerciseEntryView } from '../types/api';
 
+/** Props for rendering a read-only exercise performance table. */
 interface ExerciseTableProps {
+  /** Exercise entry containing either sets or cardio laps. */
   entry: ExerciseEntryView;
 }
 

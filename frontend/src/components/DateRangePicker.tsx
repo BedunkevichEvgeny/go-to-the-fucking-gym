@@ -1,6 +1,10 @@
+/** Date range selection props for history filtering controls. */
 interface DateRangePickerProps {
+  /** Inclusive start date in yyyy-mm-dd format. */
   dateFrom: string;
+  /** Inclusive end date in yyyy-mm-dd format. */
   dateTo: string;
+  /** Emits the next date range whenever either input changes. */
   onChange: (next: { dateFrom: string; dateTo: string }) => void;
 }
 

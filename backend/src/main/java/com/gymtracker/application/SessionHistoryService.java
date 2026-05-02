@@ -31,6 +31,18 @@ public class SessionHistoryService {
         this.dtoMapper = dtoMapper;
     }
 
+    /**
+     * Retrieves paginated session history for a user with optional date and exercise filters.
+     *
+     * @param userId authenticated user identifier
+     * @param page zero-based page index
+     * @param size page size between 1 and 100
+     * @param dateFrom inclusive lower bound for session date filtering
+     * @param dateTo inclusive upper bound for session date filtering
+     * @param exerciseName optional exercise name fragment filter
+     * @return history page with reverse-chronological items
+     * @throws ValidationException when paging parameters are out of range
+     */
     @Transactional(readOnly = true)
     public SessionHistoryPage getSessionHistory(UUID userId, int page, int size, LocalDate dateFrom, LocalDate dateTo, String exerciseName) {
         if (page < 0) {

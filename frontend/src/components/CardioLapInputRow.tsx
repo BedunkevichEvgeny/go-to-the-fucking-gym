@@ -1,9 +1,14 @@
 import type { CardioLapInput } from '../types/api';
 
+/** Props for editing a single cardio lap row. */
 interface CardioLapInputRowProps {
+  /** Zero-based lap index used for UI labels. */
   index: number;
+  /** Current lap value bound to input controls. */
   value: CardioLapInput;
+  /** Called with updated lap values after user edits. */
   onChange: (next: CardioLapInput) => void;
+  /** Optional callback to remove the current lap. */
   onRemove?: () => void;
 }
 

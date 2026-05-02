@@ -67,6 +67,11 @@ public class SessionController extends BaseController {
         this.progressionService = progressionService;
     }
 
+    /**
+     * Gets the next uncompleted program session for the authenticated user.
+     *
+     * @return 200 with session payload or 204 when no pending program session exists
+     */
     @GetMapping("/program-sessions/next")
     public ResponseEntity<ProgramSessionView> getNextProgramSession() {
         UUID userId = extractUserId();
@@ -76,6 +81,12 @@ public class SessionController extends BaseController {
                 .orElseGet(() -> ResponseEntity.noContent().build());
     }
 
+    /**
+     * Creates a logged workout session in PROGRAM or FREE mode.
+     *
+     * @param request logged session payload validated from request body
+     * @return 201 response body with persisted session details
+     */
     @PostMapping("/logged-sessions")
     @ResponseStatus(HttpStatus.CREATED)
     public LoggedSessionDetail createLoggedSession(@Valid @RequestBody LoggedSessionCreateRequest request) {
@@ -86,6 +97,16 @@ public class SessionController extends BaseController {
                 : loggedSessionService.saveLoggedSession(userId, request);
     }
 
+    /**
+     * Gets paginated workout history filtered by date range and exercise name.
+     *
+     * @param page zero-based page index
+     * @param size requested page size (1-100)
+     * @param dateFrom optional inclusive start date
+     * @param dateTo optional inclusive end date
+     * @param exerciseName optional exercise name filter
+     * @return 200 response with history page payload
+     */
     @GetMapping({"/logged-sessions", "/logged-sessions/history"})
     public SessionHistoryPage getHistory(
             @RequestParam(defaultValue = "0") @Min(0) int page,
@@ -98,11 +119,23 @@ public class SessionController extends BaseController {
         return sessionHistoryService.getSessionHistory(userId, page, size, dateFrom, dateTo, exerciseName);
     }
 
+    /**
+     * Gets full details for a single logged session owned by the authenticated user.
+     *
+     * @param sessionId logged session identifier
+     * @return 200 response with detailed session payload
+     */
     @GetMapping("/logged-sessions/{sessionId}")
     public LoggedSessionDetail getSession(@PathVariable UUID sessionId) {
         return sessionDetailService.getSessionDetails(extractUserId(), sessionId);
     }
 
+    /**
+     * Gets exercise library results for search or quick-pick usage.
+     *
+     * @param query optional search query; blank returns top exercises
+     * @return 200 response with exercise list
+     */
     @GetMapping("/exercises")
     public List<ExerciseView> getExercises(@RequestParam(required = false) String query) {
         return (query == null || query.isBlank())
@@ -110,6 +143,12 @@ public class SessionController extends BaseController {
                 : exerciseLibraryService.searchExerciseLibrary(query);
     }
 
+    /**
+     * Gets progression points for an exercise across the authenticated user's session history.
+     *
+     * @param exerciseName exercise name path parameter
+     * @return 200 response with progression response payload
+     */
     @GetMapping("/progression/{exerciseName}")
     public ProgressionResponse getProgression(@PathVariable String exerciseName) {
         return progressionService.getExerciseProgression(extractUserId(), exerciseName);

@@ -2,7 +2,9 @@ import { useState } from 'react';
 import { useExerciseLibrary } from '../../hooks/useExerciseLibrary';
 import type { ExerciseDto } from '../../types/api';
 
+/** Props for exercise library search and custom exercise creation actions. */
 interface ExerciseLibrarySearchProps {
+  /** Receives either a selected library exercise or a custom exercise name payload. */
   onAddExercise: (exercise: ExerciseDto | { name: string }) => void;
 }
 
