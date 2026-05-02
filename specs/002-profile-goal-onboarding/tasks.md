@@ -88,7 +88,7 @@
 
 - [X] T033 [US2] Implement proposal rejection and revision orchestration service in `backend/src/main/java/com/gymtracker/application/ProposalRevisionService.java`
 - [X] T034 [US2] Implement feedback persistence and attempt continuity policy in `backend/src/main/java/com/gymtracker/application/ProposalFeedbackService.java`
-- [ ] T035 [US2] Implement reject proposal endpoint in `backend/src/main/java/com/gymtracker/api/ProfileGoalOnboardingController.java`
+- [X] T035 [US2] Implement reject proposal endpoint in `backend/src/main/java/com/gymtracker/api/ProfileGoalOnboardingController.java`
 - [ ] T036 [US2] Add frontend proposal review card with reject feedback form in `frontend/src/features/profile-goals/ProposalReviewCard.tsx`
 - [ ] T037 [US2] Wire revision mutations and optimistic state updates in `frontend/src/hooks/useProfileGoalProposalReview.ts`
 - [ ] T038 [US2] Persist and restore in-progress onboarding attempt state on reload in `frontend/src/pages/ProfileGoalOnboardingPage.tsx`
