@@ -49,7 +49,7 @@
 ### Tests for User Story 1 (MANDATORY)
 
 - [X] T014 [P] [US1] Add onboarding input validation unit tests in `backend/src/test/java/com/gymtracker/application/OnboardingValidationTest.java`
-- [ ] T015 [P] [US1] Add initial proposal generation unit tests in `backend/src/test/java/com/gymtracker/application/PlanProposalServiceTest.java`
+- [X] T015 [P] [US1] Add initial proposal generation unit tests in `backend/src/test/java/com/gymtracker/application/PlanProposalServiceTest.java`
 - [ ] T016 [P] [US1] Add onboarding submission integration tests for valid/invalid payloads in `backend/src/test/java/com/gymtracker/api/ProfileGoalsControllerIT.java`
 - [ ] T017 [P] [US1] Add access-gate integration tests for brand-new users in `backend/src/test/java/com/gymtracker/api/TrackingAccessGateControllerIT.java`
 - [ ] T018 [P] [US1] Add onboarding entry/form/gate frontend tests in `frontend/src/features/profile-goals/__tests__/OnboardingPage.test.tsx`
