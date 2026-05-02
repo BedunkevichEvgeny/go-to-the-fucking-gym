@@ -1,30 +1,81 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ProposalReviewCard } from '../features/profile-goals/ProposalReviewCard';
 import {
+  useAcceptProposal,
   useCreateInitialProposal,
   useCurrentOnboardingAttempt,
   useTrackingAccessGate,
 } from '../hooks/useProfileGoalOnboarding';
-import type { GoalTargetBucket, OnboardingPrimaryGoal, OnboardingSubmissionRequest } from '../types/onboarding';
+import { useProfileGoalProposalReview } from '../hooks/useProfileGoalProposalReview';
+import type {
+  GoalTargetBucket,
+  OnboardingPrimaryGoal,
+  OnboardingSubmissionRequest,
+  PlanProposalResponse,
+} from '../types/onboarding';
 
 const GOAL_OPTIONS: OnboardingPrimaryGoal[] = ['LOSE_WEIGHT', 'BUILD_HEALTHY_BODY', 'STRENGTH', 'BUILD_MUSCLES'];
 const TARGET_OPTIONS: GoalTargetBucket[] = ['LOSS_5', 'LOSS_10', 'LOSS_15', 'LOSS_20_PLUS'];
+const FORM_STORAGE_KEY = 'profile-goals.form';
+const PROPOSAL_STORAGE_KEY = 'profile-goals.proposal';
+
+function readStoredForm(): OnboardingSubmissionRequest | null {
+  try {
+    const raw = localStorage.getItem(FORM_STORAGE_KEY);
+    return raw ? (JSON.parse(raw) as OnboardingSubmissionRequest) : null;
+  } catch {
+    return null;
+  }
+}
+
+function readStoredProposal(): PlanProposalResponse | null {
+  try {
+    const raw = localStorage.getItem(PROPOSAL_STORAGE_KEY);
+    return raw ? (JSON.parse(raw) as PlanProposalResponse) : null;
+  } catch {
+    return null;
+  }
+}
 
 export function ProfileGoalOnboardingPage() {
   const navigate = useNavigate();
   const createInitialProposal = useCreateInitialProposal();
+  const rejectReview = useProfileGoalProposalReview();
+  const acceptProposal = useAcceptProposal();
   const { data: currentAttempt } = useCurrentOnboardingAttempt();
   const { data: gate } = useTrackingAccessGate();
 
-  const [form, setForm] = useState<OnboardingSubmissionRequest>({
-    age: 30,
-    currentWeight: 75,
-    weightUnit: 'KG',
-    primaryGoal: 'STRENGTH',
-    goalTargetBucket: null,
-  });
+  const [form, setForm] = useState<OnboardingSubmissionRequest>(
+    () =>
+      readStoredForm() ?? {
+        age: 30,
+        currentWeight: 75,
+        weightUnit: 'KG',
+        primaryGoal: 'STRENGTH',
+        goalTargetBucket: null,
+      },
+  );
+  const [storedProposal, setStoredProposal] = useState<PlanProposalResponse | null>(() => readStoredProposal());
 
-  const proposal = currentAttempt?.latestProposal ?? createInitialProposal.data;
+  const proposal = useMemo(
+    () => currentAttempt?.latestProposal ?? createInitialProposal.data ?? storedProposal,
+    [createInitialProposal.data, currentAttempt?.latestProposal, storedProposal],
+  );
+
+  useEffect(() => {
+    localStorage.setItem(FORM_STORAGE_KEY, JSON.stringify(form));
+  }, [form]);
+
+  useEffect(() => {
+    if (proposal) {
+      localStorage.setItem(PROPOSAL_STORAGE_KEY, JSON.stringify(proposal));
+      setStoredProposal(proposal);
+      return;
+    }
+    localStorage.removeItem(PROPOSAL_STORAGE_KEY);
+    setStoredProposal(null);
+  }, [proposal]);
 
   return (
     <section className="stack-lg">
@@ -119,26 +170,13 @@ export function ProfileGoalOnboardingPage() {
       </form>
 
       {proposal && (
-        <section className="card stack-sm">
-          <h2>Latest Proposal</h2>
-          <p>
-            Version {proposal.version} • {proposal.generatedBy.provider} ({proposal.generatedBy.deployment})
-          </p>
-          {proposal.sessions.map((session) => (
-            <article key={`${session.sequenceNumber}-${session.name}`} className="stack-xs">
-              <strong>
-                Session {session.sequenceNumber}: {session.name}
-              </strong>
-              <ul>
-                {session.exercises.map((exercise) => (
-                  <li key={`${session.sequenceNumber}-${exercise.exerciseName}`}>{exercise.exerciseName}</li>
-                ))}
-              </ul>
-            </article>
-          ))}
-        </section>
+        <ProposalReviewCard
+          proposal={proposal}
+          isBusy={rejectReview.isRejecting || acceptProposal.isPending}
+          onReject={(requestedChanges) => rejectReview.rejectProposal({ proposalId: proposal.proposalId, requestedChanges })}
+          onAccept={() => acceptProposal.mutate(proposal.proposalId)}
+        />
       )}
     </section>
   );
 }
-
