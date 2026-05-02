@@ -30,7 +30,7 @@
 - [X] T006 [P] Add `ProfileGoalOnboardingAttempt` entity mapping in `backend/src/main/java/com/gymtracker/domain/ProfileGoalOnboardingAttempt.java`
 - [X] T007 [P] Add `PlanProposal` entity mapping with JSON payload support in `backend/src/main/java/com/gymtracker/domain/PlanProposal.java`
 - [X] T008 [P] Add `ProposalFeedback` entity mapping in `backend/src/main/java/com/gymtracker/domain/ProposalFeedback.java`
-- [ ] T009 [P] Add `AcceptedProgramActivation` entity mapping in `backend/src/main/java/com/gymtracker/domain/AcceptedProgramActivation.java`
+- [X] T009 [P] Add `AcceptedProgramActivation` entity mapping in `backend/src/main/java/com/gymtracker/domain/AcceptedProgramActivation.java`
 - [ ] T010 [P] Add onboarding repositories for attempt/proposal/feedback/activation in `backend/src/main/java/com/gymtracker/infrastructure/repository/OnboardingRepositories.java`
 - [ ] T011 Add onboarding API DTOs aligned to contract schemas in `backend/src/main/java/com/gymtracker/api/dto/ProfileGoalOnboardingDtos.java`
 - [ ] T012 Add proposal payload model + mapper shared by all onboarding services in `backend/src/main/java/com/gymtracker/infrastructure/mapper/OnboardingProposalMapper.java`
