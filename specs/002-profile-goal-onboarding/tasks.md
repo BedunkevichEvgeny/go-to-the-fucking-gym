@@ -34,7 +34,7 @@
 - [X] T010 [P] Add onboarding repositories for attempt/proposal/feedback/activation in `backend/src/main/java/com/gymtracker/infrastructure/repository/OnboardingRepositories.java`
 - [X] T011 Add onboarding API DTOs aligned to contract schemas in `backend/src/main/java/com/gymtracker/api/dto/ProfileGoalOnboardingDtos.java`
 - [X] T012 Add proposal payload model + mapper shared by all onboarding services in `backend/src/main/java/com/gymtracker/infrastructure/mapper/OnboardingProposalMapper.java`
-- [ ] T013 Add typed Azure OpenAI onboarding config binding in `backend/src/main/java/com/gymtracker/infrastructure/config/AzureOpenAiOnboardingProperties.java`
+- [X] T013 Add typed Azure OpenAI onboarding config binding in `backend/src/main/java/com/gymtracker/infrastructure/config/AzureOpenAiOnboardingProperties.java`
 
 **Checkpoint**: DB + domain + repositories + DTO/config are ready; user story slices can begin.
 

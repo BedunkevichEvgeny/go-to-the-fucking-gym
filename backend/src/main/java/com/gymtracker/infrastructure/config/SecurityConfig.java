@@ -21,7 +21,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 @Configuration
 @EnableMethodSecurity
-@EnableConfigurationProperties(SecurityUsersProperties.class)
+@EnableConfigurationProperties({SecurityUsersProperties.class, AzureOpenAiOnboardingProperties.class})
 public class SecurityConfig {
 
     @Bean
