@@ -91,7 +91,7 @@
 - [X] T035 [US2] Implement reject proposal endpoint in `backend/src/main/java/com/gymtracker/api/ProfileGoalOnboardingController.java`
 - [X] T036 [US2] Add frontend proposal review card with reject feedback form in `frontend/src/features/profile-goals/ProposalReviewCard.tsx`
 - [X] T037 [US2] Wire revision mutations and optimistic state updates in `frontend/src/hooks/useProfileGoalProposalReview.ts`
-- [ ] T038 [US2] Persist and restore in-progress onboarding attempt state on reload in `frontend/src/pages/ProfileGoalOnboardingPage.tsx`
+- [X] T038 [US2] Persist and restore in-progress onboarding attempt state on reload in `frontend/src/pages/ProfileGoalOnboardingPage.tsx`
 
 **Checkpoint**: US2 revision loop is independently functional and testable.
 
