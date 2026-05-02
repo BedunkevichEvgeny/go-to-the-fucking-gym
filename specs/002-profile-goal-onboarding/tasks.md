@@ -64,7 +64,7 @@
 - [X] T024 [US1] Add frontend onboarding types and API client methods in `frontend/src/types/onboarding.ts`
 - [X] T025 [US1] Add onboarding query/mutation hooks for submit/current/gate in `frontend/src/hooks/useProfileGoalOnboarding.ts`
 - [X] T026 [US1] Implement onboarding page with profile-goal form in `frontend/src/pages/ProfileGoalOnboardingPage.tsx`
-- [ ] T027 [US1] Add first-page entry route/button for `My Profile & Goals` in `frontend/src/App.tsx`
+- [X] T027 [US1] Add first-page entry route/button for `My Profile & Goals` in `frontend/src/App.tsx`
 - [ ] T028 [US1] Add mandatory new-user redirect handling before program logging in `frontend/src/pages/ProgramSessionPage.tsx`
 
 **Checkpoint**: US1 is independently functional and testable as MVP.
