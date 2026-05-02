@@ -15,9 +15,11 @@ import com.gymtracker.infrastructure.repository.WorkoutProgramRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import java.time.OffsetDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
+import org.springframework.lang.Nullable;
 
 @Service
 public class AcceptedProgramActivationService {
@@ -58,7 +60,7 @@ public class AcceptedProgramActivationService {
             throw new ValidationException("Proposal is not in an acceptable state");
         }
 
-        WorkoutProgram replacedProgram = deactivateCurrentProgram(userId);
+        WorkoutProgram replacedProgram = deactivateCurrentPrograms(userId);
         PlanProposalResponse proposalResponse = onboardingProposalMapper.toResponse(proposal);
         WorkoutProgram activatedProgram = workoutProgramRepository.save(
                 programActivationService.activateProposal(userId, proposalResponse));
@@ -70,27 +72,67 @@ public class AcceptedProgramActivationService {
         attempt.setStatus(OnboardingAttemptStatus.ACCEPTED);
         entityManager.merge(attempt);
 
-        AcceptedProgramActivation activation = AcceptedProgramActivation.builder()
-                .attemptId(attempt.getId())
-                .proposalId(proposal.getId())
-                .userId(userId)
-                .activatedProgramId(activatedProgram.getId())
-                .replacedProgramId(replacedProgram == null ? null : replacedProgram.getId())
-                .activatedAt(OffsetDateTime.now())
-                .build();
-        entityManager.persist(activation);
+        persistActivationRecord(attempt.getId(), proposal.getId(), userId, activatedProgram.getId(), replacedProgram);
 
         return activatedProgram;
     }
 
-    private WorkoutProgram deactivateCurrentProgram(UUID userId) {
-        return workoutProgramRepository.findFirstByUserIdAndStatus(userId, ProgramStatus.ACTIVE)
-                .map(program -> {
-                    program.setStatus(ProgramStatus.REPLACED);
-                    program.setCompletedAt(OffsetDateTime.now());
-                    return workoutProgramRepository.save(program);
-                })
-                .orElse(null);
+    @Nullable
+    private WorkoutProgram deactivateCurrentPrograms(UUID userId) {
+        List<WorkoutProgram> activePrograms = entityManager
+                .createQuery(
+                        "select p from WorkoutProgram p where p.userId = :userId and p.status = :status",
+                        WorkoutProgram.class)
+                .setParameter("userId", userId)
+                .setParameter("status", ProgramStatus.ACTIVE)
+                .getResultList();
+
+        if (activePrograms.isEmpty()) {
+            return null;
+        }
+
+        OffsetDateTime replacedAt = OffsetDateTime.now();
+        activePrograms.forEach(program -> {
+            program.setStatus(ProgramStatus.REPLACED);
+            program.setCompletedAt(replacedAt);
+            workoutProgramRepository.save(program);
+        });
+
+        return activePrograms.stream()
+                .max(Comparator.comparing(WorkoutProgram::getCreatedAt, Comparator.nullsLast(Comparator.naturalOrder())))
+                .orElse(activePrograms.getFirst());
+    }
+
+    private void persistActivationRecord(
+            UUID attemptId,
+            UUID proposalId,
+            UUID userId,
+            UUID activatedProgramId,
+            @Nullable
+            WorkoutProgram replacedProgram
+    ) {
+        List<AcceptedProgramActivation> existing = entityManager
+                .createQuery(
+                        "select a from AcceptedProgramActivation a where a.proposalId = :proposalId",
+                        AcceptedProgramActivation.class)
+                .setParameter("proposalId", proposalId)
+                .setMaxResults(1)
+                .getResultList();
+
+        if (!existing.isEmpty()) {
+            return;
+        }
+
+        UUID replacedProgramId = replacedProgram != null ? replacedProgram.getId() : null;
+        AcceptedProgramActivation activation = AcceptedProgramActivation.builder()
+                .attemptId(attemptId)
+                .proposalId(proposalId)
+                .userId(userId)
+                .activatedProgramId(activatedProgramId)
+                .replacedProgramId(replacedProgramId)
+                .activatedAt(OffsetDateTime.now())
+                .build();
+        entityManager.persist(activation);
     }
 
     private WorkoutProgram loadActivatedProgramOrFail(UUID proposalId) {
