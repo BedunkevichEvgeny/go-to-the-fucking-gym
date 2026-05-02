@@ -34,3 +34,11 @@ Thumbs.db
 *.tmp
 *.swp
 /.env*
+
+.specify/memory/*.log
+.specify/memory/*.txt
+
+!.specify/memory/constitution.md
+!.specify/memory/constitution_update_checklist.md
+
+
