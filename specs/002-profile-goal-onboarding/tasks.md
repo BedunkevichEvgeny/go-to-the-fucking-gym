@@ -62,7 +62,7 @@
 - [X] T022 [US1] Implement create/current/access-gate onboarding endpoints in `backend/src/main/java/com/gymtracker/api/ProfileGoalOnboardingController.java`
 - [X] T023 [US1] Enforce onboarding-required guard for program-session access in `backend/src/main/java/com/gymtracker/api/SessionController.java`
 - [X] T024 [US1] Add frontend onboarding types and API client methods in `frontend/src/types/onboarding.ts`
-- [ ] T025 [US1] Add onboarding query/mutation hooks for submit/current/gate in `frontend/src/hooks/useProfileGoalOnboarding.ts`
+- [X] T025 [US1] Add onboarding query/mutation hooks for submit/current/gate in `frontend/src/hooks/useProfileGoalOnboarding.ts`
 - [ ] T026 [US1] Implement onboarding page with profile-goal form in `frontend/src/pages/ProfileGoalOnboardingPage.tsx`
 - [ ] T027 [US1] Add first-page entry route/button for `My Profile & Goals` in `frontend/src/App.tsx`
 - [ ] T028 [US1] Add mandatory new-user redirect handling before program logging in `frontend/src/pages/ProgramSessionPage.tsx`
