@@ -32,7 +32,7 @@
 - [X] T008 [P] Add `ProposalFeedback` entity mapping in `backend/src/main/java/com/gymtracker/domain/ProposalFeedback.java`
 - [X] T009 [P] Add `AcceptedProgramActivation` entity mapping in `backend/src/main/java/com/gymtracker/domain/AcceptedProgramActivation.java`
 - [X] T010 [P] Add onboarding repositories for attempt/proposal/feedback/activation in `backend/src/main/java/com/gymtracker/infrastructure/repository/OnboardingRepositories.java`
-- [ ] T011 Add onboarding API DTOs aligned to contract schemas in `backend/src/main/java/com/gymtracker/api/dto/ProfileGoalOnboardingDtos.java`
+- [X] T011 Add onboarding API DTOs aligned to contract schemas in `backend/src/main/java/com/gymtracker/api/dto/ProfileGoalOnboardingDtos.java`
 - [ ] T012 Add proposal payload model + mapper shared by all onboarding services in `backend/src/main/java/com/gymtracker/infrastructure/mapper/OnboardingProposalMapper.java`
 - [ ] T013 Add typed Azure OpenAI onboarding config binding in `backend/src/main/java/com/gymtracker/infrastructure/config/AzureOpenAiOnboardingProperties.java`
 
