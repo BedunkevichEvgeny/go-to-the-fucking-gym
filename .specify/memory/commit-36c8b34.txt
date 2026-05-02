@@ -1,2 +1,0 @@
-36c8b349e0cd4b27a3ef6690654c1e01b2f95f78 chore(spec): mark T058-T063 complete
-specs/001-workout-tracker/tasks.md

@@ -823,7 +823,7 @@ Session data now enqueued for AI analysis. Non-blocking, < 500ms p95. Async pipe
 
 ### Quickstart Validation
 
-- [ ] T111 Execute `specs/001-workout-tracker/quickstart.md` end-to-end:
+- [X] T111 Execute `specs/001-workout-tracker/quickstart.md` end-to-end:
   - Follow PostgreSQL setup instructions
   - Follow backend bootstrap instructions
   - Follow frontend bootstrap instructions
@@ -834,21 +834,21 @@ Session data now enqueued for AI analysis. Non-blocking, < 500ms p95. Async pipe
 
 ### Feature Sign-Off Checklist
 
-- [ ] T112 Verify all user story acceptance scenarios pass:
+- [X] T112 Verify all user story acceptance scenarios pass:
   - User Story 1 (Program Session): All 6 acceptance scenarios pass manually or via test
   - User Story 2 (Free Session): All 5 acceptance scenarios pass
   - User Story 3 (History): All 5 acceptance scenarios pass
   - User Story 4 (Progression): All 4 acceptance scenarios pass
-- [ ] T113 Verify performance targets met:
+- [X] T113 Verify performance targets met:
   - Session save p95 <= 1.5s
   - History/detail/progression reads p95 <= 2s
   - AI handoff enqueue p95 <= 500ms
   - Document results in PERFORMANCE.md
-- [ ] T114 Verify security & user isolation:
+- [X] T114 Verify security & user isolation:
   - User1 cannot access user2 data (403 on all unauthorized attempts)
   - Unauthenticated requests rejected (401)
   - Cross-user attacks tested and mitigated
-- [ ] T115 Verify UI/UX consistency:
+- [X] T115 Verify UI/UX consistency:
   - Program + free session forms use identical add/edit/remove patterns (PUX-002)
   - All buttons, inputs, messages use consistent styling
   - Empty states clear and actionable
