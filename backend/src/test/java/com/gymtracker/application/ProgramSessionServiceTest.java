@@ -19,6 +19,7 @@ import com.gymtracker.infrastructure.repository.ProgramExerciseTargetRepository;
 import com.gymtracker.infrastructure.repository.ProgramSessionRepository;
 import com.gymtracker.infrastructure.repository.WorkoutProgramRepository;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.TypedQuery;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -47,6 +48,13 @@ class ProgramSessionServiceTest {
 
     @BeforeEach
     void setUp() {
+        // Configure EntityManager mock to return empty results for queries
+        TypedQuery<?> mockQuery = org.mockito.Mockito.mock(TypedQuery.class);
+        when(mockQuery.setParameter(any(String.class), any())).thenReturn(mockQuery);
+        when(mockQuery.setMaxResults(any(Integer.class))).thenReturn(mockQuery);
+        when(mockQuery.getResultList()).thenReturn(List.of());
+        when(entityManager.createQuery(any(String.class), any(Class.class))).thenReturn((TypedQuery<?>) (Object) mockQuery);
+
         programSessionService = new ProgramSessionService(
                 workoutProgramRepository,
                 programSessionRepository,
