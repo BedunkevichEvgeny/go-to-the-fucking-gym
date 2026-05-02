@@ -3,6 +3,7 @@ package com.gymtracker.application;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -26,10 +27,15 @@ import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class ProgramSessionServiceTest {
 
     @Mock
@@ -48,12 +54,12 @@ class ProgramSessionServiceTest {
 
     @BeforeEach
     void setUp() {
-        // Configure EntityManager mock to return empty results for queries
-        TypedQuery<?> mockQuery = org.mockito.Mockito.mock(TypedQuery.class);
-        when(mockQuery.setParameter(any(String.class), any())).thenReturn(mockQuery);
+        // Use lenient mocking for EntityManager since it's not always used
+        TypedQuery mockQuery = Mockito.mock(TypedQuery.class);
+        when(mockQuery.setParameter(anyString(), any())).thenReturn(mockQuery);
         when(mockQuery.setMaxResults(any(Integer.class))).thenReturn(mockQuery);
         when(mockQuery.getResultList()).thenReturn(List.of());
-        when(entityManager.createQuery(any(String.class), any(Class.class))).thenReturn((TypedQuery<?>) (Object) mockQuery);
+        when(entityManager.createQuery(anyString(), any(Class.class))).thenReturn(mockQuery);
 
         programSessionService = new ProgramSessionService(
                 workoutProgramRepository,
