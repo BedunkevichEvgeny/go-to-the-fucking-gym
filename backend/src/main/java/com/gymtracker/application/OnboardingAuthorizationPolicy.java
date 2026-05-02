@@ -15,7 +15,7 @@ public class OnboardingAuthorizationPolicy {
 
     public void requireOwnedAttempt(java.util.UUID userId, ProfileGoalOnboardingAttempt attempt) {
         if (!attempt.getUserId().equals(userId)) {
-            throw new ForbiddenException("Onboarding attempt does not belong to the authenticated user");
+            throw new ForbiddenException("onboarding attempt does not belong to the authenticated user");
         }
     }
 
