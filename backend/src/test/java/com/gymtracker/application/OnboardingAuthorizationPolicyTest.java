@@ -32,9 +32,9 @@ class OnboardingAuthorizationPolicyTest {
         ProfileGoalOnboardingAttempt attempt = ProfileGoalOnboardingAttempt.builder()
                 .id(UUID.randomUUID())
                 .userId(userId)
-                .userAge(30)
-                .userWeight(BigDecimal.valueOf(75))
-                .userWeightUnit(WeightUnit.KG)
+                .age(30)
+                .currentWeight(BigDecimal.valueOf(75))
+                .weightUnit(WeightUnit.KG)
                 .primaryGoal(OnboardingEnums.OnboardingPrimaryGoal.STRENGTH)
                 .build();
 
@@ -53,9 +53,9 @@ class OnboardingAuthorizationPolicyTest {
         ProfileGoalOnboardingAttempt attempt = ProfileGoalOnboardingAttempt.builder()
                 .id(UUID.randomUUID())
                 .userId(otherUserId)
-                .userAge(30)
-                .userWeight(BigDecimal.valueOf(75))
-                .userWeightUnit(WeightUnit.KG)
+                .age(30)
+                .currentWeight(BigDecimal.valueOf(75))
+                .weightUnit(WeightUnit.KG)
                 .primaryGoal(OnboardingEnums.OnboardingPrimaryGoal.STRENGTH)
                 .build();
 
@@ -73,9 +73,9 @@ class OnboardingAuthorizationPolicyTest {
         ProfileGoalOnboardingAttempt attempt = ProfileGoalOnboardingAttempt.builder()
                 .id(UUID.randomUUID())
                 .userId(userId)
-                .userAge(30)
-                .userWeight(BigDecimal.valueOf(75))
-                .userWeightUnit(WeightUnit.KG)
+                .age(30)
+                .currentWeight(BigDecimal.valueOf(75))
+                .weightUnit(WeightUnit.KG)
                 .primaryGoal(OnboardingEnums.OnboardingPrimaryGoal.STRENGTH)
                 .build();
 
@@ -104,9 +104,9 @@ class OnboardingAuthorizationPolicyTest {
         ProfileGoalOnboardingAttempt attempt = ProfileGoalOnboardingAttempt.builder()
                 .id(UUID.randomUUID())
                 .userId(otherUserId)
-                .userAge(30)
-                .userWeight(BigDecimal.valueOf(75))
-                .userWeightUnit(WeightUnit.KG)
+                .age(30)
+                .currentWeight(BigDecimal.valueOf(75))
+                .weightUnit(WeightUnit.KG)
                 .primaryGoal(OnboardingEnums.OnboardingPrimaryGoal.STRENGTH)
                 .build();
 
@@ -134,9 +134,9 @@ class OnboardingAuthorizationPolicyTest {
         ProfileGoalOnboardingAttempt attempt = ProfileGoalOnboardingAttempt.builder()
                 .id(UUID.randomUUID())
                 .userId(userId)
-                .userAge(30)
-                .userWeight(BigDecimal.valueOf(75))
-                .userWeightUnit(WeightUnit.KG)
+                .age(30)
+                .currentWeight(BigDecimal.valueOf(75))
+                .weightUnit(WeightUnit.KG)
                 .primaryGoal(OnboardingEnums.OnboardingPrimaryGoal.STRENGTH)
                 .build();
 
@@ -171,9 +171,9 @@ class OnboardingAuthorizationPolicyTest {
         ProfileGoalOnboardingAttempt attempt = ProfileGoalOnboardingAttempt.builder()
                 .id(UUID.randomUUID())
                 .userId(otherUserId)
-                .userAge(30)
-                .userWeight(BigDecimal.valueOf(75))
-                .userWeightUnit(WeightUnit.KG)
+                .age(30)
+                .currentWeight(BigDecimal.valueOf(75))
+                .weightUnit(WeightUnit.KG)
                 .primaryGoal(OnboardingEnums.OnboardingPrimaryGoal.STRENGTH)
                 .build();
 
@@ -207,9 +207,9 @@ class OnboardingAuthorizationPolicyTest {
         ProfileGoalOnboardingAttempt attempt = ProfileGoalOnboardingAttempt.builder()
                 .id(UUID.randomUUID())
                 .userId(userId)
-                .userAge(30)
-                .userWeight(BigDecimal.valueOf(75))
-                .userWeightUnit(WeightUnit.KG)
+                .age(30)
+                .currentWeight(BigDecimal.valueOf(75))
+                .weightUnit(WeightUnit.KG)
                 .primaryGoal(OnboardingEnums.OnboardingPrimaryGoal.STRENGTH)
                 .build();
 
@@ -238,9 +238,9 @@ class OnboardingAuthorizationPolicyTest {
         ProfileGoalOnboardingAttempt attempt = ProfileGoalOnboardingAttempt.builder()
                 .id(UUID.randomUUID())
                 .userId(otherUserId)
-                .userAge(30)
-                .userWeight(BigDecimal.valueOf(75))
-                .userWeightUnit(WeightUnit.KG)
+                .age(30)
+                .currentWeight(BigDecimal.valueOf(75))
+                .weightUnit(WeightUnit.KG)
                 .primaryGoal(OnboardingEnums.OnboardingPrimaryGoal.STRENGTH)
                 .build();
 
@@ -268,9 +268,9 @@ class OnboardingAuthorizationPolicyTest {
         ProfileGoalOnboardingAttempt attempt = ProfileGoalOnboardingAttempt.builder()
                 .id(UUID.randomUUID())
                 .userId(userId)
-                .userAge(30)
-                .userWeight(BigDecimal.valueOf(75))
-                .userWeightUnit(WeightUnit.KG)
+                .age(30)
+                .currentWeight(BigDecimal.valueOf(75))
+                .weightUnit(WeightUnit.KG)
                 .primaryGoal(OnboardingEnums.OnboardingPrimaryGoal.STRENGTH)
                 .build();
 
@@ -299,9 +299,9 @@ class OnboardingAuthorizationPolicyTest {
         ProfileGoalOnboardingAttempt attempt = ProfileGoalOnboardingAttempt.builder()
                 .id(UUID.randomUUID())
                 .userId(otherUserId)
-                .userAge(30)
-                .userWeight(BigDecimal.valueOf(75))
-                .userWeightUnit(WeightUnit.KG)
+                .age(30)
+                .currentWeight(BigDecimal.valueOf(75))
+                .weightUnit(WeightUnit.KG)
                 .primaryGoal(OnboardingEnums.OnboardingPrimaryGoal.STRENGTH)
                 .build();
 
