@@ -814,7 +814,7 @@ Session data now enqueued for AI analysis. Non-blocking, < 500ms p95. Async pipe
   - Run code coverage tool (JaCoCo for backend, Istanbul for frontend)
   - Aim for >= 80% coverage on domain + application layers
   - Document coverage report location
-- [ ] T110 [P] Set up CI/CD pipeline (GitHub Actions example):
+- [X] T110 [P] Set up CI/CD pipeline (GitHub Actions example):
   - Create `.github/workflows/test.yml` to run backend tests + frontend tests on PR
   - Run linting checks
   - Run performance tests (optional)
