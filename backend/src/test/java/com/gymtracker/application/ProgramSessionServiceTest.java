@@ -18,6 +18,7 @@ import com.gymtracker.infrastructure.mapper.DtoMapper;
 import com.gymtracker.infrastructure.repository.ProgramExerciseTargetRepository;
 import com.gymtracker.infrastructure.repository.ProgramSessionRepository;
 import com.gymtracker.infrastructure.repository.WorkoutProgramRepository;
+import jakarta.persistence.EntityManager;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -39,6 +40,9 @@ class ProgramSessionServiceTest {
     @Mock
     private ProgramExerciseTargetRepository targetRepository;
 
+    @Mock
+    private EntityManager entityManager;
+
     private ProgramSessionService programSessionService;
 
     @BeforeEach
@@ -47,7 +51,8 @@ class ProgramSessionServiceTest {
                 workoutProgramRepository,
                 programSessionRepository,
                 targetRepository,
-                new DtoMapper());
+                new DtoMapper(),
+                entityManager);
     }
 
     @Test
