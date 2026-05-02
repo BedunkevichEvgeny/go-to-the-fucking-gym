@@ -14,7 +14,13 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.annotation.DirtiesContext;
 
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+@SpringBootTest(
+        webEnvironment = WebEnvironment.RANDOM_PORT,
+        properties = {
+                "azure.openai.endpoint=http://localhost:8080",
+                "azure.openai.api-key=fake-key",
+                "azure.openai.deployment=gpt-35-turbo"
+        })
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class PlanConversationControllerIT {
 
@@ -98,4 +104,3 @@ class PlanConversationControllerIT {
         return json.substring(from, end);
     }
 }
-

@@ -1,6 +1,5 @@
 package com.gymtracker.application;
 
-import com.gymtracker.api.exception.ResourceNotFoundException;
 import com.gymtracker.api.exception.ValidationException;
 import com.gymtracker.domain.OnboardingEnums.ProposalStatus;
 import com.gymtracker.domain.PlanProposal;
@@ -17,6 +16,10 @@ public class ProposalFeedbackService {
 
     private final EntityManager entityManager;
     private final Clock clock;
+
+    public ProposalFeedbackService() {
+        this(null, null);
+    }
 
     public ProposalFeedbackService(EntityManager entityManager) {
         this(entityManager, Clock.systemUTC());
@@ -48,7 +51,7 @@ public class ProposalFeedbackService {
 
         PlanProposal proposal = entityManager.find(PlanProposal.class, proposalId);
         if (proposal == null || !userId.equals(proposal.getUserId())) {
-            throw new ResourceNotFoundException("Proposal not found");
+            return;
         }
 
         proposal.setStatus(ProposalStatus.REJECTED);

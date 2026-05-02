@@ -3,13 +3,16 @@ package com.gymtracker.api;
 import com.gymtracker.api.dto.ProfileGoalOnboardingDtos.OnboardingAttemptResponse;
 import com.gymtracker.api.dto.ProfileGoalOnboardingDtos.OnboardingSubmissionRequest;
 import com.gymtracker.api.dto.ProfileGoalOnboardingDtos.PlanProposalResponse;
+import com.gymtracker.api.dto.ProfileGoalOnboardingDtos.ProposalRejectRequest;
 import com.gymtracker.api.dto.ProfileGoalOnboardingDtos.TrackingAccessGateResponse;
 import com.gymtracker.application.PlanProposalService;
+import com.gymtracker.application.ProposalRevisionService;
 import com.gymtracker.application.security.AuthenticationService;
 import jakarta.validation.Valid;
 import java.util.UUID;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,13 +23,16 @@ import org.springframework.web.bind.annotation.RestController;
 public class ProfileGoalOnboardingController extends BaseController {
 
     private final PlanProposalService planProposalService;
+    private final ProposalRevisionService proposalRevisionService;
 
     public ProfileGoalOnboardingController(
             AuthenticationService authenticationService,
-            PlanProposalService planProposalService
+            PlanProposalService planProposalService,
+            ProposalRevisionService proposalRevisionService
     ) {
         super(authenticationService);
         this.planProposalService = planProposalService;
+        this.proposalRevisionService = proposalRevisionService;
     }
 
     @PostMapping("/onboarding")
@@ -46,5 +52,12 @@ public class ProfileGoalOnboardingController extends BaseController {
     public TrackingAccessGateResponse checkTrackingAccessGate() {
         return planProposalService.getTrackingAccessGate(extractUserId());
     }
-}
 
+    @PostMapping("/proposals/{proposalId}/reject")
+    public PlanProposalResponse rejectProposal(
+            @PathVariable UUID proposalId,
+            @Valid @RequestBody ProposalRejectRequest request
+    ) {
+        return proposalRevisionService.rejectAndRevise(extractUserId(), proposalId, request);
+    }
+}
