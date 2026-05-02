@@ -174,7 +174,12 @@ export function ProfileGoalOnboardingPage() {
           proposal={proposal}
           isBusy={rejectReview.isRejecting || acceptProposal.isPending}
           onReject={(requestedChanges) => rejectReview.rejectProposal({ proposalId: proposal.proposalId, requestedChanges })}
-          onAccept={() => acceptProposal.mutate(proposal.proposalId)}
+          onAccept={async () => {
+            await acceptProposal.mutateAsync(proposal.proposalId);
+            localStorage.removeItem(PROPOSAL_STORAGE_KEY);
+            setStoredProposal(null);
+            navigate('/program-session');
+          }}
         />
       )}
     </section>
