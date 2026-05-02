@@ -61,7 +61,7 @@
 - [X] T021 [US1] Implement onboarding AI generation client with LangChain4j + Azure OpenAI in `backend/src/main/java/com/gymtracker/infrastructure/ai/OnboardingPlanGenerator.java`
 - [X] T022 [US1] Implement create/current/access-gate onboarding endpoints in `backend/src/main/java/com/gymtracker/api/ProfileGoalOnboardingController.java`
 - [X] T023 [US1] Enforce onboarding-required guard for program-session access in `backend/src/main/java/com/gymtracker/api/SessionController.java`
-- [ ] T024 [US1] Add frontend onboarding types and API client methods in `frontend/src/types/onboarding.ts`
+- [X] T024 [US1] Add frontend onboarding types and API client methods in `frontend/src/types/onboarding.ts`
 - [ ] T025 [US1] Add onboarding query/mutation hooks for submit/current/gate in `frontend/src/hooks/useProfileGoalOnboarding.ts`
 - [ ] T026 [US1] Implement onboarding page with profile-goal form in `frontend/src/pages/ProfileGoalOnboardingPage.tsx`
 - [ ] T027 [US1] Add first-page entry route/button for `My Profile & Goals` in `frontend/src/App.tsx`
