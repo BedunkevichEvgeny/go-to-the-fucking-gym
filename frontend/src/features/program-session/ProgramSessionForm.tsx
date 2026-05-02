@@ -4,9 +4,13 @@ import { CardioLapInputRow } from '../../components/CardioLapInputRow';
 import { SetInputRow } from '../../components/SetInputRow';
 import type { ExerciseEntryInput, LoggedSessionCreateRequest, ProgramSessionView } from '../../types/api';
 
+/** Props for logging the next prescribed program session. */
 interface ProgramSessionFormProps {
+  /** Program session payload including exercise targets to log against. */
   session: ProgramSessionView;
+  /** Submit handler invoked with the completed logged session payload. */
   onSubmit: (payload: LoggedSessionCreateRequest) => Promise<void> | void;
+  /** Indicates whether save is in progress to disable submit actions. */
   isSaving: boolean;
 }
 

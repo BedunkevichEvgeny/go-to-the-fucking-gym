@@ -5,7 +5,9 @@ import { useSessionDetail } from '../../hooks/useSessionDetail';
 import type { ExerciseEntryView } from '../../types/api';
 import { ExerciseProgressionLink } from './ExerciseProgressionLink';
 
+/** Props for loading and rendering a single session details screen. */
 interface SessionDetailViewProps {
+  /** Session identifier used by the detail query hook. */
   sessionId: string;
 }
 

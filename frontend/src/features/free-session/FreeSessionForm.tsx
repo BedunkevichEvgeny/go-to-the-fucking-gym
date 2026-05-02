@@ -5,8 +5,11 @@ import { SetInputRow } from '../../components/SetInputRow';
 import type { ExerciseDto, ExerciseEntryInput, ExerciseType, LoggedSessionCreateRequest } from '../../types/api';
 import { ExerciseLibrarySearch } from './ExerciseLibrarySearch';
 
+/** Props for creating and submitting a free workout session. */
 interface FreeSessionFormProps {
+  /** Submit handler invoked with the complete free-session payload. */
   onSubmit: (payload: LoggedSessionCreateRequest) => Promise<void> | void;
+  /** Disables save actions while a submit operation is in-flight. */
   isSaving: boolean;
 }
 

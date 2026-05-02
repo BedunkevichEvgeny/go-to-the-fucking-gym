@@ -20,6 +20,15 @@ public class SessionDetailService {
         this.dtoMapper = dtoMapper;
     }
 
+    /**
+     * Loads a fully detailed logged session while enforcing user ownership.
+     *
+     * @param userId authenticated user identifier
+     * @param sessionId logged session identifier
+     * @return detailed logged session payload
+     * @throws ResourceNotFoundException when the session does not exist
+     * @throws ForbiddenException when the session belongs to another user
+     */
     @Transactional(readOnly = true)
     public LoggedSessionDetail getSessionDetails(UUID userId, UUID sessionId) {
         var session = loggedSessionRepository.findDetailedById(sessionId)

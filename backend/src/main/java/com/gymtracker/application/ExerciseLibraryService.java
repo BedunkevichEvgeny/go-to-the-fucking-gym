@@ -27,6 +27,13 @@ public class ExerciseLibraryService {
         this.dtoMapper = dtoMapper;
     }
 
+    /**
+     * Searches active exercises by name using a case-insensitive match.
+     *
+     * @param query free-text query, empty or null to return the default top subset
+     * @return list of matching exercise views ordered by name
+     * @throws ValidationException when the query exceeds the supported length limit
+     */
     @Transactional(readOnly = true)
     @Cacheable("exercise-search")
     public List<ExerciseView> searchExerciseLibrary(String query) {
@@ -40,6 +47,11 @@ public class ExerciseLibraryService {
                 .toList();
     }
 
+    /**
+     * Returns the most frequently used active exercises for quick selection UIs.
+     *
+     * @return up to 50 exercise views sorted by usage and name
+     */
     @Transactional(readOnly = true)
     public List<ExerciseView> getTopExercises() {
         return exerciseRepository.findTopActiveExercisesByUsage(
@@ -49,6 +61,13 @@ public class ExerciseLibraryService {
                 .toList();
     }
 
+    /**
+     * Loads a single exercise entity by identifier.
+     *
+     * @param id exercise identifier
+     * @return persisted exercise entity
+     * @throws ResourceNotFoundException when no exercise exists for the provided id
+     */
     @Transactional(readOnly = true)
     public Exercise getExerciseById(UUID id) {
         return exerciseRepository.findById(id)

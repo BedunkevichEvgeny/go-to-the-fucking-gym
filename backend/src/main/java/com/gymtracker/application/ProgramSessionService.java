@@ -40,6 +40,12 @@ public class ProgramSessionService {
         this.dtoMapper = dtoMapper;
     }
 
+    /**
+     * Loads the next uncompleted session from the user's active workout program.
+     *
+     * @param userId authenticated user identifier
+     * @return optional next program session view, empty when no active or pending session exists
+     */
     @Transactional(readOnly = true)
     public Optional<ProgramSessionView> loadNextUncompletedSession(UUID userId) {
         log.info("Loading next uncompleted program session for user {}", userId);
@@ -51,6 +57,14 @@ public class ProgramSessionService {
                 .map(session -> dtoMapper.toDto(session, targetRepository.findByProgramSession_IdOrderBySortOrderAsc(session.getId())));
     }
 
+    /**
+     * Marks a program session as completed and closes the parent program when all sessions are done.
+     *
+     * @param sessionId program session identifier
+     * @param userId authenticated user identifier
+     * @throws ResourceNotFoundException when the requested program session does not exist
+     * @throws ForbiddenException when the program session belongs to a different user
+     */
     @Transactional
     public void markProgramSessionCompleted(UUID sessionId, UUID userId) {
         ProgramSession session = programSessionRepository.findById(sessionId)
@@ -72,6 +86,15 @@ public class ProgramSessionService {
         log.info("Marked program session {} completed for user {}", sessionId, userId);
     }
 
+    /**
+     * Resolves a program session and enforces authenticated ownership.
+     *
+     * @param sessionId program session identifier
+     * @param userId authenticated user identifier
+     * @return owned program session entity
+     * @throws ResourceNotFoundException when the requested program session does not exist
+     * @throws ForbiddenException when the program session belongs to a different user
+     */
     @Transactional(readOnly = true)
     public ProgramSession requireOwnedProgramSession(UUID sessionId, UUID userId) {
         ProgramSession session = programSessionRepository.findById(sessionId)

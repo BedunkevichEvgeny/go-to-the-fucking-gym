@@ -18,6 +18,14 @@ public class ProgressionService {
         this.progressionQueryBuilder = progressionQueryBuilder;
     }
 
+    /**
+     * Fetches progression points for a specific exercise and user.
+     *
+     * @param userId authenticated user identifier
+     * @param exerciseName exercise display name used for matching historical entries
+     * @return progression response with chronological points for charting
+     * @throws ValidationException when exerciseName is null or blank
+     */
     @Transactional(readOnly = true)
     public ProgressionResponse getExerciseProgression(UUID userId, String exerciseName) {
         if (exerciseName == null || exerciseName.isBlank()) {

@@ -1,9 +1,14 @@
 import type { StrengthSetInput } from '../types/api';
 
+/** Props for editing a single strength/bodyweight set row. */
 interface SetInputRowProps {
+  /** Zero-based set index used for UI labels. */
   index: number;
+  /** Current set value bound to input controls. */
   value: StrengthSetInput;
+  /** Called with the next set state when any field changes. */
   onChange: (next: StrengthSetInput) => void;
+  /** Optional callback that removes the current set row. */
   onRemove?: () => void;
 }
 

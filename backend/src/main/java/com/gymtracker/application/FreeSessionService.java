@@ -16,6 +16,14 @@ public class FreeSessionService {
         this.loggedSessionService = loggedSessionService;
     }
 
+    /**
+     * Persists a free workout session for the authenticated user.
+     *
+     * @param userId authenticated user identifier
+     * @param request session payload expected to have FREE type
+     * @return saved session detail
+     * @throws ValidationException when session type is not FREE
+     */
     public LoggedSessionDetail saveFreeSession(UUID userId, LoggedSessionCreateRequest request) {
         if (request.sessionType() != SessionType.FREE) {
             throw new ValidationException("FreeSessionService only accepts FREE sessions");

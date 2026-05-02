@@ -21,6 +21,13 @@ public class SessionValidatorService {
         this.programExerciseTargetRepository = programExerciseTargetRepository;
     }
 
+    /**
+     * Validates that submitted program-session exercises exactly match the prescribed target order.
+     *
+     * @param programSessionId program session identifier
+     * @param entries submitted exercise entries
+     * @throws ForbiddenException when exercise names or ordering differ from stored targets
+     */
     public void validateProgramSessionNotModifiable(UUID programSessionId, List<ExerciseEntryInput> entries) {
         List<String> targets = programExerciseTargetRepository.findByProgramSession_IdOrderBySortOrderAsc(programSessionId)
                 .stream()
@@ -32,6 +39,12 @@ public class SessionValidatorService {
         }
     }
 
+    /**
+     * Validates consistency of bodyweight and weighted set fields.
+     *
+     * @param set submitted strength set input
+     * @throws ValidationException when bodyweight rules are violated
+     */
     public void validateBodyweightSet(StrengthSetInput set) {
         if (Boolean.TRUE.equals(set.isBodyWeight()) && set.weightValue() != null) {
             throw new ValidationException("Bodyweight sets must not include a weight value");
@@ -41,12 +54,24 @@ public class SessionValidatorService {
         }
     }
 
+    /**
+     * Validates required cardio lap duration value.
+     *
+     * @param lap submitted cardio lap input
+     * @throws ValidationException when duration is missing or below one second
+     */
     public void validateCardioLap(CardioLapInput lap) {
         if (lap.durationSeconds() == null || lap.durationSeconds() < 1) {
             throw new ValidationException("Cardio lap duration must be at least 1 second");
         }
     }
 
+    /**
+     * Validates exercise entry content based on exercise type.
+     *
+     * @param entry submitted exercise entry
+     * @throws ValidationException when required sets or laps are missing
+     */
     public void validateExerciseEntry(ExerciseEntryInput entry) {
         if (entry.exerciseType() == ExerciseType.CARDIO) {
             if (entry.cardioLaps() == null || entry.cardioLaps().isEmpty()) {
@@ -61,6 +86,12 @@ public class SessionValidatorService {
         entry.sets().forEach(this::validateBodyweightSet);
     }
 
+    /**
+     * Validates session feelings payload and rating bounds.
+     *
+     * @param feelings submitted feelings payload
+     * @throws ValidationException when rating is missing or outside 1-10
+     */
     public void validateSessionFeelings(SessionFeelingsInput feelings) {
         if (feelings == null || feelings.rating() == null || feelings.rating() < 1 || feelings.rating() > 10) {
             throw new ValidationException("Session feeling rating must be between 1 and 10");

@@ -805,7 +805,7 @@ Session data now enqueued for AI analysis. Non-blocking, < 500ms p95. Async pipe
   - Ensure all endpoints follow REST conventions (POST for create, GET for read, etc.)
   - Run linting checks (checkstyle for backend, ESLint for frontend)
   - Fix any style violations
-- [ ] T108 [P] Add missing JSDoc/TypeDoc comments:
+- [X] T108 [P] Add missing JSDoc/TypeDoc comments:
   - Document all public service methods with @param, @return, @throws
   - Document all React components with PropTypes or TypeScript interfaces
   - Document all endpoints with descriptions of parameters and responses

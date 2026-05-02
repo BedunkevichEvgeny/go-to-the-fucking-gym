@@ -53,6 +53,15 @@ public class LoggedSessionService {
         this.aiHandoffService = aiHandoffService;
     }
 
+    /**
+     * Persists a logged workout session with all nested entries, sets/laps, and feelings.
+     *
+     * @param userId authenticated user identifier
+     * @param request complete session payload
+     * @return saved session detail payload
+     * @throws ValidationException when request content violates session validation rules
+     * @throws ForbiddenException when a program session request does not match the next allowed program session
+     */
     @Transactional
     public LoggedSessionDetail saveLoggedSession(UUID userId, LoggedSessionCreateRequest request) {
         sessionValidatorService.validateSessionFeelings(request.feelings());
