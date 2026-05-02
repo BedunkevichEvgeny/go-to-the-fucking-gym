@@ -13,7 +13,7 @@
 
 **Purpose**: Prepare feature scaffolding and shared configuration touchpoints without deep quality hardening.
 
-- [ ] T001 Add onboarding package skeleton and feature README in `backend/src/main/java/com/gymtracker/application/onboarding/README.md`
+- [X] T001 Add onboarding package skeleton and feature README in `backend/src/main/java/com/gymtracker/application/onboarding/README.md`
 - [ ] T002 Add onboarding frontend feature folders with placeholder exports in `frontend/src/features/profile-goals/index.ts`
 - [ ] T003 Register Azure OpenAI onboarding properties in `backend/src/main/resources/application.properties`
 
