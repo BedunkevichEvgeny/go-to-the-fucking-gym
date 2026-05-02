@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { onboardingApi } from '../types/onboarding';
+import { onboardingApi, type OnboardingAttemptResponse } from '../types/onboarding';
 
 export function useProfileGoalProposalReview() {
   const queryClient = useQueryClient();
@@ -13,7 +13,7 @@ export function useProfileGoalProposalReview() {
       return { previous, requestedChanges };
     },
     onSuccess: (nextProposal) => {
-      queryClient.setQueryData(['profile-goals', 'onboarding', 'current'], (current: any) => {
+      queryClient.setQueryData<OnboardingAttemptResponse | null>(['profile-goals', 'onboarding', 'current'], (current) => {
         if (!current) {
           return null;
         }
