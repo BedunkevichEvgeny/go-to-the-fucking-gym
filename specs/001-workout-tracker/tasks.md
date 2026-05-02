@@ -809,7 +809,7 @@ Session data now enqueued for AI analysis. Non-blocking, < 500ms p95. Async pipe
   - Document all public service methods with @param, @return, @throws
   - Document all React components with PropTypes or TypeScript interfaces
   - Document all endpoints with descriptions of parameters and responses
-- [ ] T109 [P] Verify test coverage:
+- [X] T109 [P] Verify test coverage:
   - Check that all business rules from spec.md test coverage matrix are covered
   - Run code coverage tool (JaCoCo for backend, Istanbul for frontend)
   - Aim for >= 80% coverage on domain + application layers
