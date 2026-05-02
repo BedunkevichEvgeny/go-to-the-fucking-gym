@@ -112,7 +112,7 @@
 - [X] T043 [P] [US3] Add 001 next-session compatibility integration test after activation in `backend/src/test/java/com/gymtracker/api/ProgramSessionControllerIT.java`
 - [X] T044 [P] [US3] Add history/progression unaffected integration test after replacement in `backend/src/test/java/com/gymtracker/api/SessionHistoryControllerIT.java`
 - [X] T045 [P] [US3] Add onboarding acceptance frontend integration test in `frontend/src/features/profile-goals/__tests__/OnboardingAcceptance.test.tsx`
-- [ ] T046 [P] [US3] Add explicit API compatibility assertions between 002 onboarding and 001 tracker contracts in `backend/src/test/java/com/gymtracker/api/OnboardingContractCompatibilityIT.java`
+- [X] T046 [P] [US3] Add explicit API compatibility assertions between 002 onboarding and 001 tracker contracts in `backend/src/test/java/com/gymtracker/api/OnboardingContractCompatibilityIT.java`
 - [ ] T047 [P] [US3] Add IC-006 regression integration test for users without onboarding metadata using 001 flows in `backend/src/test/java/com/gymtracker/api/OnboardingContractCompatibilityIT.java`
 - [X] T048 [P] [US3] Add FR-013 onboarding ownership unit tests for attempts/proposals/feedback/accept authorization policy in `backend/src/test/java/com/gymtracker/application/OnboardingAuthorizationPolicyTest.java`
 - [X] T049 [P] [US3] Add FR-013 cross-user denial integration tests for attempts/proposals/feedback/accept endpoints in `backend/src/test/java/com/gymtracker/api/ProfileGoalOnboardingAuthorizationIT.java`
