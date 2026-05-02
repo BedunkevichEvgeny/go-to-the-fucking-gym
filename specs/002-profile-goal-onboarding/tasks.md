@@ -124,7 +124,7 @@
 - [ ] T052 [US3] Implement accept proposal endpoint and response contract mapping in `backend/src/main/java/com/gymtracker/api/ProfileGoalOnboardingController.java`
 - [X] T053 [US3] Integrate activation record persistence and active-program deactivation policy in `backend/src/main/java/com/gymtracker/application/AcceptedProgramActivationService.java`
 - [X] T054 [US3] Update program-session retrieval compatibility mapping for activated plans in `backend/src/main/java/com/gymtracker/application/ProgramSessionService.java`
-- [ ] T055 [US3] Implement frontend accept action and post-accept navigation to tracker in `frontend/src/features/profile-goals/ProposalAcceptanceActions.tsx`
+- [X] T055 [US3] Implement frontend accept action and post-accept navigation to tracker in `frontend/src/features/profile-goals/ProposalAcceptanceActions.tsx`
 - [ ] T056 [US3] Wire acceptance flow and tracker refresh in `frontend/src/pages/ProfileGoalOnboardingPage.tsx`
 
 **Checkpoint**: US3 activation and 001 compatibility are independently functional and testable.
