@@ -59,7 +59,7 @@
 - [X] T019 [US1] Implement onboarding validation service for age/weight/goal rules in `backend/src/main/java/com/gymtracker/application/OnboardingValidationService.java`
 - [X] T020 [US1] Implement initial proposal generation orchestration in `backend/src/main/java/com/gymtracker/application/PlanProposalService.java`
 - [X] T021 [US1] Implement onboarding AI generation client with LangChain4j + Azure OpenAI in `backend/src/main/java/com/gymtracker/infrastructure/ai/OnboardingPlanGenerator.java`
-- [ ] T022 [US1] Implement create/current/access-gate onboarding endpoints in `backend/src/main/java/com/gymtracker/api/ProfileGoalOnboardingController.java`
+- [X] T022 [US1] Implement create/current/access-gate onboarding endpoints in `backend/src/main/java/com/gymtracker/api/ProfileGoalOnboardingController.java`
 - [ ] T023 [US1] Enforce onboarding-required guard for program-session access in `backend/src/main/java/com/gymtracker/api/SessionController.java`
 - [ ] T024 [US1] Add frontend onboarding types and API client methods in `frontend/src/types/onboarding.ts`
 - [ ] T025 [US1] Add onboarding query/mutation hooks for submit/current/gate in `frontend/src/hooks/useProfileGoalOnboarding.ts`
