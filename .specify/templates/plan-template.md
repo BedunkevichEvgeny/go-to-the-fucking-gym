@@ -24,7 +24,7 @@
 **Target Platform**: [e.g., Linux server, iOS 15+, WASM or NEEDS CLARIFICATION]
 **Project Type**: [web application (Spring Boot backend + React frontend) or NEEDS CLARIFICATION]  
 **Performance Goals**: [domain-specific, e.g., 1000 req/s, 10k lines/sec, 60 fps or NEEDS CLARIFICATION]  
-**Constraints**: [simple design, low-latency targets, English-only docs/specs, or NEEDS CLARIFICATION]  
+**Constraints**: [simple design, English-only docs/specs, task traceability expectations, or NEEDS CLARIFICATION]  
 **Scale/Scope**: [domain-specific, e.g., 10k users, 1M LOC, 50 screens or NEEDS CLARIFICATION]
 
 ## Constitution Check
@@ -36,7 +36,8 @@
 - [ ] All business logic is mapped to unit and integration tests.
 - [ ] Backend implementation uses Java 21 and Spring Boot best practices.
 - [ ] Frontend implementation uses React and shared UX conventions.
-- [ ] Performance goals define measurable latency targets (for example p95).
+- [ ] Planned work can be decomposed into discrete tasks that support issue tracking,
+  one-task-per-commit delivery, and post-merge closure review.
 - [ ] Plan and linked artifacts are written in English.
 
 ## Project Structure

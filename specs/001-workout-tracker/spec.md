@@ -173,10 +173,13 @@ A user wants to see how a specific exercise has improved over time across all se
 - **SC-004**: Progression chart for any exercise loads and displays within 2 seconds regardless of history length.
 - **SC-005**: The exercise library covers at least 100 common exercises at launch, reducing the need for custom entries in 80% of free sessions.
 
-### Performance & UX Consistency Outcomes *(mandatory)*
+### UX Consistency Outcomes *(mandatory when UI changes exist)*
 
-- **PUX-001**: Session history list and session detail screens load within 2 seconds for users with up to 2 years of training data.
-- **PUX-002**: Program session and free session logging screens share the same interaction patterns for exercise data entry (add set, edit set, remove set) to minimize cognitive switching.
+- **UX-001**: Program session and free session logging screens share the same interaction patterns for exercise data entry (add set, edit set, remove set) to minimize cognitive switching.
+
+### Additional Non-Functional Outcomes *(include when materially relevant)*
+
+- **NF-001**: Session history list and session detail screens load within 2 seconds for users with up to 2 years of training data.
 
 ## Assumptions
 
