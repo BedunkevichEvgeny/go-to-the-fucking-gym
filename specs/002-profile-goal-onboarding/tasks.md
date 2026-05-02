@@ -28,7 +28,7 @@
 - [X] T004 Create onboarding schema migration for attempt/proposal/feedback/activation tables in `backend/src/main/resources/db/migration/V002__profile_goal_onboarding.sql`
 - [X] T005 [P] Add onboarding domain enums for goal/status/provider in `backend/src/main/java/com/gymtracker/domain/OnboardingEnums.java`
 - [X] T006 [P] Add `ProfileGoalOnboardingAttempt` entity mapping in `backend/src/main/java/com/gymtracker/domain/ProfileGoalOnboardingAttempt.java`
-- [ ] T007 [P] Add `PlanProposal` entity mapping with JSON payload support in `backend/src/main/java/com/gymtracker/domain/PlanProposal.java`
+- [X] T007 [P] Add `PlanProposal` entity mapping with JSON payload support in `backend/src/main/java/com/gymtracker/domain/PlanProposal.java`
 - [ ] T008 [P] Add `ProposalFeedback` entity mapping in `backend/src/main/java/com/gymtracker/domain/ProposalFeedback.java`
 - [ ] T009 [P] Add `AcceptedProgramActivation` entity mapping in `backend/src/main/java/com/gymtracker/domain/AcceptedProgramActivation.java`
 - [ ] T010 [P] Add onboarding repositories for attempt/proposal/feedback/activation in `backend/src/main/java/com/gymtracker/infrastructure/repository/OnboardingRepositories.java`
