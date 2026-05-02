@@ -12,7 +12,6 @@ import com.gymtracker.domain.OnboardingEnums.OnboardingPrimaryGoal;
 import com.gymtracker.domain.OnboardingEnums.ProposalProvider;
 import com.gymtracker.domain.WeightUnit;
 import com.gymtracker.infrastructure.ai.OnboardingPlanGenerator;
-import com.gymtracker.infrastructure.mapper.OnboardingProposalMapper;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
@@ -30,9 +29,6 @@ class PlanProposalServiceTest {
 
     @Mock
     private OnboardingPlanGenerator onboardingPlanGenerator;
-
-    @Mock
-    private OnboardingProposalMapper onboardingProposalMapper;
 
     @InjectMocks
     private PlanProposalService service;
@@ -55,14 +51,15 @@ class PlanProposalServiceTest {
                 new com.gymtracker.api.dto.ProfileGoalOnboardingDtos.GeneratedBy(ProposalProvider.AZURE_OPENAI, "test"),
                 List.of(new ProposedSession(1, "Session A", List.of())));
 
-        when(onboardingPlanGenerator.generateInitialProposal(any())).thenReturn(generated);
+        when(onboardingPlanGenerator.generateInitialProposal(any(), any())).thenReturn(generated);
 
         PlanProposalResponse response = service.createInitialProposal(userId, request);
 
         verify(validationService).validate(request);
-        verify(onboardingPlanGenerator).generateInitialProposal(any());
+        verify(onboardingPlanGenerator).generateInitialProposal(any(), any());
         assertThat(response.version()).isEqualTo(1);
         assertThat(response.generatedBy().provider()).isEqualTo(ProposalProvider.AZURE_OPENAI);
     }
 }
+
 
