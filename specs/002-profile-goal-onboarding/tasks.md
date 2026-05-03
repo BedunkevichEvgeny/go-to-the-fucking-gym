@@ -248,6 +248,7 @@
 
 - `T004 -> T006/T007/T008/T009/T010 -> T020/T022 -> T033/T035 -> T046/T049/T050 -> T051/T052 -> T062`
 - `T063-BUG-001/T064-BUG-002 -> T065-BUG-003 -> T066-BUG-004 -> T067-BUG-005 -> rollout`
+- `T068-BUG-006-TEST -> T069-BUG-006 -> T070-BUG-006-ENUM`
 - `T023` and `T028` must complete before US1 is considered done for mandatory new-user gating.
 
 ### Within Each User Story
@@ -267,6 +268,7 @@
 - US3 test tasks `T039-T050` can run in parallel.
 - Docs/ops polish tasks `T058-T060` can run in parallel.
 - Phase 8 test tasks `T065-BUG-003-TEST` and `T066-BUG-004-TEST` can run in parallel before implementation.
+- Phase 9: `T068-BUG-006-TEST` and `T070-BUG-006-ENUM` can run in parallel; `T069-BUG-006` depends on `T068-BUG-006-TEST`.
 
 ## Parallel Example: User Story 1
 
@@ -296,7 +298,55 @@ Task T045 frontend acceptance flow tests in frontend/src/features/profile-goals/
 
 ---
 
-## Implementation Strategy
+## Phase 9: LLM Response Type Safety (Bug BUG-006)
+
+**Trigger**: Smoke test revealed `ExerciseType.valueOf("FLEXIBILITY")` crash caused by
+prompt/enum mismatch and unguarded raw-string LLM parsing. `buildPrompt()` lists
+`FLEXIBILITY` as a valid type, but `ExerciseType` enum has no such constant. Additionally,
+`BODYWEIGHT` exists in the enum but is absent from the prompt.
+
+**Status**: BLOCKING — `generateInitialProposal()` crashes in production on any plan containing flexibility exercises.
+
+### Tests for Phase 9 (MANDATORY — write first, run failing)
+
+- [X] T068-BUG-006-TEST [CRITICAL] Add regression unit tests in
+  `backend/src/test/java/com/gymtracker/infrastructure/ai/OnboardingPlanGeneratorTest.java`
+  - Assert LLM response with `"type": "FLEXIBILITY"` does NOT throw `IllegalArgumentException`
+  - Assert `"type": "BODYWEIGHT"` is parsed correctly to `ExerciseType.BODYWEIGHT`
+  - Assert `"type": "UNKNOWN_VALUE_XYZ"` is handled gracefully (fallback to `STRENGTH`, not crash)
+  - Assert session list is non-empty after parsing a response containing unknown types
+  - Use `@MockBean`/stub for `LangChainSessionProcessor` returning controlled JSON
+
+### Implementation Tasks for Phase 9
+
+- [X] T069-BUG-006 [CRITICAL] Replace raw-string LLM response and manual JSON parsing with
+  LangChain4j structured output via typed DTOs in `backend/src/main/java/com/gymtracker/infrastructure/ai/`
+  - Create `backend/src/main/java/com/gymtracker/infrastructure/ai/dto/OnboardingPlanDto.java`
+    (record with `List<SessionDto> sessions`)
+  - Create `backend/src/main/java/com/gymtracker/infrastructure/ai/dto/SessionDto.java`
+    (record with `int sequenceNumber`, `String name`, `List<ExerciseDto> exercises`)
+  - Create `backend/src/main/java/com/gymtracker/infrastructure/ai/dto/ExerciseDto.java`
+    (record with `String name`, `ExerciseType type`, `Integer targetSets`, `Integer targetReps`,
+    `BigDecimal targetWeight`, `WeightUnit weightUnit`, `Integer durationSeconds`) —
+    `ExerciseType` field enforces valid enum values at deserialisation time
+  - Change `LangChainSessionProcessor.process()` return type from `String` to `OnboardingPlanDto`
+    (LangChain4j `AiServices` handles structured output / JSON extraction + enum mapping automatically)
+  - Update `AiChatModelConfig` bean registration if needed for the new return type
+  - Remove `parseLlmResponse()`, `parseExercise()`, `extractJsonPayload()` from `OnboardingPlanGenerator`
+  - Map `OnboardingPlanDto` directly to `List<ProposedSession>` in `generateInitialProposal()`
+  - Update `buildPrompt()`: replace `STRENGTH|CARDIO|FLEXIBILITY` with `STRENGTH|BODYWEIGHT|CARDIO`;
+    replace "flexibility work" prose with "mobility/bodyweight work"
+  - Dependency: T068-BUG-006-TEST must exist (failing) before this task begins
+
+- [X] T070-BUG-006-ENUM [HIGH] Audit `ExerciseType` enum and prompt alignment in
+  `backend/src/test/java/com/gymtracker/infrastructure/ai/OnboardingPlanGeneratorPromptTest.java`
+  - Add unit test asserting the `buildPrompt()` output contains every `ExerciseType` constant name
+  - Verify no enum constant is missing from the prompt template after T069
+  - Verify `FLEXIBILITY` does NOT appear anywhere in the prompt after T069
+
+---
+
+
 
 ### MVP First (US1)
 
