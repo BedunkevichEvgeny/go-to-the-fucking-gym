@@ -11,6 +11,10 @@ import com.gymtracker.domain.OnboardingEnums.OnboardingPrimaryGoal;
 import com.gymtracker.domain.OnboardingEnums.ProposalStatus;
 import com.gymtracker.domain.WeightUnit;
 import com.gymtracker.infrastructure.ai.LangChainSessionProcessor;
+import com.gymtracker.infrastructure.ai.dto.ExerciseDto;
+import com.gymtracker.infrastructure.ai.dto.OnboardingPlanDto;
+import com.gymtracker.infrastructure.ai.dto.SessionDto;
+import com.gymtracker.domain.ExerciseType;
 import com.gymtracker.infrastructure.repository.AcceptedProgramActivationRepository;
 import com.gymtracker.infrastructure.repository.PlanProposalRepository;
 import com.gymtracker.infrastructure.repository.ProfileGoalOnboardingAttemptRepository;
@@ -71,10 +75,23 @@ class PlanProposalServiceIT {
             + "\"targetSets\":3,\"targetReps\":8,\"targetWeight\":50.0,"
             + "\"weightUnit\":\"KG\",\"durationSeconds\":null}]}]}";
 
+    /** Structured DTO equivalent of {@link #ONBOARDING_STUB_JSON}, returned by the
+     * {@code processOnboarding} spy stub so that the AI layer never makes real HTTP calls. */
+    private static final OnboardingPlanDto ONBOARDING_STUB_DTO = new OnboardingPlanDto(
+            java.util.List.of(new SessionDto(1, "Strength Day",
+                    java.util.List.of(new ExerciseDto("Squat", ExerciseType.STRENGTH, 3, 8,
+                            new java.math.BigDecimal("50.0"), null, null)))));
+
     @BeforeEach
     void stubChatModel() {
-        // Ensure the AiServices proxy (backed by mocked ChatModel) returns valid JSON
-        // for every test that calls createInitialProposal without explicit spy stubbing.
+        // Stub processOnboarding so that every test that calls createInitialProposal gets a
+        // valid OnboardingPlanDto without hitting the real AI service.
+        org.mockito.Mockito.doReturn(ONBOARDING_STUB_DTO)
+                .when(langChainSessionProcessorSpy)
+                .processOnboarding(org.mockito.ArgumentMatchers.anyString(),
+                        org.mockito.ArgumentMatchers.anyString());
+
+        // Also stub the underlying chatModel as a fallback (used by process() call in T067 tests)
         org.mockito.Mockito.when(chatModel.chat(org.mockito.ArgumentMatchers.anyString()))
                 .thenReturn(ONBOARDING_STUB_JSON);
     }
@@ -330,6 +347,64 @@ class PlanProposalServiceIT {
         assertThat(prompt)
                 .as("onboarding prompt must NOT use the old session-analysis wording")
                 .doesNotContain("Analyze workout session for progression coaching");
+    }
+
+    // ── T080-BUG-010-TEST: getCurrentAttempt returns status ACCEPTED after proposal acceptance ──
+
+    /**
+     * T080-BUG-010-TEST: After submitting onboarding, generating a proposal, and accepting it,
+     * {@link PlanProposalService#getCurrentAttempt(UUID)} must return a non-empty Optional
+     * with status == ACCEPTED (not empty / 204).
+     * The response must also carry the proposal fields (proposalId, version, sessions).
+     */
+    @Test
+    void getCurrentAttempt_ReturnsAcceptedStatusAfterProposalAcceptance() {
+        OnboardingSubmissionRequest request = new OnboardingSubmissionRequest(
+                28,
+                BigDecimal.valueOf(72),
+                WeightUnit.KG,
+                OnboardingPrimaryGoal.STRENGTH,
+                null
+        );
+
+        // Step 1 – submit onboarding and generate initial proposal
+        PlanProposalResponse proposal = planProposalService.createInitialProposal(userId, request);
+
+        // Step 2 – mark the attempt as ACCEPTED
+        attemptRepository.findFirstByUserIdAndStatus(userId,
+                com.gymtracker.domain.OnboardingEnums.OnboardingAttemptStatus.IN_PROGRESS)
+                .ifPresent(attempt -> {
+                    attempt.setStatus(com.gymtracker.domain.OnboardingEnums.OnboardingAttemptStatus.ACCEPTED);
+                    attemptRepository.save(attempt);
+                });
+
+        // Step 3 – simulate acceptance activation record
+        AcceptedProgramActivation activation = new AcceptedProgramActivation();
+        activation.setId(UUID.randomUUID());
+        activation.setProposalId(proposal.proposalId());
+        activation.setUserId(userId);
+        activation.setAttemptId(proposal.attemptId());
+        activation.setActivatedProgramId(UUID.randomUUID());
+        activationRepository.save(activation);
+
+        // Step 4 – call getCurrentAttempt (equivalent to GET /api/profile-goals/onboarding/current)
+        Optional<OnboardingAttemptResponse> result = planProposalService.getCurrentAttempt(userId);
+
+        // Assert HTTP 200 equivalent: result must be present (not empty / 204)
+        assertThat(result).isPresent();
+
+        OnboardingAttemptResponse response = result.get();
+
+        // Assert status == ACCEPTED
+        assertThat(response.status())
+                .as("status must be ACCEPTED after proposal acceptance")
+                .isEqualTo(com.gymtracker.domain.OnboardingEnums.OnboardingAttemptStatus.ACCEPTED);
+
+        // Assert proposal fields are present
+        assertThat(response.latestProposal()).isNotNull();
+        assertThat(response.latestProposal().proposalId()).isEqualTo(proposal.proposalId());
+        assertThat(response.latestProposal().version()).isEqualTo(1);
+        assertThat(response.latestProposal().sessions()).isNotNull();
     }
 
     @Test

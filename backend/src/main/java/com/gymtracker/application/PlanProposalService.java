@@ -96,8 +96,15 @@ public class PlanProposalService {
 
     @Transactional(readOnly = true)
     public Optional<OnboardingAttemptResponse> getCurrentAttempt(UUID userId) {
+        // Prefer in-progress attempt first; fall back to the latest accepted attempt so that
+        // Profile & Goals always shows the user's current programme after acceptance.
         Optional<ProfileGoalOnboardingAttempt> attemptOpt = attemptRepository
                 .findFirstByUserIdAndStatus(userId, OnboardingAttemptStatus.IN_PROGRESS);
+
+        if (attemptOpt.isEmpty()) {
+            attemptOpt = attemptRepository
+                    .findFirstByUserIdAndStatusOrderByCreatedAtDesc(userId, OnboardingAttemptStatus.ACCEPTED);
+        }
 
         if (attemptOpt.isEmpty()) {
             return Optional.empty();

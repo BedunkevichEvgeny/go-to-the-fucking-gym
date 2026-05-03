@@ -12,6 +12,8 @@ public interface ProfileGoalOnboardingAttemptRepository extends JpaRepository<Pr
 
     Optional<ProfileGoalOnboardingAttempt> findLatestByUserIdAndStatus(UUID userId, OnboardingAttemptStatus status);
 
+    Optional<ProfileGoalOnboardingAttempt> findFirstByUserIdAndStatusOrderByCreatedAtDesc(UUID userId, OnboardingAttemptStatus status);
+
     boolean existsByUserIdAndStatus(UUID userId, OnboardingAttemptStatus status);
 }
 

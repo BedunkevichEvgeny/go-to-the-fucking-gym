@@ -234,6 +234,10 @@
 - **Phase 7 (CRITICAL BUG FIXES) -> BLOCKING all use until complete; must be prioritized immediately**
   - T063-BUG-001 must complete before smoke test acceptance
   - T064-BUG-002 must complete before T035 (reject endpoint), T052 (accept endpoint) can pass integration tests
+- **Phase 10 (BUG-009 / BUG-010) -> fixes are already applied; T076 and T080/T081 tests must pass before regression is considered closed**
+  - T076-BUG-009-TEST depends on T075-BUG-009 (fix already applied)
+  - T080-BUG-010-TEST depends on T077/T078 (fixes already applied)
+  - T081-BUG-010-FE-TEST depends on T079 (fix already applied); can run in parallel with T080
 - **Phaze 8 cricical bugs fixes for Azure Open AI iteraction -> depends on Phase 7 and BLOCKS rollout**
   - T065-BUG-003-TEST/T065-BUG-003 must pass before AI integration sign-off
   - T066-BUG-004-TEST/T066-BUG-004 must pass before fail-fast behavior is compliant
@@ -269,6 +273,7 @@
 - Docs/ops polish tasks `T058-T060` can run in parallel.
 - Phase 8 test tasks `T065-BUG-003-TEST` and `T066-BUG-004-TEST` can run in parallel before implementation.
 - Phase 9: `T068-BUG-006-TEST` and `T070-BUG-006-ENUM` can run in parallel; `T069-BUG-006` depends on `T068-BUG-006-TEST`.
+- Phase 10: `T080-BUG-010-TEST` (backend IT) and `T081-BUG-010-FE-TEST` (frontend component test) can run in parallel; both depend on already-applied fixes T077/T078/T079. `T076-BUG-009-TEST` can run independently in parallel with the BUG-010 tests.
 
 ## Parallel Example: User Story 1
 
@@ -418,5 +423,61 @@ prompt/enum mismatch and unguarded raw-string LLM parsing. `buildPrompt()` lists
 3. Do not combine multiple checklist IDs in one commit.
 4. Mark checklist item done only after its tests pass for that scope.
 
+---
 
+## Phase 10: Post-Smoke-Test Bug Fixes (Session Save & Profile Display)
+
+**Purpose**: Fix two regressions found during smoke testing after feature 002 rollout.
+
+**Status**: BLOCKING — second session save crashes and accepted program is invisible.
+
+### Bug BUG-009 — 400 on second session save (STRENGTH set with null weightValue)
+
+**Root cause**: `SessionValidatorService.validateBodyweightSet()` rejected any non-bodyweight set
+with a missing `weightValue`. Resistance-band / cable exercises have no numeric weight, so the
+rule contradicts the feature-001 data model which makes `weightValue` unconditionally optional.
+
+- [X] T075-BUG-009 [CRITICAL] Remove overly strict `weightValue`-required rule in `SessionValidatorService.validateBodyweightSet()` — keep only the "bodyweight + weight value" guard; align with 001 spec: `isBodyWeight` flag is the sole discriminant
+  - **File**: `backend/src/main/java/com/gymtracker/application/SessionValidatorService.java`
+  - **Fix**: deleted `if (!isBodyWeight && weightValue == null) throw ...`
+
+- [X] T076-BUG-009-TEST [HIGH] Add regression unit test in `SessionValidatorServiceTest` (or equivalent)
+  - Assert `{ isBodyWeight: false, weightValue: null }` does **NOT** throw
+  - Assert `{ isBodyWeight: true, weightValue: 50.0 }` DOES throw
+  - Assert `{ isBodyWeight: false, weightValue: 7.5 }` does NOT throw
+
+---
+
+### Bug BUG-010 — Accepted program not displayed in Profile & Goals
+
+**Root cause**: `PlanProposalService.getCurrentAttempt()` only queried for `IN_PROGRESS` attempts.
+After acceptance the attempt transitions to `ACCEPTED` and the method returned `Optional.empty()`,
+causing HTTP 204 → frontend rendered nothing.
+
+- [X] T077-BUG-010 [CRITICAL] Extend `PlanProposalService.getCurrentAttempt()` to fall back to the latest `ACCEPTED` attempt when no `IN_PROGRESS` attempt exists
+  - **File**: `backend/src/main/java/com/gymtracker/application/PlanProposalService.java`
+  - Added `findFirstByUserIdAndStatusOrderByCreatedAtDesc(userId, ACCEPTED)` fallback
+
+- [X] T078-BUG-010-REPO [CRITICAL] Add `findFirstByUserIdAndStatusOrderByCreatedAtDesc` derived query to `ProfileGoalOnboardingAttemptRepository`
+  - **File**: `backend/src/main/java/com/gymtracker/infrastructure/repository/ProfileGoalOnboardingAttemptRepository.java`
+
+- [X] T079-BUG-010-FE [HIGH] Update `ProfileGoalOnboardingPage` to render a read-only "Your Active Program" card when `currentAttempt.status === 'ACCEPTED'`; show `ProposalReviewCard` with accept/reject only for `IN_PROGRESS` proposals
+  - **File**: `frontend/src/pages/ProfileGoalOnboardingPage.tsx`
+
+- [X] T080-BUG-010-TEST [HIGH] Add integration test asserting `GET /api/profile-goals/onboarding/current` returns HTTP 200 with `status: ACCEPTED` after proposal acceptance (not 204)
+  - **File**: `backend/src/test/java/com/gymtracker/application/PlanProposalServiceIT.java`
+  - Submit onboarding, generate proposal, call accept endpoint, then call `GET /api/profile-goals/onboarding/current`
+  - Assert HTTP 200 (not 204) and `response.status === "ACCEPTED"`
+  - Assert proposal fields are present in the response body
+
+- [X] T081-BUG-010-FE-TEST [P] [HIGH] Add Vitest/RTL component test asserting accepted state renders read-only "Your Active Program" card without accept/reject buttons
+  - **File**: `frontend/tests/ProfileGoalOnboardingPage.accept-error.test.tsx` (extend existing file, or create `frontend/tests/ProfileGoalOnboardingPage.accepted-state.test.tsx`)
+  - Mock `useCurrentOnboardingAttempt` to return a fixture with `status: "ACCEPTED"` and a populated proposal
+  - Assert a heading or label matching `"Your Active Program"` (or equivalent) is visible in the DOM
+  - Assert no "Accept" button is present
+  - Assert no "Reject" / feedback form is present
+  - Assert proposal exercise details are readable (read-only view)
+  - **Acceptance criteria**: Test goes red if accepted-state branch is removed from `ProfileGoalOnboardingPage`; green with current implementation; CI stays green
+
+---
 

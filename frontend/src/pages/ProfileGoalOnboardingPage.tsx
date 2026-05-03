@@ -154,7 +154,43 @@ export function ProfileGoalOnboardingPage() {
         </button>
       </form>
 
-      {proposal && (
+      {proposal && currentAttempt?.status === 'ACCEPTED' && (
+        <section className="card stack-sm">
+          <h2>Your Active Program</h2>
+          <p>
+            Version {proposal.version} • {proposal.generatedBy.provider} ({proposal.generatedBy.deployment})
+          </p>
+          {proposal.sessions.map((session) => (
+            <article key={`${session.sequenceNumber}-${session.name}`} className="stack-xs">
+              <strong>
+                Session {session.sequenceNumber}: {session.name}
+              </strong>
+              <ul>
+                {session.exercises.map((exercise) => (
+                  <li key={`${session.sequenceNumber}-${exercise.exerciseName}`}>
+                    <strong>{exercise.exerciseName}</strong>
+                    {exercise.targetSets != null && exercise.targetReps != null && (
+                      <span> — {exercise.targetSets}×{exercise.targetReps} reps</span>
+                    )}
+                    {exercise.targetWeight != null && (
+                      <span> @ {exercise.targetWeight} {exercise.targetWeightUnit ?? ''}</span>
+                    )}
+                    {exercise.targetDurationSeconds != null && (
+                      <span> — {exercise.targetDurationSeconds}s</span>
+                    )}
+                    {exercise.targetDistance != null && (
+                      <span> / {exercise.targetDistance} {exercise.targetDistanceUnit ?? ''}</span>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </article>
+          ))}
+          <p className="eyebrow">Plan accepted — regenerate below to start a new onboarding.</p>
+        </section>
+      )}
+
+      {proposal && currentAttempt?.status !== 'ACCEPTED' && (
         <ProposalReviewCard
           proposal={proposal}
           isBusy={rejectReview.isRejecting || acceptProposal.isPending}
