@@ -144,6 +144,44 @@
 
 ---
 
+## Phase 7: CRITICAL BUG FIXES (Smoke Test Findings) 🚨
+
+**Purpose**: Fix critical bugs discovered in smoke testing that break core functionality.
+
+**Status**: BLOCKING - Must complete before any production or demo use.
+
+### Tests for Bug Fixes (MANDATORY)
+
+- [X] T063-BUG-001-TEST [CRITICAL] Add AI generation integration test verifying real Azure OpenAI calls in `backend/src/test/java/com/gymtracker/infrastructure/ai/AzureOpenAiIntegrationIT.java`
+  - Verify non-hardcoded proposal generation from actual LLM
+  - Mock or use real Azure OpenAI endpoint
+  - Assert exercises are NOT the hardcoded "Back Squat" and "Treadmill Run"
+
+- [X] T064-BUG-002-TEST [CRITICAL] Add proposal state persistence integration tests in `backend/src/test/java/com/gymtracker/application/PlanProposalServiceIT.java`
+  - Test `getCurrentAttempt()` returns actual persisted attempt after creation
+  - Test proposal version chain: create v1 → reject → create v2 (linked, incrementing version)
+  - Test `resolveAttemptSnapshot()` loads actual user inputs, not hardcoded values
+  - Test reject/revise cycle maintains proposalId chain and attemptId continuity
+
+### Implementation for Bug Fixes
+
+- [X] T063-BUG-001 [CRITICAL] Implement real Azure OpenAI LLM integration in `OnboardingPlanGenerator`
+  - Remove hardcoded "Back Squat" and "Treadmill Run" exercises
+  - Implement LangChain4j + Azure OpenAI API call to generate contextual plan
+  - Add error handling for LLM timeouts/failures with user-visible retry messaging
+  - Use `AzureOpenAiOnboardingProperties` to configure endpoint/key/deployment
+  - **Maps to**: FR-005 (proposal structure generation), eliminates fake-data blocker
+
+- [X] T064-BUG-002 [CRITICAL] Complete `PlanProposalService` persistence implementations
+  - Implement `getCurrentAttempt(userId)` → query `ProfileGoalOnboardingAttempt` + `PlanProposal` from DB, return latest attempt with proposal chain
+  - Implement `resolveAttemptSnapshot(userId, attemptId)` → fetch actual stored `OnboardingSubmissionRequest` from proposal payload, not hardcoded values
+  - Fix `createRevision(userId, proposalId, requestedChanges)` → maintain proposalId chain (reuse parent proposalId or link to parent), increment version, preserve attemptId
+  - Implement `getTrackingAccessGate(userId)` → query `ProfileGoalOnboardingAttempt` status; return true only if status is `ACCEPTED` or user has active `AcceptedProgramActivation`
+  - Add repository queries for attempt/proposal/activation lookups
+  - **Maps to**: FR-008 (repeated revision cycle), FR-012 (linkage model), eliminates acceptance/rejection state loss
+
+---
+
 ## Dependencies & Execution Order
 
 ### Phase Dependencies
@@ -154,6 +192,9 @@
 - Phase 4 (US2) -> depends on Phase 3 baseline proposal flow.
 - Phase 5 (US3) -> depends on Phase 3 proposal creation and Phase 4 revision state integrity.
 - Phase 6 -> depends on completion of Phases 3-5.
+- **Phase 7 (CRITICAL BUG FIXES) -> BLOCKING all use until complete; must be prioritized immediately**
+  - T063-BUG-001 must complete before smoke test acceptance
+  - T064-BUG-002 must complete before T035 (reject endpoint), T052 (accept endpoint) can pass integration tests
 
 ### User Story Dependency Graph
 
