@@ -14,7 +14,8 @@ public record LoggedSessionDetail(
         String notes,
         Integer totalDurationSeconds,
         SessionFeelingsInput feelings,
-        List<ExerciseEntryView> exerciseEntries
+        List<ExerciseEntryView> exerciseEntries,
+        String aiSuggestion
 ) {
 }
 
