@@ -47,6 +47,9 @@ public class DtoMapper {
     }
 
     public LoggedSessionDetail toDetailDto(LoggedSession loggedSession) {
+        String suggestion = loggedSession.getAiSuggestion() == null
+                ? null
+                : loggedSession.getAiSuggestion().getSuggestion();
         return new LoggedSessionDetail(
                 loggedSession.getId(),
                 loggedSession.getSessionType(),
@@ -84,7 +87,8 @@ public class DtoMapper {
                                                 lap.getDistanceValue(),
                                                 lap.getDistanceUnit()))
                                         .toList()))
-                        .toList());
+                        .toList(),
+                suggestion);
     }
 
     public SessionHistoryItem toHistoryItem(LoggedSession loggedSession) {
