@@ -1,7 +1,5 @@
 package com.gymtracker.infrastructure.ai;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gymtracker.api.dto.ProfileGoalOnboardingDtos.GeneratedBy;
 import com.gymtracker.api.dto.ProfileGoalOnboardingDtos.OnboardingSubmissionRequest;
 import com.gymtracker.api.dto.ProfileGoalOnboardingDtos.PlanProposalResponse;
@@ -11,9 +9,11 @@ import com.gymtracker.domain.ExerciseType;
 import com.gymtracker.domain.OnboardingEnums.ProposalProvider;
 import com.gymtracker.domain.OnboardingEnums.ProposalStatus;
 import com.gymtracker.domain.WeightUnit;
+import com.gymtracker.infrastructure.ai.dto.ExerciseDto;
+import com.gymtracker.infrastructure.ai.dto.OnboardingPlanDto;
+import com.gymtracker.infrastructure.ai.dto.SessionDto;
 import com.gymtracker.infrastructure.config.AzureOpenAiOnboardingProperties;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -31,7 +31,6 @@ public class OnboardingPlanGenerator {
 
     private final AzureOpenAiOnboardingProperties properties;
     private final LangChainSessionProcessor langChainProcessor;
-    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public OnboardingPlanGenerator(
         AzureOpenAiOnboardingProperties properties,
@@ -48,12 +47,15 @@ public class OnboardingPlanGenerator {
         logger.debug("Generating proposal with prompt: {}", prompt);
 
         try {
-            String llmResponse = langChainProcessor.process(userId.toString(), prompt);
-            if (llmResponse == null || llmResponse.isBlank()) {
-                throw new IllegalStateException("Model returned empty or blank output for onboarding proposal");
+            OnboardingPlanDto planDto = langChainProcessor.processOnboarding(userId.toString(), prompt);
+
+            if (planDto == null || planDto.sessions() == null || planDto.sessions().isEmpty()) {
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_GATEWAY,
+                        "AI returned no usable sessions for onboarding proposal");
             }
 
-            List<ProposedSession> sessions = parseLlmResponse(llmResponse, request);
+            List<ProposedSession> sessions = mapSessions(planDto, request);
             if (sessions.isEmpty()) {
                 throw new ResponseStatusException(
                         HttpStatus.BAD_GATEWAY,
@@ -78,7 +80,8 @@ public class OnboardingPlanGenerator {
         }
     }
 
-    private String buildPrompt(OnboardingSubmissionRequest request) {
+    // package-private for testing
+    String buildPrompt(OnboardingSubmissionRequest request) {
         return String.format("""
                 Create a personalized 3-4 week fitness plan for someone with these characteristics:
                 - Age: %d years
@@ -87,7 +90,7 @@ public class OnboardingPlanGenerator {
                 - Experience Level: beginner
                 
                 Generate a structured plan with 3-4 sessions per week. Each session should include:
-                - Mix of strength training, cardio, and flexibility work
+                - Mix of strength training, cardio, and mobility/bodyweight work
                 - Realistic exercise selections based on the person's profile
                 - Moderate intensity appropriate for the age and current fitness
                 
@@ -102,7 +105,7 @@ public class OnboardingPlanGenerator {
                       "exercises": [
                         {
                           "name": "Exercise Name",
-                          "type": "STRENGTH|CARDIO|FLEXIBILITY",
+                          "type": "STRENGTH|BODYWEIGHT|CARDIO",
                           "targetSets": 3,
                           "targetReps": 8,
                           "targetWeight": 50.0,
@@ -120,116 +123,46 @@ public class OnboardingPlanGenerator {
             request.primaryGoal());
     }
 
-    private List<ProposedSession> parseLlmResponse(String response, OnboardingSubmissionRequest request) {
-        if (response == null || response.isBlank()) {
-            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "AI returned an empty response");
-        }
-
-        try {
-            String jsonPayload = extractJsonPayload(response);
-            JsonNode root = objectMapper.readTree(jsonPayload);
-            List<ProposedSession> sessions = new ArrayList<>();
-
-            JsonNode sessionsNode = root.get("sessions");
-            if (sessionsNode == null || !sessionsNode.isArray()) {
-                throw new ResponseStatusException(
-                        HttpStatus.BAD_GATEWAY,
-                        "AI response JSON does not contain a valid 'sessions' array");
+    private List<ProposedSession> mapSessions(OnboardingPlanDto planDto, OnboardingSubmissionRequest request) {
+        List<ProposedSession> sessions = new ArrayList<>();
+        for (SessionDto sessionDto : planDto.sessions()) {
+            if (sessionDto == null) {
+                continue;
             }
+            int sequenceNumber = sessionDto.sequenceNumber();
+            String sessionName = sessionDto.name() == null ? "" : sessionDto.name().trim();
+            List<ProposedExerciseTarget> exercises = mapExercises(sessionDto.exercises(), request);
 
-            for (JsonNode sessionNode : sessionsNode) {
-                int sequenceNumber = sessionNode.path("sequenceNumber").asInt(0);
-                String sessionName = sessionNode.path("name").asText("").trim();
-                List<ProposedExerciseTarget> exercises = new ArrayList<>();
-
-                JsonNode exercisesNode = sessionNode.get("exercises");
-                if (exercisesNode != null && exercisesNode.isArray()) {
-                    for (JsonNode exerciseNode : exercisesNode) {
-                        ProposedExerciseTarget target = parseExercise(exerciseNode, request);
-                        if (target != null) {
-                            exercises.add(target);
-                        }
-                    }
-                }
-
-                if (sequenceNumber > 0 && !sessionName.isEmpty() && !exercises.isEmpty()) {
-                    sessions.add(new ProposedSession(sequenceNumber, sessionName, exercises));
-                }
+            if (sequenceNumber > 0 && !sessionName.isEmpty() && !exercises.isEmpty()) {
+                sessions.add(new ProposedSession(sequenceNumber, sessionName, exercises));
             }
-
-            return sessions;
-        } catch (ResponseStatusException responseStatusException) {
-            throw responseStatusException;
-        } catch (Exception exception) {
-            logger.error("Failed to parse AI response as onboarding proposal JSON", exception);
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_GATEWAY,
-                    "AI returned malformed JSON for onboarding proposal",
-                    exception);
         }
+        return sessions;
     }
 
-    private String extractJsonPayload(String response) {
-        String trimmed = response.trim();
-        if (trimmed.startsWith("{") && trimmed.endsWith("}")) {
-            return trimmed;
+    private List<ProposedExerciseTarget> mapExercises(List<ExerciseDto> exerciseDtos,
+                                                       OnboardingSubmissionRequest request) {
+        List<ProposedExerciseTarget> targets = new ArrayList<>();
+        if (exerciseDtos == null) {
+            return targets;
         }
-
-        int firstBrace = trimmed.indexOf('{');
-        int lastBrace = trimmed.lastIndexOf('}');
-        if (firstBrace >= 0 && lastBrace > firstBrace) {
-            return trimmed.substring(firstBrace, lastBrace + 1);
-        }
-
-        throw new ResponseStatusException(
-                HttpStatus.BAD_GATEWAY,
-                "AI response is not valid JSON: " + trimmed);
-    }
-
-    private ProposedExerciseTarget parseExercise(JsonNode exerciseNode, OnboardingSubmissionRequest request) {
-        try {
-            String exerciseName = exerciseNode.path("name").asText(exerciseNode.path("exerciseName").asText(""));
-            String typeStr = exerciseNode.path("type").asText(exerciseNode.path("exerciseType").asText("STRENGTH"));
-            ExerciseType type = ExerciseType.valueOf(typeStr);
-
-            if (exerciseName == null || exerciseName.isBlank()) {
-                return null;
+        WeightUnit weightUnit = request.weightUnit() == null ? WeightUnit.KG : request.weightUnit();
+        for (ExerciseDto dto : exerciseDtos) {
+            if (dto == null || dto.name() == null || dto.name().isBlank()) {
+                continue;
             }
-
-            Integer targetSets = null;
-            Integer targetReps = null;
-            BigDecimal targetWeight = null;
-            Integer durationSeconds = null;
-
-            if (exerciseNode.has("targetSets") && !exerciseNode.get("targetSets").isNull()) {
-                targetSets = exerciseNode.get("targetSets").asInt();
-            }
-            if (exerciseNode.has("targetReps") && !exerciseNode.get("targetReps").isNull()) {
-                targetReps = exerciseNode.get("targetReps").asInt();
-            }
-            if (exerciseNode.has("targetWeight") && !exerciseNode.get("targetWeight").isNull()) {
-                targetWeight = BigDecimal.valueOf(exerciseNode.get("targetWeight").asDouble());
-            }
-            if (exerciseNode.has("durationSeconds") && !exerciseNode.get("durationSeconds").isNull()) {
-                durationSeconds = exerciseNode.get("durationSeconds").asInt();
-            }
-
-            WeightUnit weightUnit = request.weightUnit() == null ? WeightUnit.KG : request.weightUnit();
-
-            return new ProposedExerciseTarget(
-                    exerciseName,
+            ExerciseType type = dto.type() != null ? dto.type() : ExerciseType.STRENGTH;
+            targets.add(new ProposedExerciseTarget(
+                    dto.name(),
                     type,
-                    targetSets,
-                    targetReps,
-                    targetWeight,
+                    dto.targetSets(),
+                    dto.targetReps(),
+                    dto.targetWeight(),
                     weightUnit,
-                    durationSeconds,
+                    dto.durationSeconds(),
                     null,
-                    null);
-
-        } catch (Exception exception) {
-            logger.warn("Failed to parse exercise node", exception);
-            return null;
+                    null));
         }
+        return targets;
     }
 }

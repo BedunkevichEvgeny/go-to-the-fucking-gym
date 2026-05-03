@@ -1,5 +1,6 @@
 package com.gymtracker.infrastructure.ai;
 
+import com.gymtracker.infrastructure.ai.dto.OnboardingPlanDto;
 import dev.langchain4j.service.MemoryId;
 import dev.langchain4j.service.SystemMessage;
 import dev.langchain4j.service.UserMessage;
@@ -20,6 +21,10 @@ import dev.langchain4j.service.UserMessage;
  */
 public interface LangChainSessionProcessor {
 
+    /**
+     * Free-text session analysis — used by {@link AiHandoffService} for progression coaching.
+     * Returns the raw model output as a {@code String}.
+     */
     @SystemMessage("""
             You are a workout progression coach and fitness AI assistant.
             Analyse workout sessions and provide evidence-based progression insights,
@@ -28,4 +33,17 @@ public interface LangChainSessionProcessor {
             Never add markdown code blocks or any wrapper text — return raw content only.
             """)
     String process(@MemoryId String memoryId, @UserMessage String userMessage);
+
+    /**
+     * Structured-output onboarding plan generation — LangChain4j {@code AiServices} automatically
+     * generates a JSON schema from {@link OnboardingPlanDto} and instructs the model to conform to it.
+     * Jackson deserializes the response; unknown {@code ExerciseType} values fall back to
+     * {@code STRENGTH} via {@link com.gymtracker.infrastructure.ai.dto.SafeExerciseTypeDeserializer}.
+     */
+    @SystemMessage("""
+            You are a personalised fitness planning AI.
+            Generate a structured onboarding workout plan strictly as a JSON object matching the
+            schema provided. Do NOT add any markdown, prose, or wrapper text — return raw JSON only.
+            """)
+    OnboardingPlanDto processOnboarding(@MemoryId String memoryId, @UserMessage String userMessage);
 }
