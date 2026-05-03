@@ -1,8 +1,5 @@
 package com.gymtracker.application;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.gymtracker.api.dto.ProfileGoalOnboardingDtos.GeneratedBy;
 import com.gymtracker.api.dto.ProfileGoalOnboardingDtos.OnboardingAttemptResponse;
 import com.gymtracker.api.dto.ProfileGoalOnboardingDtos.OnboardingSubmissionRequest;
 import com.gymtracker.api.dto.ProfileGoalOnboardingDtos.PlanProposalResponse;
@@ -35,7 +32,6 @@ public class PlanProposalService {
     private final PlanProposalRepository proposalRepository;
     private final AcceptedProgramActivationRepository activationRepository;
     private final OnboardingProposalMapper proposalMapper;
-    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public PlanProposalService(
             OnboardingValidationService validationService,

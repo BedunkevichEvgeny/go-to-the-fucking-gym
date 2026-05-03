@@ -2,7 +2,10 @@ package com.gymtracker.application;
 
 import com.gymtracker.api.dto.ProfileGoalOnboardingDtos.ProposedExerciseTarget;
 import com.gymtracker.api.dto.ProfileGoalOnboardingDtos.ProposedSession;
-import com.gymtracker.domain.*;
+import com.gymtracker.domain.ProgramExerciseTarget;
+import com.gymtracker.domain.ProgramSession;
+import com.gymtracker.domain.ProgramStatus;
+import com.gymtracker.domain.WorkoutProgram;
 import org.springframework.stereotype.Component;
 
 import java.time.OffsetDateTime;

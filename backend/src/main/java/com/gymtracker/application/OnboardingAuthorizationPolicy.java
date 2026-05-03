@@ -1,7 +1,10 @@
 package com.gymtracker.application;
 
 import com.gymtracker.api.exception.ForbiddenException;
-import com.gymtracker.domain.*;
+import com.gymtracker.domain.OnboardingEnums;
+import com.gymtracker.domain.PlanProposal;
+import com.gymtracker.domain.ProfileGoalOnboardingAttempt;
+import com.gymtracker.domain.ProposalFeedback;
 import org.springframework.stereotype.Component;
 
 /**
