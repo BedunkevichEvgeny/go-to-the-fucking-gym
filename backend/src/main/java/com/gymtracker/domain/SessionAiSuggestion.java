@@ -30,7 +30,7 @@ public class SessionAiSuggestion {
     @JoinColumn(name = "session_id")
     private LoggedSession session;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String suggestion;
 
     @Column(name = "generated_at", nullable = false)
