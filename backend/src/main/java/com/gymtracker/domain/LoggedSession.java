@@ -5,6 +5,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
@@ -65,6 +66,9 @@ public class LoggedSession {
 
     @OneToOne(mappedBy = "session", cascade = CascadeType.ALL, orphanRemoval = true)
     private SessionFeelings feelings;
+
+    @OneToOne(mappedBy = "session", fetch = FetchType.LAZY, optional = true)
+    private SessionAiSuggestion aiSuggestion;
 
     @PrePersist
     void prePersist() {
