@@ -352,7 +352,7 @@ prompt/enum mismatch and unguarded raw-string LLM parsing. `buildPrompt()` lists
 
 ### B1 — Integration test: `requestedChanges` reaches AI prompt
 
-- [ ] T071-BUG-B1 [US2] Add integration test asserting `requestedChanges` is forwarded to the AI revision prompt in `backend/src/test/java/com/gymtracker/application/PlanRevisionFeedbackIT.java`
+- [X] T071-BUG-B1 [US2] Add integration test asserting `requestedChanges` is forwarded to the AI revision prompt in `backend/src/test/java/com/gymtracker/application/PlanRevisionFeedbackIT.java`
   - Use a `@SpyBean` or `@MockBean` on `OnboardingPlanGenerator` (or `LangChainSessionProcessor`) to capture the prompt argument
   - Call `POST /api/onboarding/{attemptId}/proposals/{proposalId}/reject` with a non-blank `requestedChanges` value via `MockMvc` or `TestRestTemplate`
   - Assert the captured prompt string **contains** the exact feedback text submitted
@@ -362,7 +362,7 @@ prompt/enum mismatch and unguarded raw-string LLM parsing. `buildPrompt()` lists
 
 ### B2 — Frontend component test: exercise detail rendering in `ProposalReviewCard`
 
-- [ ] T072-BUG-B2 [P] [US2] Add Vitest/RTL component tests for exercise detail fields in `frontend/tests/ProposalReviewCard.exercise-details.test.tsx`
+- [X] T072-BUG-B2 [P] [US2] Add Vitest/RTL component tests for exercise detail fields in `frontend/tests/ProposalReviewCard.exercise-details.test.tsx`
   - Render `ProposalReviewCard` with a proposal fixture containing `targetSets`, `targetReps`, `targetWeight`, and `targetWeightUnit`; assert all four values appear in the DOM
   - Render with `targetDurationSeconds` set; assert the formatted duration string is visible
   - Render with `targetDistance` and `targetDistanceUnit` set; assert both appear in the DOM
@@ -374,7 +374,7 @@ prompt/enum mismatch and unguarded raw-string LLM parsing. `buildPrompt()` lists
 
 ### B3 — Frontend test: no stale localStorage proposal rendered when backend returns 204
 
-- [ ] T073-BUG-B3 [P] Add Vitest/RTL page-level test asserting stale localStorage proposal is NOT rendered when `useCurrentOnboardingAttempt` returns `null` in `frontend/tests/ProfileGoalOnboardingPage.stale-localStorage.test.tsx`
+- [X] T073-BUG-B3 [P] Add Vitest/RTL page-level test asserting stale localStorage proposal is NOT rendered when `useCurrentOnboardingAttempt` returns `null` in `frontend/tests/ProfileGoalOnboardingPage.stale-localStorage.test.tsx`
   - Before rendering, seed `localStorage` with key `profile-goals.proposal` containing a serialised proposal fixture
   - Mock `useCurrentOnboardingAttempt` to return `{ data: null, isLoading: false }` (simulates 204 from backend)
   - Mock `useCreateInitialProposal` to return `{ data: undefined, isPending: false, mutateAsync: vi.fn() }`
@@ -386,7 +386,7 @@ prompt/enum mismatch and unguarded raw-string LLM parsing. `buildPrompt()` lists
 
 ### B4 — Frontend test: accept-button error message shown and navigation suppressed on 404
 
-- [ ] T074-BUG-B4 [P] Add Vitest/RTL page-level test asserting error message is displayed and navigation does NOT occur when `acceptProposal.mutateAsync` rejects in `frontend/tests/ProfileGoalOnboardingPage.accept-error.test.tsx`
+- [X] T074-BUG-B4 [P] Add Vitest/RTL page-level test asserting error message is displayed and navigation does NOT occur when `acceptProposal.mutateAsync` rejects in `frontend/tests/ProfileGoalOnboardingPage.accept-error.test.tsx`
   - Render page with a valid in-progress attempt fixture (proposal visible, Accept button enabled)
   - Mock `acceptProposal.mutateAsync` to reject with a simulated 404 error
   - Fire a click on the Accept button
