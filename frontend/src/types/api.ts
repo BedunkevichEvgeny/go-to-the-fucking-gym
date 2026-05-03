@@ -90,6 +90,7 @@ export interface LoggedSessionDetail {
   totalDurationSeconds?: number | null;
   feelings: SessionFeelingsInput;
   exerciseEntries: ExerciseEntryView[];
+  aiSuggestion?: string | null;
 }
 
 export interface SessionHistoryItem {
