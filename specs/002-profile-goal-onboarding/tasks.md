@@ -190,7 +190,7 @@
 
 ### Tests for Phase 8 Remediation (MANDATORY)
 
-- [ ] T065-BUG-003-TEST [CRITICAL] Add LangChain/Azure integration contract test for onboarding assistant chat path in `backend/src/test/java/com/gymtracker/infrastructure/ai/AzureOpenAiIntegrationIT.java`
+- [X] T065-BUG-003-TEST [CRITICAL] Add LangChain/Azure integration contract test for onboarding assistant chat path in `backend/src/test/java/com/gymtracker/infrastructure/ai/AzureOpenAiIntegrationIT.java`
   - Assert `LangChainSessionProcessor` uses real `AzureOpenAiChatModel` execution path instead of stubbed provider output
   - Assert returned content is strict JSON consumable by onboarding proposal parser
   - Assert test fails for stub-like plain-text or non-JSON responses
@@ -205,16 +205,16 @@
 
 ### Implementation for Phase 8 Remediation
 
-- [ ] T065-BUG-003 [CRITICAL] Replace stubbed Azure call path with real LangChain/Azure execution in `backend/src/main/java/com/gymtracker/infrastructure/ai/LangChainSessionProcessor.java`
+- [X] T065-BUG-003 [CRITICAL] Replace stubbed Azure call path with real LangChain/Azure execution in `backend/src/main/java/com/gymtracker/infrastructure/ai/LangChainSessionProcessor.java`
   - Remove synthetic/default response branch and route calls through runtime model invocation
   - Ensure the processing path consumes `ChatModel` backed by `AzureOpenAiChatModel`
 
-- [ ] T066-BUG-004 [CRITICAL] Implement explicit onboarding LangChain abstractions in `backend/src/main/java/com/gymtracker/infrastructure/ai/ChatMemoryProvider.java`
+- [X] T066-BUG-004 [CRITICAL] Implement explicit onboarding LangChain abstractions in `backend/src/main/java/com/gymtracker/infrastructure/ai/ChatMemoryProvider.java`
   - Add `ChatMemoryProvider` contract
   - Add onboarding assistant interface via `AiServices` with `chat` method
   - Add `ChatModel` and `AzureOpenAiChatModel` wiring used by onboarding assistant
 
-- [ ] T067-BUG-005 [CRITICAL] Refactor onboarding proposal generation to assistant prompt path in `backend/src/main/java/com/gymtracker/infrastructure/ai/OnboardingPlanGenerator.java`
+- [X] T067-BUG-005 [CRITICAL] Refactor onboarding proposal generation to assistant prompt path in `backend/src/main/java/com/gymtracker/infrastructure/ai/OnboardingPlanGenerator.java`
   - Remove fake `SessionSummaryDTO` bridge usage from onboarding generation
   - Keep fail-fast behavior: malformed/empty output surfaces explicit error
   - Keep zero hardcoded fallback proposal payloads
