@@ -195,7 +195,7 @@
   - Assert returned content is strict JSON consumable by onboarding proposal parser
   - Assert test fails for stub-like plain-text or non-JSON responses
 
-- [ ] T066-BUG-004-TEST [CRITICAL] Add fail-fast malformed/empty model-output tests in `backend/src/test/java/com/gymtracker/infrastructure/ai/LangChainSessionProcessorTest.java`
+- [X] T066-BUG-004-TEST [CRITICAL] Add fail-fast malformed/empty model-output tests in `backend/src/test/java/com/gymtracker/infrastructure/ai/LangChainSessionProcessorTest.java`
   - Assert no hardcoded fallback proposal/session data is emitted on parse failure
   - Assert explicit error is surfaced for malformed and empty model output
 

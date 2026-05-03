@@ -41,6 +41,89 @@ class LangChainSessionProcessorTest {
         assertThat(attempts.get()).isEqualTo(3);
     }
 
+    // ── T066-BUG-004-TEST: fail-fast malformed/empty model-output ─────────────
+
+    @Test
+    void processThrowsOnEmptyModelOutput() {
+        LangChainSessionProcessor processor = processorReturning("");
+
+        assertThatThrownBy(() -> processor.process(sampleSummary()))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("empty or blank");
+    }
+
+    @Test
+    void processThrowsOnBlankModelOutput() {
+        LangChainSessionProcessor processor = processorReturning("   \t\n  ");
+
+        assertThatThrownBy(() -> processor.process(sampleSummary()))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("empty or blank");
+    }
+
+    @Test
+    void processThrowsOnNullModelOutput() {
+        LangChainSessionProcessor processor = processorReturning(null);
+
+        assertThatThrownBy(() -> processor.process(sampleSummary()))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("empty or blank");
+    }
+
+    @Test
+    void processDoesNotReturnHardcodedFallbackWhenModelFails() {
+        LangChainSessionProcessor processor = new LangChainSessionProcessor(
+                "https://integration.test.azure.openai",
+                "test-key",
+                "test-deployment",
+                30,
+                1
+        ) {
+            @Override
+            String callAzureOpenAi(String prompt) {
+                throw new RuntimeException("upstream model failure");
+            }
+        };
+
+        // Must propagate the upstream error — never swallow it and return any fallback string
+        assertThatThrownBy(() -> processor.process(sampleSummary()))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessageContaining("upstream model failure");
+    }
+
+    @Test
+    void processDoesNotReturnHardcodedFallbackOnMalformedResponse() {
+        // A realistic "malformed" response: looks like JSON but truncated
+        String malformedJson = "{\"proposal\": null, \"sessions\": [";
+
+        LangChainSessionProcessor processor = processorReturning(malformedJson);
+
+        // The processor must surface the raw (non-blank) response as-is for now;
+        // crucially it must NOT silently replace it with fabricated proposal/session data.
+        String result = processor.process(sampleSummary());
+
+        assertThat(result).isEqualTo(malformedJson);
+        assertThat(result).doesNotContain("Bench Press"); // no hardcoded workout data
+        assertThat(result).doesNotContain("fallback");    // no silent fallback label
+    }
+
+    // ── helpers ────────────────────────────────────────────────────────────────
+
+    private LangChainSessionProcessor processorReturning(String fixedResponse) {
+        return new LangChainSessionProcessor(
+                "https://integration.test.azure.openai",
+                "test-key",
+                "test-deployment",
+                30,
+                1
+        ) {
+            @Override
+            String callAzureOpenAi(String prompt) {
+                return fixedResponse;
+            }
+        };
+    }
+
     @Test
     void processDoesNotRetryNonTransientFailures() {
         AtomicInteger attempts = new AtomicInteger();

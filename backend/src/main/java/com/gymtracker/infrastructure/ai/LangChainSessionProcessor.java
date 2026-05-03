@@ -44,6 +44,10 @@ public class LangChainSessionProcessor {
         for (int attempt = 1; attempt <= maxAttempts; attempt++) {
             try {
                 String response = callAzureOpenAiWithTimeout(prompt);
+                if (response == null || response.isBlank()) {
+                    throw new IllegalStateException(
+                            "Model returned empty or blank output for session " + summary.sessionId());
+                }
                 log.info("AI handoff processed session {} for user {} using deployment {}",
                         summary.sessionId(), summary.userId(), deployment);
                 return response;
