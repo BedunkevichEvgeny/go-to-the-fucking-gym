@@ -162,10 +162,10 @@ _The existing gate in `AiHandoffService` already skips FREE sessions. No new bac
 
 **Purpose**: Code quality, documentation, and final validation.
 
-- [ ] T024 Run `./mvnw checkstyle:check` in `backend/`; fix any style violations in new/modified files (`AiHandoffService.java`, `SessionAiSuggestion.java`, `SessionAiSuggestionRepository.java`, `DtoMapper.java`, `LoggedSessionDetail.java`, `LoggedSession.java`)
-- [ ] T025 [P] Run `npm run lint` in `frontend/`; fix any lint errors in new/modified files (`api.ts`, `usePollSessionSuggestion.ts`, `AiCoachingInsightCard.tsx`, `ProgramSessionPage.tsx`, `SessionDetailView.tsx`)
-- [ ] T026 [P] Verify all backend tests pass: `./mvnw test` in `backend/` — confirm `AiHandoffServiceTest`, `DtoMapperTest`, `LoggedSessionServiceIT`, `SessionDetailServiceIT`, `SessionHistoryServiceIT` are green
-- [ ] T027 [P] Verify all frontend tests pass: `npm run test` in `frontend/` — confirm `AiCoachingInsightCard.test.tsx`, `ProgramSessionPage.postSave.test.tsx`, `SessionDetailView.suggestion.test.tsx` are green
+- [X] T024 Run `./mvnw checkstyle:check` in `backend/`; fix any style violations in new/modified files (`AiHandoffService.java`, `SessionAiSuggestion.java`, `SessionAiSuggestionRepository.java`, `DtoMapper.java`, `LoggedSessionDetail.java`, `LoggedSession.java`)
+- [X] T025 [P] Run `npm run lint` in `frontend/`; fix any lint errors in new/modified files (`api.ts`, `usePollSessionSuggestion.ts`, `AiCoachingInsightCard.tsx`, `ProgramSessionPage.tsx`, `SessionDetailView.tsx`)
+- [X] T026 [P] Verify all backend tests pass: `./mvnw test` in `backend/` — confirm `AiHandoffServiceTest`, `DtoMapperTest`, `LoggedSessionServiceIT`, `SessionDetailServiceIT`, `SessionHistoryServiceIT` are green
+- [X] T027 [P] Verify all frontend tests pass: `npm run test` in `frontend/` — confirm `AiCoachingInsightCard.test.tsx`, `ProgramSessionPage.postSave.test.tsx`, `SessionDetailView.suggestion.test.tsx` are green
 - [ ] T028 Execute manual smoke test per `specs/003-post-session-ai-suggestion/quickstart.md` — save a program session end-to-end in local dev, verify suggestion appears, navigate to history, verify suggestion visible in detail view
 
 ---
