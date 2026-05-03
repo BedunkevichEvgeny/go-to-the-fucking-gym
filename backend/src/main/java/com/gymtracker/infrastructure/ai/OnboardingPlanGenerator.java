@@ -48,16 +48,10 @@ public class OnboardingPlanGenerator {
         logger.debug("Generating proposal with prompt: {}", prompt);
 
         try {
-            String llmResponse = langChainProcessor.process(
-                    new SessionSummaryDTO(
-                            userId,
-                            UUID.randomUUID(),
-                            null,
-                            null,
-                            0,
-                            null,
-                            new SessionSummaryDTO.UserPreferences(request.weightUnit().toString()),
-                            List.of()));
+            String llmResponse = langChainProcessor.process(userId.toString(), prompt);
+            if (llmResponse == null || llmResponse.isBlank()) {
+                throw new IllegalStateException("Model returned empty or blank output for onboarding proposal");
+            }
 
             List<ProposedSession> sessions = parseLlmResponse(llmResponse, request);
             if (sessions.isEmpty()) {
