@@ -1,24 +1,20 @@
 <!--
 Sync Impact Report
-- Version change: 0.0.0-template -> 1.0.0
+- Version change: 1.0.0 -> 2.0.0
 - Modified principles:
-  - Template Principle 1 -> I. Fast Prototype Delivery
-  - Template Principle 2 -> II. Simplicity Over Cleverness
-  - Template Principle 3 -> III. Mandatory Business Logic Test Coverage
-  - Template Principle 4 -> IV. Java 21 + Spring Boot Backend Standards
-  - Template Principle 5 -> V. React Frontend Standards
-  - Added: VI. Consistent User Experience
-  - Added: VII. Performance and Low Latency by Default
-  - Added: VIII. English-Only Documentation and Specifications
-- Added sections:
-  - Technology and Quality Constraints
-  - Development Workflow and Quality Gates
+  - VII. Performance and Low Latency by Default -> removed
+  - VIII. English-Only Documentation and Specifications -> VII. English-Only Documentation and Specifications
+- Added sections: none
 - Removed sections: none
 - Templates requiring updates:
   - ✅ updated: .specify/templates/plan-template.md
   - ✅ updated: .specify/templates/spec-template.md
   - ✅ updated: .specify/templates/tasks-template.md
   - ⚠ pending: none
+- Runtime guidance updated:
+  - ✅ updated: specs/001-workout-tracker/plan.md
+  - ✅ updated: specs/001-workout-tracker/spec.md
+  - ✅ updated: specs/001-workout-tracker/tasks.md
 - Follow-up TODOs: none
 -->
 
@@ -64,13 +60,7 @@ visual behavior, feedback messages, and error handling. New UI flows MUST align 
 established interaction patterns unless a documented UX decision approves divergence.
 Rationale: consistency reduces user confusion and support load.
 
-### VII. Performance and Low Latency by Default
-Features MUST define measurable latency and performance targets before implementation.
-Design and code reviews MUST verify that critical paths meet agreed response-time
-budgets (for example, p95/p99 targets) under expected load. Rationale: performance is
-a product requirement, not a post-release optimization task.
-
-### VIII. English-Only Documentation and Specifications
+### VII. English-Only Documentation and Specifications
 All project documentation, specifications, plans, tasks, and architecture notes MUST
 be written in English. User-facing localized content may vary by product needs, but
 engineering artifacts remain English-only. Rationale: one working language reduces
@@ -82,8 +72,8 @@ ambiguity and supports collaboration.
 - Backend framework MUST be Spring Boot.
 - Frontend framework MUST be React.
 - Business logic changes MUST include corresponding unit and integration tests.
-- Every feature spec MUST include UX consistency expectations and measurable
-  performance criteria.
+- Every feature spec MUST include UX consistency expectations and any
+  materially relevant non-functional constraints required to define done.
 - All specification artifacts MUST be authored in English.
 
 ## Development Workflow and Quality Gates
@@ -93,8 +83,15 @@ ambiguity and supports collaboration.
 3. Author or update tests for all business rules before merge.
 4. Verify backend and frontend stack compliance in plan and review.
 5. Validate UX consistency against existing interaction patterns.
-6. Verify performance targets with tests, profiling, or benchmark evidence.
-7. Reject pull requests that violate English-only engineering documentation.
+6. Create or link a GitHub issue for each planned task before implementation when the
+   work will be executed through the standard delivery workflow; if a task is not
+   tracked as an issue, the reason MUST be documented in the task list or pull
+   request.
+7. Complete each planned task in its own commit; a commit MUST NOT claim completion
+   for multiple task IDs.
+8. After merge, review each linked issue or task against acceptance criteria and close
+   it when the delivered change satisfies the documented scope.
+9. Reject pull requests that violate English-only engineering documentation.
 
 ## Governance
 
@@ -116,9 +113,16 @@ Versioning policy:
 Compliance review expectations:
 - Every implementation plan MUST pass a constitution check before design and again
   before implementation.
-- Every pull request MUST show evidence of testing, stack compliance, UX review,
-  and performance consideration when applicable.
-- Periodic governance review SHOULD occur at least once per quarter to confirm this
-  constitution still reflects project needs.
+- Every pull request MUST show evidence of testing, stack compliance, UX review, and
+  linked task or issue traceability.
+- Each planned task SHOULD be created as a GitHub issue so planning, review, and
+  closure remain auditable; if a task is not created as an issue, the exception MUST
+  be documented in the delivery record.
+- Each completed task MUST land in a separate commit that references the relevant task
+  ID or linked issue.
+- After merge, maintainers MUST review linked issues or task records and close only
+  the items whose acceptance criteria are satisfied by the merged change.
+- Maintainers MUST review this constitution at least once per quarter to confirm it
+  still reflects project needs.
 
-**Version**: 1.0.0 | **Ratified**: 2026-04-26 | **Last Amended**: 2026-04-26
+**Version**: 2.0.0 | **Ratified**: 2026-04-26 | **Last Amended**: 2026-05-02

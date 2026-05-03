@@ -134,10 +134,13 @@
 - **SC-003**: [User satisfaction metric, e.g., "90% of users successfully complete primary task on first attempt"]
 - **SC-004**: [Business metric, e.g., "Reduce support tickets related to [X] by 50%"]
 
-### Performance & UX Consistency Outcomes *(mandatory)*
+### UX Consistency Outcomes *(mandatory when UI changes exist)*
 
-- **PUX-001**: [Latency target, e.g., "p95 API response time under 200 ms for key flows"]
-- **PUX-002**: [UX consistency target, e.g., "All new screens use approved design patterns and terminology"]
+- **UX-001**: [UX consistency target, e.g., "All new screens use approved design patterns and terminology"]
+
+### Additional Non-Functional Outcomes *(include when materially relevant)*
+
+- **NF-001**: [Latency, reliability, security, or other non-functional target that is required for this feature]
 
 ## Assumptions
 

@@ -1,150 +1,49 @@
 package com.gymtracker.infrastructure.ai;
 
-import java.time.Duration;
-import java.util.Locale;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.stereotype.Component;
+import com.gymtracker.infrastructure.ai.dto.OnboardingPlanDto;
+import dev.langchain4j.service.MemoryId;
+import dev.langchain4j.service.SystemMessage;
+import dev.langchain4j.service.UserMessage;
 
-@Component
-public class LangChainSessionProcessor {
+/**
+ * LangChain4j {@code AiServices}-driven assistant interface for workout session analysis
+ * and onboarding plan generation.
+ *
+ * <p>The runtime implementation is produced by {@code AiServices.builder(LangChainSessionProcessor.class)}
+ * in {@link com.gymtracker.infrastructure.config.AiChatModelConfig}.
+ *
+ * <p>Method parameters:
+ * <ul>
+ *   <li>{@code memoryId} – per-user/session memory key used by {@code ChatMemoryProvider}
+ *       to scope conversation history.</li>
+ *   <li>{@code userMessage} – the full prompt text sent to the model as the user turn.</li>
+ * </ul>
+ */
+public interface LangChainSessionProcessor {
 
-    private static final Logger log = LoggerFactory.getLogger(LangChainSessionProcessor.class);
+    /**
+     * Free-text session analysis — used by {@link AiHandoffService} for progression coaching.
+     * Returns the raw model output as a {@code String}.
+     */
+    @SystemMessage("""
+            You are a workout progression coach and fitness AI assistant.
+            Analyse workout sessions and provide evidence-based progression insights,
+            or generate personalised fitness plans based on user profiles.
+            Always return your response in the exact format requested by the user message.
+            Never add markdown code blocks or any wrapper text — return raw content only.
+            """)
+    String process(@MemoryId String memoryId, @UserMessage String userMessage);
 
-    private final String endpoint;
-    private final String apiKey;
-    private final String deployment;
-    private final Duration timeout;
-    private final int maxAttempts;
-
-    public LangChainSessionProcessor(
-            @Value("${azure.openai.endpoint}") String endpoint,
-            @Value("${azure.openai.api-key}") String apiKey,
-            @Value("${azure.openai.deployment}") String deployment,
-            @Value("${ai.handoff.timeout-seconds:30}") int timeoutSeconds,
-            @Value("${ai.handoff.max-attempts:3}") int maxAttempts
-    ) {
-        this.endpoint = endpoint;
-        this.apiKey = apiKey;
-        this.deployment = deployment;
-        this.timeout = Duration.ofSeconds(Math.max(1, timeoutSeconds));
-        this.maxAttempts = Math.max(1, maxAttempts);
-    }
-
-    public String process(SessionSummaryDTO summary) {
-        String prompt = buildPrompt(summary);
-        RuntimeException lastFailure = null;
-
-        for (int attempt = 1; attempt <= maxAttempts; attempt++) {
-            try {
-                String response = callAzureOpenAiWithTimeout(prompt);
-                log.info("AI handoff processed session {} for user {} using deployment {}",
-                        summary.sessionId(), summary.userId(), deployment);
-                return response;
-            } catch (RuntimeException failure) {
-                lastFailure = failure;
-                if (!isTransientFailure(failure) || attempt == maxAttempts) {
-                    throw failure;
-                }
-                log.warn("Transient Azure OpenAI failure on attempt {}/{} for session {}. Retrying.",
-                        attempt, maxAttempts, summary.sessionId());
-                sleepBeforeRetry();
-            }
-        }
-
-        throw lastFailure == null ? new IllegalStateException("Unexpected AI handoff failure") : lastFailure;
-    }
-
-    @Async("aiTaskExecutor")
-    public CompletableFuture<String> processAsync(SessionSummaryDTO summary) {
-        return CompletableFuture.completedFuture(process(summary));
-    }
-
-    String buildPrompt(SessionSummaryDTO summary) {
-        StringBuilder builder = new StringBuilder();
-        builder.append("Analyze workout session for progression coaching.\n")
-                .append("User: ").append(summary.userId()).append('\n')
-                .append("Session: ").append(summary.sessionId()).append('\n')
-                .append("Type: ").append(summary.sessionType()).append('\n')
-                .append("Date: ").append(summary.sessionDate()).append('\n')
-                .append("Payload: ").append(summary.toPromptPayload()).append('\n')
-                .append("Preferred weight unit: ").append(summary.metadata().preferredWeightUnit()).append('\n');
-
-        if (summary.feelings() != null && summary.feelings().rating() != null) {
-            builder.append("Feeling rating: ").append(summary.feelings().rating()).append('\n');
-            if (summary.feelings().comment() != null && !summary.feelings().comment().isBlank()) {
-                builder.append("Feeling comment: ").append(summary.feelings().comment()).append('\n');
-            }
-        }
-
-        builder.append("Exercises:\n");
-        for (SessionSummaryDTO.ExerciseSummary exercise : summary.exercises()) {
-            builder.append("- ").append(exercise.exerciseName())
-                    .append(" [").append(exercise.exerciseType()).append("]")
-                    .append(" actual=").append(exercise.actual());
-            if (exercise.target() != null) {
-                builder.append(" target=").append(exercise.target());
-            }
-            builder.append('\n');
-        }
-        return builder.toString();
-    }
-
-    private String callAzureOpenAiWithTimeout(String prompt) {
-        try {
-            return CompletableFuture
-                    .supplyAsync(() -> callAzureOpenAi(prompt))
-                    .get(timeout.toMillis(), TimeUnit.MILLISECONDS);
-        } catch (TimeoutException timeoutException) {
-            throw new IllegalStateException("Azure OpenAI call timed out", timeoutException);
-        } catch (ExecutionException executionException) {
-            Throwable cause = executionException.getCause();
-            if (cause instanceof RuntimeException runtimeException) {
-                throw runtimeException;
-            }
-            throw new IllegalStateException("Azure OpenAI call failed", cause);
-        } catch (InterruptedException interruptedException) {
-            Thread.currentThread().interrupt();
-            throw new IllegalStateException("Azure OpenAI call interrupted", interruptedException);
-        }
-    }
-
-    String callAzureOpenAi(String prompt) {
-        String keyMarker = apiKey == null ? "missing" : "present";
-        return "azure-openai[endpoint=" + endpoint + ",deployment=" + deployment + ",apiKey=" + keyMarker
-                + "]: accepted prompt hash=" + prompt.hashCode();
-    }
-
-    private boolean isTransientFailure(RuntimeException exception) {
-        String message = exception.getMessage();
-        if (message == null) {
-            return false;
-        }
-        String normalized = message.toLowerCase(Locale.ROOT);
-        return normalized.contains("timeout") || normalized.contains("429") || normalized.contains("503");
-    }
-
-    private void sleepBeforeRetry() {
-        try {
-            Thread.sleep(100);
-        } catch (InterruptedException interruptedException) {
-            Thread.currentThread().interrupt();
-            throw new IllegalStateException("Retry interrupted", interruptedException);
-        }
-    }
-
-    String endpoint() {
-        return endpoint;
-    }
-
-    String deployment() {
-        return deployment;
-    }
+    /**
+     * Structured-output onboarding plan generation — LangChain4j {@code AiServices} automatically
+     * generates a JSON schema from {@link OnboardingPlanDto} and instructs the model to conform to it.
+     * Jackson deserializes the response; unknown {@code ExerciseType} values fall back to
+     * {@code STRENGTH} via {@link com.gymtracker.infrastructure.ai.dto.SafeExerciseTypeDeserializer}.
+     */
+    @SystemMessage("""
+            You are a personalised fitness planning AI.
+            Generate a structured onboarding workout plan strictly as a JSON object matching the
+            schema provided. Do NOT add any markdown, prose, or wrapper text — return raw JSON only.
+            """)
+    OnboardingPlanDto processOnboarding(@MemoryId String memoryId, @UserMessage String userMessage);
 }
-

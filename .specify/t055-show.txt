@@ -1,0 +1,3 @@
+7499b99 T055 implement frontend proposal acceptance action
+frontend/src/features/profile-goals/ProposalAcceptanceActions.tsx
+specs/002-profile-goal-onboarding/tasks.md

@@ -3,6 +3,7 @@ package com.gymtracker.application;
 import com.gymtracker.api.dto.ProgramSessionView;
 import com.gymtracker.api.exception.ForbiddenException;
 import com.gymtracker.api.exception.ResourceNotFoundException;
+import com.gymtracker.domain.AcceptedProgramActivation;
 import com.gymtracker.domain.ProgramStatus;
 import com.gymtracker.domain.ProgramSession;
 import com.gymtracker.domain.WorkoutProgram;
@@ -10,6 +11,7 @@ import com.gymtracker.infrastructure.mapper.DtoMapper;
 import com.gymtracker.infrastructure.repository.ProgramExerciseTargetRepository;
 import com.gymtracker.infrastructure.repository.ProgramSessionRepository;
 import com.gymtracker.infrastructure.repository.WorkoutProgramRepository;
+import jakarta.persistence.EntityManager;
 import java.time.OffsetDateTime;
 import java.util.Optional;
 import java.util.UUID;
@@ -27,17 +29,20 @@ public class ProgramSessionService {
     private final ProgramSessionRepository programSessionRepository;
     private final ProgramExerciseTargetRepository targetRepository;
     private final DtoMapper dtoMapper;
+    private final EntityManager entityManager;
 
     public ProgramSessionService(
             WorkoutProgramRepository workoutProgramRepository,
             ProgramSessionRepository programSessionRepository,
             ProgramExerciseTargetRepository targetRepository,
-            DtoMapper dtoMapper
+            DtoMapper dtoMapper,
+            EntityManager entityManager
     ) {
         this.workoutProgramRepository = workoutProgramRepository;
         this.programSessionRepository = programSessionRepository;
         this.targetRepository = targetRepository;
         this.dtoMapper = dtoMapper;
+        this.entityManager = entityManager;
     }
 
     /**
@@ -49,12 +54,45 @@ public class ProgramSessionService {
     @Transactional(readOnly = true)
     public Optional<ProgramSessionView> loadNextUncompletedSession(UUID userId) {
         log.info("Loading next uncompleted program session for user {}", userId);
-        Optional<WorkoutProgram> activeProgram = workoutProgramRepository.findFirstByUserIdAndStatus(userId, ProgramStatus.ACTIVE);
-        if (activeProgram.isEmpty()) {
+        Optional<WorkoutProgram> currentProgram = resolveCurrentProgramForTracking(userId);
+        if (currentProgram.isEmpty()) {
             return Optional.empty();
         }
-        return programSessionRepository.findFirstByProgram_IdAndCompletedFalseOrderBySequenceNumberAsc(activeProgram.get().getId())
+        return programSessionRepository.findFirstByProgram_IdAndCompletedFalseOrderBySequenceNumberAsc(currentProgram.get().getId())
                 .map(session -> dtoMapper.toDto(session, targetRepository.findByProgramSession_IdOrderBySortOrderAsc(session.getId())));
+    }
+
+    private Optional<WorkoutProgram> resolveCurrentProgramForTracking(UUID userId) {
+        Optional<WorkoutProgram> activeProgram = workoutProgramRepository.findFirstByUserIdAndStatus(userId, ProgramStatus.ACTIVE);
+        if (activeProgram.isPresent()) {
+            return activeProgram;
+        }
+
+        Optional<AcceptedProgramActivation> latestActivation = entityManager
+                .createQuery(
+                        "select a from AcceptedProgramActivation a where a.userId = :userId order by a.activatedAt desc",
+                        AcceptedProgramActivation.class)
+                .setParameter("userId", userId)
+                .setMaxResults(1)
+                .getResultList()
+                .stream()
+                .findFirst();
+
+        if (latestActivation.isEmpty()) {
+            return Optional.empty();
+        }
+
+        UUID activatedProgramId = latestActivation.get().getActivatedProgramId();
+        Optional<WorkoutProgram> activatedProgram = workoutProgramRepository.findById(activatedProgramId)
+                .filter(program -> userId.equals(program.getUserId()));
+
+        if (activatedProgram.isPresent()) {
+            log.info("Falling back to activated onboarding program {} for user {}", activatedProgramId, userId);
+        } else {
+            log.warn("Activation record found but activated program {} is missing or not owned by user {}", activatedProgramId, userId);
+        }
+
+        return activatedProgram;
     }
 
     /**

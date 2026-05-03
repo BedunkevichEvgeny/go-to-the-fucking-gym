@@ -1,5 +1,6 @@
 package com.gymtracker.application;
 
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
 
@@ -44,6 +45,34 @@ class SessionValidatorServiceTest {
 
         assertThatThrownBy(() -> service.validateBodyweightSet(new StrengthSetInput(8, true, new BigDecimal("20"), com.gymtracker.domain.WeightUnit.KG)))
                 .isInstanceOf(ValidationException.class);
+    }
+
+    // ── T076-BUG-009-TEST: regression tests for validateBodyweightSet edge cases ──────────────
+
+    @Test
+    void validateBodyweightSet_NonBodyweightWithNullWeight_DoesNotThrow() {
+        // { isBodyWeight: false, weightValue: null } must NOT throw
+        SessionValidatorService service = new SessionValidatorService(programExerciseTargetRepository);
+        assertThatCode(() -> service.validateBodyweightSet(new StrengthSetInput(8, false, null, null)))
+                .doesNotThrowAnyException();
+    }
+
+    @Test
+    void validateBodyweightSet_BodyweightWithNonNullWeight_Throws() {
+        // { isBodyWeight: true, weightValue: 50.0 } DOES throw
+        SessionValidatorService service = new SessionValidatorService(programExerciseTargetRepository);
+        assertThatThrownBy(() -> service.validateBodyweightSet(
+                new StrengthSetInput(8, true, new BigDecimal("50.0"), com.gymtracker.domain.WeightUnit.KG)))
+                .isInstanceOf(ValidationException.class);
+    }
+
+    @Test
+    void validateBodyweightSet_NonBodyweightWithWeight_DoesNotThrow() {
+        // { isBodyWeight: false, weightValue: 7.5 } does NOT throw
+        SessionValidatorService service = new SessionValidatorService(programExerciseTargetRepository);
+        assertThatCode(() -> service.validateBodyweightSet(
+                new StrengthSetInput(8, false, new BigDecimal("7.5"), com.gymtracker.domain.WeightUnit.KG)))
+                .doesNotThrowAnyException();
     }
 }
 

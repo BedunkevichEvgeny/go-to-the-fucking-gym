@@ -42,15 +42,17 @@ public class SessionValidatorService {
     /**
      * Validates consistency of bodyweight and weighted set fields.
      *
+     * <p>Only the {@code isBodyWeight} flag is used as the discriminant. A weight value is always
+     * optional — some exercises (e.g. resistance bands, cable machines without a plate counter) are
+     * legitimately performed without a numeric weight. The sole invalid combination is
+     * {@code isBodyWeight=true} together with a non-null {@code weightValue}.
+     *
      * @param set submitted strength set input
-     * @throws ValidationException when bodyweight rules are violated
+     * @throws ValidationException when bodyweight flag is set alongside a weight value
      */
     public void validateBodyweightSet(StrengthSetInput set) {
         if (Boolean.TRUE.equals(set.isBodyWeight()) && set.weightValue() != null) {
             throw new ValidationException("Bodyweight sets must not include a weight value");
-        }
-        if (!Boolean.TRUE.equals(set.isBodyWeight()) && set.weightValue() == null) {
-            throw new ValidationException("Non-bodyweight sets require a weight value");
         }
     }
 

@@ -55,3 +55,31 @@ Matrix source: `specs/001-workout-tracker/spec.md` (Test Coverage Requirements t
 - Spec matrix mapping verification: PASS
 - >=80% target for domain+application where possible: PARTIAL PASS (`application` meets target, `domain` does not)
 
+---
+
+# Regression Matrix Verification (T062)
+
+Date: 2026-05-02
+Features: `specs/001-workout-tracker` + `specs/002-profile-goal-onboarding`
+
+## Commands Executed
+
+- Backend targeted unblock check: `mvn -Dtest=UserIsolationTest test`
+- Backend full regression: `mvn test`
+- Frontend lint: `npm run lint`
+- Frontend regression tests: `npm test`
+
+## Result Matrix
+
+| Area | Command | Result | Notes |
+|---|---|---|---|
+| Backend targeted tests | `mvn -Dtest=UserIsolationTest test` | PASS | `UserIsolationTest` compiles and passes with missing Mockito/JPA symbols resolved. |
+| Backend full regression | `mvn test` | PASS | 102 tests run, 0 failures, 0 errors, 0 skipped (`backend/test-rerun.log`). |
+| Frontend lint | `npm run lint` | PASS | ESLint completes with no reported errors (`frontend/lint-rerun.log`). |
+| Frontend full tests | `npm test` | PASS | 15 test files passed; 39 tests passed (`frontend/test-rerun.log`). |
+
+## Remaining Follow-up (Non-blocking)
+
+- Frontend test output still includes React Router future-flag warnings and one React `act(...)` warning in existing hook tests.
+- Backend Maven output still includes environment-level warnings (Mockito agent/self-attach, local Maven settings warning about unrecognised `<url>`).
+

@@ -3,6 +3,7 @@ package com.gymtracker.application;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -18,16 +19,23 @@ import com.gymtracker.infrastructure.mapper.DtoMapper;
 import com.gymtracker.infrastructure.repository.ProgramExerciseTargetRepository;
 import com.gymtracker.infrastructure.repository.ProgramSessionRepository;
 import com.gymtracker.infrastructure.repository.WorkoutProgramRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.TypedQuery;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class ProgramSessionServiceTest {
 
     @Mock
@@ -39,15 +47,26 @@ class ProgramSessionServiceTest {
     @Mock
     private ProgramExerciseTargetRepository targetRepository;
 
+    @Mock
+    private EntityManager entityManager;
+
     private ProgramSessionService programSessionService;
 
     @BeforeEach
     void setUp() {
+        // Use lenient mocking for EntityManager since it's not always used
+        TypedQuery mockQuery = Mockito.mock(TypedQuery.class);
+        when(mockQuery.setParameter(anyString(), any())).thenReturn(mockQuery);
+        when(mockQuery.setMaxResults(any(Integer.class))).thenReturn(mockQuery);
+        when(mockQuery.getResultList()).thenReturn(List.of());
+        when(entityManager.createQuery(anyString(), any(Class.class))).thenReturn(mockQuery);
+
         programSessionService = new ProgramSessionService(
                 workoutProgramRepository,
                 programSessionRepository,
                 targetRepository,
-                new DtoMapper());
+                new DtoMapper(),
+                entityManager);
     }
 
     @Test

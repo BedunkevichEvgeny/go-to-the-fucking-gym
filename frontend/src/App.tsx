@@ -2,6 +2,7 @@ import { Link, Route, Routes } from 'react-router-dom';
 import './App.css';
 import { FreeSessionPage } from './pages/FreeSessionPage';
 import { ProgramSessionPage } from './pages/ProgramSessionPage';
+import { ProfileGoalOnboardingPage } from './pages/ProfileGoalOnboardingPage';
 import { ProgressionChartPage } from './pages/ProgressionChartPage';
 import { SessionHistoryPage } from './pages/SessionHistoryPage';
 
@@ -23,6 +24,9 @@ function HomePage() {
         <Link className="button secondary" to="/free-session">
           Start free session
         </Link>
+        <Link className="button secondary" to="/profile-goals">
+          My Profile & Goals
+        </Link>
         <Link className="button ghost" to="/history">
           Browse workout history
         </Link>
@@ -37,6 +41,7 @@ function App() {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/program-session" element={<ProgramSessionPage />} />
+        <Route path="/profile-goals" element={<ProfileGoalOnboardingPage />} />
         <Route path="/free-session" element={<FreeSessionPage />} />
         <Route path="/history" element={<SessionHistoryPage />} />
         <Route path="/history/:sessionId" element={<SessionHistoryPage />} />

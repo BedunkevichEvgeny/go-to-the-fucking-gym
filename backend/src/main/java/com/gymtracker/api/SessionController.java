@@ -6,9 +6,11 @@ import com.gymtracker.api.dto.LoggedSessionDetail;
 import com.gymtracker.api.dto.ProgramSessionView;
 import com.gymtracker.api.dto.ProgressionResponse;
 import com.gymtracker.api.dto.SessionHistoryPage;
+import com.gymtracker.api.exception.ForbiddenException;
 import com.gymtracker.application.ExerciseLibraryService;
 import com.gymtracker.application.FreeSessionService;
 import com.gymtracker.application.LoggedSessionService;
+import com.gymtracker.application.PlanProposalService;
 import com.gymtracker.application.ProgramSessionService;
 import com.gymtracker.application.ProgressionService;
 import com.gymtracker.application.SessionDetailService;
@@ -46,6 +48,7 @@ public class SessionController extends BaseController {
     private final SessionDetailService sessionDetailService;
     private final ExerciseLibraryService exerciseLibraryService;
     private final ProgressionService progressionService;
+    private final PlanProposalService planProposalService;
 
     public SessionController(
             AuthenticationService authenticationService,
@@ -55,7 +58,8 @@ public class SessionController extends BaseController {
             SessionHistoryService sessionHistoryService,
             SessionDetailService sessionDetailService,
             ExerciseLibraryService exerciseLibraryService,
-            ProgressionService progressionService
+            ProgressionService progressionService,
+            PlanProposalService planProposalService
     ) {
         super(authenticationService);
         this.programSessionService = programSessionService;
@@ -65,6 +69,7 @@ public class SessionController extends BaseController {
         this.sessionDetailService = sessionDetailService;
         this.exerciseLibraryService = exerciseLibraryService;
         this.progressionService = progressionService;
+        this.planProposalService = planProposalService;
     }
 
     /**
@@ -75,6 +80,9 @@ public class SessionController extends BaseController {
     @GetMapping("/program-sessions/next")
     public ResponseEntity<ProgramSessionView> getNextProgramSession() {
         UUID userId = extractUserId();
+        if (!planProposalService.getTrackingAccessGate(userId).canAccessProgramTracking()) {
+            throw new ForbiddenException("Program tracking is blocked until onboarding is accepted");
+        }
         log.info("GET next program session for user {}", userId);
         return programSessionService.loadNextUncompletedSession(userId)
                 .map(ResponseEntity::ok)

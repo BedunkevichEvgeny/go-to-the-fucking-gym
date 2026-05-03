@@ -56,10 +56,11 @@ class SessionValidatorTest {
     }
 
     @Test
-    void validateBodyweightSetRejectsNullWeightWhenNotBodyweight() {
-        assertThatThrownBy(() -> service.validateBodyweightSet(new StrengthSetInput(8, false, null, null)))
-                .isInstanceOf(ValidationException.class)
-                .hasMessageContaining("require a weight value");
+    void validateBodyweightSetAllowsNullWeightWhenNotBodyweight() {
+        // weightValue is unconditionally optional per feature-001 spec; resistance bands and
+        // cable machines may legitimately have no numeric weight.
+        assertThatCode(() -> service.validateBodyweightSet(new StrengthSetInput(8, false, null, null)))
+                .doesNotThrowAnyException();
     }
 
     @Test

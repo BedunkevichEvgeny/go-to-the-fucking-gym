@@ -13,11 +13,17 @@ unit and integration test coverage; add contract and end-to-end tests when neede
 
 **Organization**: Tasks are grouped by user story to enable independent implementation and testing of each story.
 
-## Format: `[ID] [P?] [Story] Description`
+**Delivery Governance**: Each task SHOULD be mirrored as a GitHub issue for
+traceability. Each completed task MUST be delivered in its own commit. After merge,
+the linked issue or task record MUST be reviewed and closed when its acceptance
+criteria are satisfied.
+
+## Format: `[ID] [P?] (Story) Description`
 
 - **[P]**: Can run in parallel (different files, no dependencies)
-- **[Story]**: Which user story this task belongs to (e.g., US1, US2, US3)
+- **(Story)**: Which user story this task belongs to (e.g., US1, US2, US3)
 - Include exact file paths in descriptions
+- Add the linked GitHub issue reference when it becomes available
 
 ## Path Conventions
 
@@ -84,18 +90,18 @@ Examples of foundational tasks (adjust based on your project):
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T010 [P] [US1] Unit tests for business rules in backend/src/test/java/[module]/[Name]Test.java
-- [ ] T011 [P] [US1] Integration tests for user journey in backend/src/test/java/[module]/[Name]IT.java
-- [ ] T012 [P] [US1] Frontend component/behavior tests in frontend/src/**/*.test.tsx
+- [ ] T010 [P] (US1) Unit tests for business rules in backend/src/test/java/[module]/[Name]Test.java
+- [ ] T011 [P] (US1) Integration tests for user journey in backend/src/test/java/[module]/[Name]IT.java
+- [ ] T012 [P] (US1) Frontend component/behavior tests in frontend/src/**/*.test.tsx
 
 ### Implementation for User Story 1
 
-- [ ] T013 [P] [US1] Create backend domain model in backend/src/main/java/[module]/domain/[Entity1].java
-- [ ] T014 [P] [US1] Create backend domain model in backend/src/main/java/[module]/domain/[Entity2].java
-- [ ] T015 [US1] Implement backend service in backend/src/main/java/[module]/service/[Service].java (depends on T013, T014)
-- [ ] T016 [US1] Implement backend endpoint in backend/src/main/java/[module]/api/[Controller].java
-- [ ] T017 [US1] Implement React UI flow in frontend/src/[feature]/[Component].tsx
-- [ ] T018 [US1] Add validation, error handling, and consistent UX feedback states
+- [ ] T013 [P] (US1) Create backend domain model in backend/src/main/java/[module]/domain/[Entity1].java
+- [ ] T014 [P] (US1) Create backend domain model in backend/src/main/java/[module]/domain/[Entity2].java
+- [ ] T015 (US1) Implement backend service in backend/src/main/java/[module]/service/[Service].java (depends on T013, T014)
+- [ ] T016 (US1) Implement backend endpoint in backend/src/main/java/[module]/api/[Controller].java
+- [ ] T017 (US1) Implement React UI flow in frontend/src/[feature]/[Component].tsx
+- [ ] T018 (US1) Add validation, error handling, and consistent UX feedback states
 
 **Checkpoint**: At this point, User Story 1 should be fully functional and testable independently
 
@@ -109,17 +115,17 @@ Examples of foundational tasks (adjust based on your project):
 
 ### Tests for User Story 2 (MANDATORY) ⚠️
 
-- [ ] T019 [P] [US2] Unit tests for business rules in backend/src/test/java/[module]/[Name]Test.java
-- [ ] T020 [P] [US2] Integration tests for user journey in backend/src/test/java/[module]/[Name]IT.java
-- [ ] T021 [P] [US2] Frontend component/behavior tests in frontend/src/**/*.test.tsx
+- [ ] T019 [P] (US2) Unit tests for business rules in backend/src/test/java/[module]/[Name]Test.java
+- [ ] T020 [P] (US2) Integration tests for user journey in backend/src/test/java/[module]/[Name]IT.java
+- [ ] T021 [P] (US2) Frontend component/behavior tests in frontend/src/**/*.test.tsx
 
 ### Implementation for User Story 2
 
-- [ ] T022 [P] [US2] Create backend domain model in backend/src/main/java/[module]/domain/[Entity].java
-- [ ] T023 [US2] Implement backend service in backend/src/main/java/[module]/service/[Service].java
-- [ ] T024 [US2] Implement backend endpoint in backend/src/main/java/[module]/api/[Controller].java
-- [ ] T025 [US2] Implement React UI flow in frontend/src/[feature]/[Component].tsx
-- [ ] T026 [US2] Integrate with User Story 1 components (if needed)
+- [ ] T022 [P] (US2) Create backend domain model in backend/src/main/java/[module]/domain/[Entity].java
+- [ ] T023 (US2) Implement backend service in backend/src/main/java/[module]/service/[Service].java
+- [ ] T024 (US2) Implement backend endpoint in backend/src/main/java/[module]/api/[Controller].java
+- [ ] T025 (US2) Implement React UI flow in frontend/src/[feature]/[Component].tsx
+- [ ] T026 (US2) Integrate with User Story 1 components (if needed)
 
 **Checkpoint**: At this point, User Stories 1 AND 2 should both work independently
 
@@ -133,16 +139,16 @@ Examples of foundational tasks (adjust based on your project):
 
 ### Tests for User Story 3 (MANDATORY) ⚠️
 
-- [ ] T027 [P] [US3] Unit tests for business rules in backend/src/test/java/[module]/[Name]Test.java
-- [ ] T028 [P] [US3] Integration tests for user journey in backend/src/test/java/[module]/[Name]IT.java
-- [ ] T029 [P] [US3] Frontend component/behavior tests in frontend/src/**/*.test.tsx
+- [ ] T027 [P] (US3) Unit tests for business rules in backend/src/test/java/[module]/[Name]Test.java
+- [ ] T028 [P] (US3) Integration tests for user journey in backend/src/test/java/[module]/[Name]IT.java
+- [ ] T029 [P] (US3) Frontend component/behavior tests in frontend/src/**/*.test.tsx
 
 ### Implementation for User Story 3
 
-- [ ] T030 [P] [US3] Create backend domain model in backend/src/main/java/[module]/domain/[Entity].java
-- [ ] T031 [US3] Implement backend service in backend/src/main/java/[module]/service/[Service].java
-- [ ] T032 [US3] Implement backend endpoint in backend/src/main/java/[module]/api/[Controller].java
-- [ ] T033 [US3] Implement React UI flow in frontend/src/[feature]/[Component].tsx
+- [ ] T030 [P] (US3) Create backend domain model in backend/src/main/java/[module]/domain/[Entity].java
+- [ ] T031 (US3) Implement backend service in backend/src/main/java/[module]/service/[Service].java
+- [ ] T032 (US3) Implement backend endpoint in backend/src/main/java/[module]/api/[Controller].java
+- [ ] T033 (US3) Implement React UI flow in frontend/src/[feature]/[Component].tsx
 
 **Checkpoint**: All user stories should now be independently functional
 
@@ -158,7 +164,7 @@ Examples of foundational tasks (adjust based on your project):
 
 - [ ] TXXX [P] Documentation updates in docs/
 - [ ] TXXX Code cleanup and refactoring
-- [ ] TXXX Performance optimization across all stories
+- [ ] TXXX Cross-cutting non-functional validation required by the spec or plan
 - [ ] TXXX [P] Close any remaining business-logic test coverage gaps
 - [ ] TXXX Security hardening
 - [ ] TXXX Run quickstart.md validation
@@ -250,11 +256,17 @@ With multiple developers:
 ## Notes
 
 - [P] tasks = different files, no dependencies
-- [Story] label maps task to specific user story for traceability
+- (Story) label maps task to specific user story for traceability
 - Each user story should be independently completable and testable
 - Keep implementations simple and avoid tricky edge-case-heavy designs
-- Ensure performance and low-latency validation is part of done criteria
+- Ensure any feature-specific non-functional validation required by the spec or plan
+  is part of done criteria
 - Verify tests fail before implementing
-- Commit after each task or logical group
+- Create or link the GitHub issue for each task before implementation when following
+  the standard delivery workflow; document any exception
+- Commit each completed task separately; do not combine multiple task IDs in one
+  commit
+- After merge, review and close the linked issue or task record when acceptance
+  criteria are met
 - Stop at any checkpoint to validate story independently
 - Avoid: vague tasks, same file conflicts, cross-story dependencies that break independence

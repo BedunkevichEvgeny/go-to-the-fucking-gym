@@ -1,0 +1,17 @@
+?? .specify/t053-backend-compile-exit.txt
+?? .specify/t053-backend-exit.txt
+?? .specify/t053-commit.txt
+?? .specify/t053-show.txt
+?? .specify/t054-backend-compile-exit.txt
+?? .specify/t054-commit.txt
+?? .specify/t054-show.txt
+?? .specify/t055-commit.txt
+?? .specify/t055-frontend-lint-exit.txt
+?? .specify/t055-show.txt
+?? .specify/t056-commit.txt
+?? .specify/t056-frontend-lint-exit.txt
+?? .specify/t056-frontend-test-exit.txt
+?? .specify/t056-show.txt
+?? .specify/tmp-checklists.json
+?? .specify/tmp-git-status.txt
+?? .specify/tmp-prereq.json

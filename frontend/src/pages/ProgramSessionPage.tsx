@@ -1,12 +1,29 @@
 import { useNavigate } from 'react-router-dom';
+import { useTrackingAccessGate } from '../hooks/useProfileGoalOnboarding';
 import { useLogSession } from '../hooks/useLogSession';
 import { useNextProgramSession } from '../hooks/useNextProgramSession';
 import { ProgramSessionForm } from '../features/program-session/ProgramSessionForm';
 
 export function ProgramSessionPage() {
   const navigate = useNavigate();
+  const gate = useTrackingAccessGate();
   const { data, isLoading, error } = useNextProgramSession();
   const logSession = useLogSession();
+
+  if (gate.isLoading) {
+    return <p className="card">Checking onboarding access…</p>;
+  }
+
+  if (gate.data && !gate.data.canAccessProgramTracking) {
+    return (
+      <section className="card stack-sm">
+        <p>Onboarding is required before logging program sessions.</p>
+        <button className="button primary" type="button" onClick={() => navigate('/profile-goals')}>
+          Go to My Profile & Goals
+        </button>
+      </section>
+    );
+  }
 
   if (isLoading) {
     return <p className="card">Loading next program session…</p>;

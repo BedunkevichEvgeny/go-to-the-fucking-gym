@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -49,17 +50,23 @@ public class AiHandoffService {
         }
 
         SessionSummaryDTO summary = buildSessionSummary(userId, session);
-        try {
-            processor.processAsync(summary).whenComplete((response, exception) -> {
-                if (exception != null) {
-                    log.error("AI handoff failed for session {}", summary.sessionId(), exception);
-                    return;
-                }
-                log.info("AI handoff finished for session {} with response: {}", summary.sessionId(), response);
-            });
-        } catch (Exception exception) {
-            log.error("AI handoff failed for session {}", session.getId(), exception);
-        }
+        String prompt = buildPromptFromSummary(summary);
+        String memoryId = summary.sessionId().toString();
+
+        CompletableFuture.supplyAsync(() -> {
+            String response = processor.process(memoryId, prompt);
+            if (response == null || response.isBlank()) {
+                throw new IllegalStateException(
+                        "Model returned empty or blank output for session " + summary.sessionId());
+            }
+            return response;
+        }).whenComplete((response, exception) -> {
+            if (exception != null) {
+                log.error("AI handoff failed for session {}", summary.sessionId(), exception);
+                return;
+            }
+            log.info("AI handoff finished for session {} with response: {}", summary.sessionId(), response);
+        });
     }
 
     /**
@@ -88,6 +95,39 @@ public class AiHandoffService {
                 new SessionSummaryDTO.UserPreferences(
                         user == null || user.getPreferredWeightUnit() == null ? "UNKNOWN" : user.getPreferredWeightUnit().name()),
                 exerciseSummaries);
+    }
+
+    /**
+     * Converts a {@link SessionSummaryDTO} into a structured text prompt for the AI model.
+     */
+    String buildPromptFromSummary(SessionSummaryDTO summary) {
+        StringBuilder builder = new StringBuilder();
+        builder.append("Analyze workout session for progression coaching.\n")
+                .append("User: ").append(summary.userId()).append('\n')
+                .append("Session: ").append(summary.sessionId()).append('\n')
+                .append("Type: ").append(summary.sessionType()).append('\n')
+                .append("Date: ").append(summary.sessionDate()).append('\n')
+                .append("Payload: ").append(summary.toPromptPayload()).append('\n')
+                .append("Preferred weight unit: ").append(summary.metadata().preferredWeightUnit()).append('\n');
+
+        if (summary.feelings() != null && summary.feelings().rating() != null) {
+            builder.append("Feeling rating: ").append(summary.feelings().rating()).append('\n');
+            if (summary.feelings().comment() != null && !summary.feelings().comment().isBlank()) {
+                builder.append("Feeling comment: ").append(summary.feelings().comment()).append('\n');
+            }
+        }
+
+        builder.append("Exercises:\n");
+        for (SessionSummaryDTO.ExerciseSummary exercise : summary.exercises()) {
+            builder.append("- ").append(exercise.exerciseName())
+                    .append(" [").append(exercise.exerciseType()).append("]")
+                    .append(" actual=").append(exercise.actual());
+            if (exercise.target() != null) {
+                builder.append(" target=").append(exercise.target());
+            }
+            builder.append('\n');
+        }
+        return builder.toString();
     }
 
     private Map<String, ProgramExerciseTarget> loadTargetsByExercise(LoggedSession session) {

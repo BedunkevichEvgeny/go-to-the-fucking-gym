@@ -435,6 +435,28 @@ Expected response: `ProgressionResponse` with 3+ points, sorted by date ascendin
 
 ---
 
+## User Story 5: Profile Goal Onboarding (Feature 002)
+
+### Goal
+Brand-new users complete onboarding before workout tracking access, can revise AI proposals, and activate an accepted plan into the existing feature-001 tracker flow.
+
+### Fast UX Walkthrough
+
+1. Open `My Profile & Goals` from the entry screen.
+2. Submit valid profile + goal values and verify a proposal card is shown.
+3. Reject once with feedback and verify a revised version appears.
+4. Accept proposal and verify redirect to tracker page.
+5. Open next session and confirm the active session comes from the accepted onboarding plan.
+
+### Acceptance Checks
+
+- Access gate shows onboarding required for new users before acceptance.
+- Proposal version increments after reject/feedback revision.
+- Accept response returns `activatedProgramId` and optional `replacedProgramId`.
+- Existing history/progression pages continue to load for the same user without contract changes.
+
+---
+
 ## Troubleshooting
 
 ### "No active program" when starting US1

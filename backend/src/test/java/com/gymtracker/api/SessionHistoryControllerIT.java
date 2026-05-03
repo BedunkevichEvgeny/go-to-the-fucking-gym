@@ -6,6 +6,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gymtracker.api.dto.ExerciseEntryInput;
 import com.gymtracker.api.dto.LoggedSessionCreateRequest;
 import com.gymtracker.api.dto.LoggedSessionDetail;
+import com.gymtracker.domain.OnboardingEnums.OnboardingAttemptStatus;
+import com.gymtracker.domain.OnboardingEnums.OnboardingPrimaryGoal;
+import com.gymtracker.domain.OnboardingEnums.ProposalProvider;
+import com.gymtracker.domain.OnboardingEnums.ProposalStatus;
+import com.gymtracker.domain.PlanProposal;
+import com.gymtracker.domain.ProfileGoalOnboardingAttempt;
 import com.gymtracker.api.dto.SessionFeelingsInput;
 import com.gymtracker.api.dto.SessionHistoryItem;
 import com.gymtracker.api.dto.SessionHistoryPage;
@@ -13,6 +19,7 @@ import com.gymtracker.api.dto.StrengthSetInput;
 import com.gymtracker.domain.ExerciseType;
 import com.gymtracker.domain.SessionType;
 import com.gymtracker.domain.WeightUnit;
+import jakarta.persistence.EntityManager;
 import java.math.BigDecimal;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -22,7 +29,9 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.Base64;
 import java.util.List;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
@@ -36,6 +45,9 @@ class SessionHistoryControllerIT {
     private int port;
 
     private final ObjectMapper objectMapper = new ObjectMapper().findAndRegisterModules();
+
+    @Autowired
+    private EntityManager entityManager;
 
     @Test
     void getHistoryReturnsCreatedSessionPage() throws Exception {
@@ -154,6 +166,31 @@ class SessionHistoryControllerIT {
         assertThat(item.totalDurationSeconds()).isNotNull();
     }
 
+    @Test
+    void historyAndProgressionRemainAvailableAfterProgramReplacement() throws Exception {
+        LoggedSessionDetail loggedBeforeReplacement = postFreeSession(LocalDate.of(2026, 4, 27), "Bench Press", "Before replacement");
+
+        UUID proposalId = persistProposedPlanForUser1("Replacement Day");
+        HttpResponse<String> acceptResponse = postJson(
+                "/api/profile-goals/proposals/" + proposalId + "/accept",
+                "{}",
+                "user1",
+                "password1");
+        assertThat(acceptResponse.statusCode()).isEqualTo(200);
+
+        HttpResponse<String> historyResponse = getHistory("page=0&size=20");
+        SessionHistoryPage historyPage = objectMapper.readValue(historyResponse.body(), SessionHistoryPage.class);
+        assertThat(historyResponse.statusCode()).isEqualTo(200);
+        assertThat(historyPage.items())
+                .extracting(item -> item.sessionId().toString())
+                .contains(loggedBeforeReplacement.sessionId().toString());
+
+        HttpResponse<String> progressionResponse = getWithBasicAuth("/api/progression/Bench Press", "user1", "password1");
+        assertThat(progressionResponse.statusCode()).isEqualTo(200);
+        assertThat(progressionResponse.body()).contains("\"exerciseName\":\"Bench Press\"");
+        assertThat(progressionResponse.body()).contains("\"points\"");
+    }
+
     private LoggedSessionDetail postFreeSession(LocalDate date, String exerciseName, String sessionName) throws Exception {
         LoggedSessionCreateRequest request = new LoggedSessionCreateRequest(
                 SessionType.FREE,
@@ -191,6 +228,77 @@ class SessionHistoryControllerIT {
                 .GET()
                 .build();
         return HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
+    }
+
+    private HttpResponse<String> getWithBasicAuth(String path, String username, String password) throws Exception {
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(baseUrl(path)))
+                .header("Authorization", basicAuth(username, password))
+                .header("Accept", "application/json")
+                .GET()
+                .build();
+        return HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
+    }
+
+    private HttpResponse<String> postJson(String path, String body, String username, String password) throws Exception {
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(baseUrl(path)))
+                .header("Authorization", basicAuth(username, password))
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(body))
+                .build();
+        return HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
+    }
+
+    private UUID persistProposedPlanForUser1(String sessionName) {
+        ProfileGoalOnboardingAttempt attempt = ProfileGoalOnboardingAttempt.builder()
+                .userId(UUID.fromString("11111111-1111-1111-1111-111111111111"))
+                .age(31)
+                .currentWeight(new BigDecimal("79.0"))
+                .weightUnit(WeightUnit.KG)
+                .primaryGoal(OnboardingPrimaryGoal.STRENGTH)
+                .status(OnboardingAttemptStatus.IN_PROGRESS)
+                .build();
+        entityManager.persist(attempt);
+
+        PlanProposal proposal = PlanProposal.builder()
+                .attempt(attempt)
+                .userId(attempt.getUserId())
+                .version(1)
+                .status(ProposalStatus.PROPOSED)
+                .provider(ProposalProvider.AZURE_OPENAI)
+                .modelDeployment("gpt-35-turbo")
+                .proposalPayload(singleSessionPayload(sessionName))
+                .build();
+        entityManager.persist(proposal);
+        entityManager.flush();
+        return proposal.getId();
+    }
+
+    private String singleSessionPayload(String sessionName) {
+        return """
+                {
+                  "sessions": [
+                    {
+                      "sequenceNumber": 1,
+                      "name": "%s",
+                      "exercises": [
+                        {
+                          "exerciseName": "Bench Press",
+                          "exerciseType": "STRENGTH",
+                          "targetSets": 3,
+                          "targetReps": 8,
+                          "targetWeight": 65,
+                          "targetWeightUnit": "KG",
+                          "targetDurationSeconds": null,
+                          "targetDistance": null,
+                          "targetDistanceUnit": null
+                        }
+                      ]
+                    }
+                  ]
+                }
+                """.formatted(sessionName);
     }
 
     private String basicAuth(String username, String password) {

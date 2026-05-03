@@ -1,0 +1,3 @@
+b0eaf91 T053 integrate activation record persistence and deactivation policy
+backend/src/main/java/com/gymtracker/application/AcceptedProgramActivationService.java
+specs/002-profile-goal-onboarding/tasks.md

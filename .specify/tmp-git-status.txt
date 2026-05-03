@@ -1,0 +1,2 @@
+?? .specify/tmp-checklists.json
+?? .specify/tmp-prereq.json

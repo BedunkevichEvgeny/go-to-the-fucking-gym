@@ -2,6 +2,8 @@ package com.gymtracker.infrastructure;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 import com.gymtracker.api.exception.ForbiddenException;
@@ -20,6 +22,8 @@ import com.gymtracker.infrastructure.repository.LoggedSessionRepository;
 import com.gymtracker.infrastructure.repository.ProgramExerciseTargetRepository;
 import com.gymtracker.infrastructure.repository.ProgramSessionRepository;
 import com.gymtracker.infrastructure.repository.WorkoutProgramRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.TypedQuery;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -29,11 +33,15 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.quality.Strictness;
 import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class UserIsolationTest {
 
     @Mock
@@ -51,17 +59,28 @@ class UserIsolationTest {
     @Mock
     private ProgramExerciseTargetRepository programExerciseTargetRepository;
 
+    @Mock
+    private EntityManager entityManager;
+
     private SessionDetailService sessionDetailService;
     private ProgramSessionService programSessionService;
 
     @BeforeEach
     void setUp() {
+        // Use lenient mocking for EntityManager since it's not always used
+        TypedQuery mockQuery = Mockito.mock(TypedQuery.class);
+        when(mockQuery.setParameter(anyString(), any())).thenReturn(mockQuery);
+        when(mockQuery.setMaxResults(any(Integer.class))).thenReturn(mockQuery);
+        when(mockQuery.getResultList()).thenReturn(List.of());
+        when(entityManager.createQuery(anyString(), any(Class.class))).thenReturn(mockQuery);
+
         sessionDetailService = new SessionDetailService(loggedSessionRepository, dtoMapper);
         programSessionService = new ProgramSessionService(
                 workoutProgramRepository,
                 programSessionRepository,
                 programExerciseTargetRepository,
-                new DtoMapper());
+                new DtoMapper(),
+                entityManager);
     }
 
     @AfterEach

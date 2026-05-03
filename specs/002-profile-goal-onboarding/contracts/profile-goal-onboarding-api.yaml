@@ -1,0 +1,295 @@
+openapi: 3.0.3
+info:
+  title: Profile Goal Onboarding API
+  version: 0.1.0
+  description: API contract for profile/goal onboarding, AI proposal revision loop, and accepted program activation.
+servers:
+  - url: /api
+security:
+  - basicAuth: []
+paths:
+  /profile-goals/onboarding:
+    post:
+      summary: Create or resume onboarding attempt and generate initial proposal
+      operationId: createInitialOnboardingProposal
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OnboardingSubmissionRequest'
+      responses:
+        '200':
+          description: Proposal generated for onboarding attempt
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlanProposalResponse'
+        '400':
+          description: Validation failure
+
+  /profile-goals/onboarding/current:
+    get:
+      summary: Get current in-progress onboarding attempt with latest proposal
+      operationId: getCurrentOnboardingAttempt
+      responses:
+        '200':
+          description: Current onboarding attempt found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OnboardingAttemptResponse'
+        '204':
+          description: No in-progress attempt
+
+  /profile-goals/proposals/{proposalId}/reject:
+    post:
+      summary: Reject a proposal and generate a revised proposal using feedback
+      operationId: rejectProposalAndRevise
+      parameters:
+        - in: path
+          name: proposalId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProposalRejectRequest'
+      responses:
+        '200':
+          description: Revised proposal generated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlanProposalResponse'
+        '400':
+          description: Validation failure
+        '404':
+          description: Proposal not found
+
+  /profile-goals/proposals/{proposalId}/accept:
+    post:
+      summary: Accept proposal and activate it as current program
+      operationId: acceptProposal
+      parameters:
+        - in: path
+          name: proposalId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Proposal accepted and active program replaced immediately
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProposalAcceptanceResponse'
+        '404':
+          description: Proposal not found
+        '409':
+          description: Proposal cannot be accepted due to stale or invalid state
+
+  /profile-goals/access-gate:
+    get:
+      summary: Check whether user can access program-session tracking without onboarding
+      operationId: checkProgramTrackingAccessGate
+      responses:
+        '200':
+          description: Access gate state returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrackingAccessGateResponse'
+
+components:
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+
+  schemas:
+    OnboardingSubmissionRequest:
+      type: object
+      required: [age, currentWeight, weightUnit, primaryGoal]
+      properties:
+        age:
+          type: integer
+          minimum: 13
+          maximum: 100
+        currentWeight:
+          type: number
+          format: double
+          exclusiveMinimum: 0
+        weightUnit:
+          type: string
+          enum: [KG, LBS]
+        primaryGoal:
+          type: string
+          enum: [LOSE_WEIGHT, BUILD_HEALTHY_BODY, STRENGTH, BUILD_MUSCLES]
+        goalTargetBucket:
+          type: string
+          nullable: true
+          enum: [LOSS_5, LOSS_10, LOSS_15, LOSS_20_PLUS]
+
+    ProposalRejectRequest:
+      type: object
+      required: [requestedChanges]
+      properties:
+        requestedChanges:
+          type: string
+          minLength: 1
+          maxLength: 2000
+
+    OnboardingAttemptResponse:
+      type: object
+      required: [attemptId, status, profileGoal, latestProposal]
+      properties:
+        attemptId:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [IN_PROGRESS, ACCEPTED, ABANDONED]
+        profileGoal:
+          $ref: '#/components/schemas/ProfileGoalSnapshot'
+        latestProposal:
+          $ref: '#/components/schemas/PlanProposalResponse'
+
+    ProfileGoalSnapshot:
+      type: object
+      required: [age, currentWeight, weightUnit, primaryGoal]
+      properties:
+        age:
+          type: integer
+        currentWeight:
+          type: number
+          format: double
+        weightUnit:
+          type: string
+          enum: [KG, LBS]
+        primaryGoal:
+          type: string
+          enum: [LOSE_WEIGHT, BUILD_HEALTHY_BODY, STRENGTH, BUILD_MUSCLES]
+        goalTargetBucket:
+          type: string
+          nullable: true
+          enum: [LOSS_5, LOSS_10, LOSS_15, LOSS_20_PLUS]
+
+    PlanProposalResponse:
+      type: object
+      required: [attemptId, proposalId, version, status, generatedBy, sessions]
+      properties:
+        attemptId:
+          type: string
+          format: uuid
+        proposalId:
+          type: string
+          format: uuid
+        version:
+          type: integer
+          minimum: 1
+        status:
+          type: string
+          enum: [PROPOSED, REJECTED, ACCEPTED]
+        generatedBy:
+          type: object
+          required: [provider, deployment]
+          properties:
+            provider:
+              type: string
+              enum: [AZURE_OPENAI]
+            deployment:
+              type: string
+        sessions:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ProposedSession'
+
+    ProposedSession:
+      type: object
+      required: [sequenceNumber, name, exercises]
+      properties:
+        sequenceNumber:
+          type: integer
+          minimum: 1
+        name:
+          type: string
+        exercises:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ProposedExerciseTarget'
+
+    ProposedExerciseTarget:
+      type: object
+      required: [exerciseName, exerciseType]
+      properties:
+        exerciseName:
+          type: string
+        exerciseType:
+          type: string
+          enum: [STRENGTH, BODYWEIGHT, CARDIO]
+        targetSets:
+          type: integer
+          nullable: true
+        targetReps:
+          type: integer
+          nullable: true
+        targetWeight:
+          type: number
+          format: double
+          nullable: true
+        targetWeightUnit:
+          type: string
+          nullable: true
+          enum: [KG, LBS]
+        targetDurationSeconds:
+          type: integer
+          nullable: true
+        targetDistance:
+          type: number
+          format: double
+          nullable: true
+        targetDistanceUnit:
+          type: string
+          nullable: true
+          enum: [KM, MI]
+
+    ProposalAcceptanceResponse:
+      type: object
+      required: [proposalId, activatedProgramId, replacedProgramId, activatedAt]
+      properties:
+        proposalId:
+          type: string
+          format: uuid
+        activatedProgramId:
+          type: string
+          format: uuid
+        replacedProgramId:
+          type: string
+          format: uuid
+          nullable: true
+        activatedAt:
+          type: string
+          format: date-time
+
+    TrackingAccessGateResponse:
+      type: object
+      required: [canAccessProgramTracking, reasonCode]
+      properties:
+        canAccessProgramTracking:
+          type: boolean
+        reasonCode:
+          type: string
+          enum: [ONBOARDING_REQUIRED, ALLOWED]
+        currentAttemptId:
+          type: string
+          format: uuid
+          nullable: true
+
