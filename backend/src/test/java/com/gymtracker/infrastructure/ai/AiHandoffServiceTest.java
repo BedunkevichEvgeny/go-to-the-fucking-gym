@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -121,7 +122,8 @@ class AiHandoffServiceTest {
         when(programExerciseTargetRepository.findByProgramSession_IdOrderBySortOrderAsc(session.getProgramSessionId()))
                 .thenReturn(List.of());
         when(userRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
-        when(processor.process(anyString(), anyString()))
+        // processor.process() is never reached when user is not found; use lenient to avoid UnnecessaryStubbing
+        lenient().when(processor.process(anyString(), anyString()))
                 .thenThrow(new IllegalStateException("boom"));
 
         assertThatCode(() -> service.enqueueSessionForAiAnalysis(UUID.randomUUID(), session)).doesNotThrowAnyException();
