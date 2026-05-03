@@ -1,6 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { ExerciseTable } from '../../components/ExerciseTable';
 import { SessionTypeBadge } from '../../components/SessionTypeBadge';
+import { AiCoachingInsightCard } from '../../components/AiCoachingInsightCard';
 import { useSessionDetail } from '../../hooks/useSessionDetail';
 import type { ExerciseEntryView } from '../../types/api';
 import { ExerciseProgressionLink } from './ExerciseProgressionLink';
@@ -38,6 +39,11 @@ export function SessionDetailView({ sessionId }: SessionDetailViewProps) {
         <p>Feeling: {data.feelings?.rating}/10</p>
         {data.feelings?.comment ? <p>{data.feelings.comment}</p> : null}
       </section>
+      {data.sessionType === 'PROGRAM' && data.aiSuggestion ? (
+        <section aria-label="AI Coaching Insight">
+          <AiCoachingInsightCard suggestion={data.aiSuggestion} isPolling={false} timedOut={false} />
+        </section>
+      ) : null}
       {data.exerciseEntries.map((entry: ExerciseEntryView) => (
         <section key={entry.exerciseName} className="card stack-sm">
           <div className="between">
