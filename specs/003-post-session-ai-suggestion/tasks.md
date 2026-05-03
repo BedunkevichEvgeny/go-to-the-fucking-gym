@@ -22,7 +22,7 @@
 
 **Purpose**: Database migration that blocks all backend user story work.
 
-- [ ] T001 Create Flyway migration `backend/src/main/resources/db/migration/V003__session_ai_suggestion.sql` — table `session_ai_suggestions` with `session_id UUID PK/FK`, `suggestion TEXT NOT NULL`, `generated_at TIMESTAMPTZ NOT NULL DEFAULT now()`, and FK constraint to `logged_sessions(id)`
+- [X] T001 Create Flyway migration `backend/src/main/resources/db/migration/V003__session_ai_suggestion.sql` — table `session_ai_suggestions` with `session_id UUID PK/FK`, `suggestion TEXT NOT NULL`, `generated_at TIMESTAMPTZ NOT NULL DEFAULT now()`, and FK constraint to `logged_sessions(id)`
 
 **Checkpoint**: Migration applied (`./mvnw flyway:migrate` or app startup) — `session_ai_suggestions` table exists in DB.
 
@@ -32,9 +32,9 @@
 
 **Purpose**: JPA entity + repository that all backend user stories depend on. Must complete before Phases 3–5 backend tasks.
 
-- [ ] T002 [P] Create `backend/src/main/java/com/gymtracker/domain/SessionAiSuggestion.java` — `@Entity`, `@Table(name = "session_ai_suggestions")`, fields: `sessionId` (UUID, `@Id @Column(name="session_id")`), `session` (`@OneToOne @MapsId @JoinColumn(name="session_id")`), `suggestion` (String, non-null), `generatedAt` (OffsetDateTime, non-null); `@PrePersist` sets `generatedAt = OffsetDateTime.now()` if null
-- [ ] T003 [P] Add lazy optional `@OneToOne` association to `backend/src/main/java/com/gymtracker/domain/LoggedSession.java`: `@OneToOne(mappedBy = "session", fetch = FetchType.LAZY, optional = true) private SessionAiSuggestion aiSuggestion;` with getter
-- [ ] T004 Create `backend/src/main/java/com/gymtracker/infrastructure/repository/SessionAiSuggestionRepository.java` — `JpaRepository<SessionAiSuggestion, UUID>`; no custom queries needed beyond inherited `existsById` and `save`
+- [X] T002 [P] Create `backend/src/main/java/com/gymtracker/domain/SessionAiSuggestion.java` — `@Entity`, `@Table(name = "session_ai_suggestions")`, fields: `sessionId` (UUID, `@Id @Column(name="session_id")`), `session` (`@OneToOne @MapsId @JoinColumn(name="session_id")`), `suggestion` (String, non-null), `generatedAt` (OffsetDateTime, non-null); `@PrePersist` sets `generatedAt = OffsetDateTime.now()` if null
+- [X] T003 [P] Add lazy optional `@OneToOne` association to `backend/src/main/java/com/gymtracker/domain/LoggedSession.java`: `@OneToOne(mappedBy = "session", fetch = FetchType.LAZY, optional = true) private SessionAiSuggestion aiSuggestion;` with getter
+- [X] T004 Create `backend/src/main/java/com/gymtracker/infrastructure/repository/SessionAiSuggestionRepository.java` — `JpaRepository<SessionAiSuggestion, UUID>`; no custom queries needed beyond inherited `existsById` and `save`
 
 **Checkpoint**: Project compiles (`./mvnw compile`) with no errors after T001–T004.
 
@@ -48,56 +48,56 @@
 
 ### Backend — Business Logic (US1)
 
-- [ ] T005 [US1] Update `backend/src/main/java/com/gymtracker/infrastructure/ai/AiHandoffService.java` — inject `SessionAiSuggestionRepository` and `LoggedSessionRepository`; replace the `whenComplete` log-only handler with a call to `persistSuggestion(sessionId, suggestion)`: check `existsById`, skip if present, otherwise create `SessionAiSuggestion` entity via `loggedSessionRepository.getReferenceById(sessionId)`, call `save`, and log result; keep the existing blank/null guard before calling `persistSuggestion`. **`@MapsId` note**: when constructing `SessionAiSuggestion`, only call `entity.setSession(loggedSession)` — do NOT call `entity.setSessionId(...)`. With `@MapsId` the JPA provider derives the PK (`sessionId`) automatically from the associated `LoggedSession.id` before flush; setting it manually is redundant and can cause `TransientPropertyValueException`.
-- [ ] T006 [US1] Add `aiSuggestion` field (nullable `String`) as last component to `backend/src/main/java/com/gymtracker/api/dto/LoggedSessionDetail.java` record
-- [ ] T007 [US1] Update `backend/src/main/java/com/gymtracker/infrastructure/mapper/DtoMapper.java` — in `toDetailDto`, read `loggedSession.getAiSuggestion()`, map to `String` (null if absent), and pass as last argument to `LoggedSessionDetail` constructor; `toHistoryItem` is NOT changed
+- [X] T005 [US1] Update `backend/src/main/java/com/gymtracker/infrastructure/ai/AiHandoffService.java` — inject `SessionAiSuggestionRepository` and `LoggedSessionRepository`; replace the `whenComplete` log-only handler with a call to `persistSuggestion(sessionId, suggestion)`: check `existsById`, skip if present, otherwise create `SessionAiSuggestion` entity via `loggedSessionRepository.getReferenceById(sessionId)`, call `save`, and log result; keep the existing blank/null guard before calling `persistSuggestion`. **`@MapsId` note**: when constructing `SessionAiSuggestion`, only call `entity.setSession(loggedSession)` — do NOT call `entity.setSessionId(...)`. With `@MapsId` the JPA provider derives the PK (`sessionId`) automatically from the associated `LoggedSession.id` before flush; setting it manually is redundant and can cause `TransientPropertyValueException`.
+- [X] T006 [US1] Add `aiSuggestion` field (nullable `String`) as last component to `backend/src/main/java/com/gymtracker/api/dto/LoggedSessionDetail.java` record
+- [X] T007 [US1] Update `backend/src/main/java/com/gymtracker/infrastructure/mapper/DtoMapper.java` — in `toDetailDto`, read `loggedSession.getAiSuggestion()`, map to `String` (null if absent), and pass as last argument to `LoggedSessionDetail` constructor; `toHistoryItem` is NOT changed
 
 ### Backend — Unit Tests (US1)
 
-- [ ] T008 [P] [US1] Create `backend/src/test/java/com/gymtracker/application/AiHandoffServiceTest.java` — Mockito-based unit tests:
+- [X] T008 [P] [US1] Create `backend/src/test/java/com/gymtracker/application/AiHandoffServiceTest.java` — Mockito-based unit tests:
   - PROGRAM session: suggestion persisted when AI returns non-blank text
   - PROGRAM session: blank/whitespace AI response → `save` never called
   - PROGRAM session: `existsById` returns true → `save` never called (immutability guard)
   - FREE session: method returns immediately, no repository interaction
-- [ ] T009 [P] [US1] Update `backend/src/test/java/com/gymtracker/infrastructure/mapper/DtoMapperTest.java` (or create if absent) — add cases:
+- [X] T009 [P] [US1] Update `backend/src/test/java/com/gymtracker/infrastructure/mapper/DtoMapperTest.java` (or create if absent) — add cases:
   - `toDetailDto` with non-null `SessionAiSuggestion` → DTO `aiSuggestion` equals entity `suggestion`
   - `toDetailDto` with null `aiSuggestion` association → DTO `aiSuggestion` is null
   - `toHistoryItem` → `SessionHistoryItem` does not contain `aiSuggestion` field
 
 ### Backend — Integration Tests (US1)
 
-- [ ] T010 [US1] Update (or create) `backend/src/test/java/com/gymtracker/integration/LoggedSessionServiceIT.java` — Testcontainers PostgreSQL; use `Awaitility.await().atMost(10, SECONDS).untilAsserted(...)` to wait for async suggestion persistence before asserting:
+- [X] T010 [US1] Update (or create) `backend/src/test/java/com/gymtracker/integration/LoggedSessionServiceIT.java` — Testcontainers PostgreSQL; use `Awaitility.await().atMost(10, SECONDS).untilAsserted(...)` to wait for async suggestion persistence before asserting:
   - Save program session → `Awaitility` waits up to 10 s → `session_ai_suggestions` row exists with correct `session_id` and non-blank `suggestion`
   - Save free session → assert immediately (no async step) → no row in `session_ai_suggestions`
   - Add `org.awaitility:awaitility` test dependency to `backend/pom.xml` if not already present
-- [ ] T011 [US1] Update (or create) `backend/src/test/java/com/gymtracker/integration/SessionDetailServiceIT.java` — MockMvc:
+- [X] T011 [US1] Update (or create) `backend/src/test/java/com/gymtracker/integration/SessionDetailServiceIT.java` — MockMvc:
   - GET `/api/logged-sessions/{id}` with suggestion in DB → response body contains `aiSuggestion` field with suggestion text
   - GET `/api/logged-sessions/{id}` without suggestion row → response body contains `"aiSuggestion": null`
 
 ### Frontend — TypeScript Types (US1)
 
-- [ ] T012 [P] [US1] Update `frontend/src/types/api.ts` — add `aiSuggestion?: string | null` to `LoggedSessionDetail` interface
+- [X] T012 [P] [US1] Update `frontend/src/types/api.ts` — add `aiSuggestion?: string | null` to `LoggedSessionDetail` interface
 
 ### Frontend — Poll Hook (US1)
 
-- [ ] T013 [US1] Create `frontend/src/hooks/usePollSessionSuggestion.ts` — use **TanStack Query** (`useQuery` from `@tanstack/react-query`), consistent with all other hooks in the codebase (e.g., `useSessionDetail.ts`). Accept `sessionId: string | null`; return the query result. Enable the query only when `sessionId` is non-null. Use a `timedOut` flag managed via `useState` + `useEffect`: start a `setTimeout` for 15 000 ms when polling begins; when it fires, set `timedOut = true`. Pass `refetchInterval: timedOut || data?.aiSuggestion ? false : 3000` to `useQuery` — this stops polling once a suggestion is found OR the timeout fires. Set `retry: false` and `refetchIntervalInBackground: false`. **Do NOT use `queryClient.cancelQueries`** — the shared key `['session-detail', sessionId]` is also consumed by `useSessionDetail` on the history detail page; cancelling it would disrupt unrelated components. Expose `{ suggestion: string | null; timedOut: boolean; isPolling: boolean }` derived from the query state. Query key: `['session-detail', sessionId]` — same key as `useSessionDetail` so the cache is shared and the detail view benefits immediately from the polled data.
+- [X] T013 [US1] Create `frontend/src/hooks/usePollSessionSuggestion.ts` — use **TanStack Query** (`useQuery` from `@tanstack/react-query`), consistent with all other hooks in the codebase (e.g., `useSessionDetail.ts`). Accept `sessionId: string | null`; return the query result. Enable the query only when `sessionId` is non-null. Use a `timedOut` flag managed via `useState` + `useEffect`: start a `setTimeout` for 15 000 ms when polling begins; when it fires, set `timedOut = true`. Pass `refetchInterval: timedOut || data?.aiSuggestion ? false : 3000` to `useQuery` — this stops polling once a suggestion is found OR the timeout fires. Set `retry: false` and `refetchIntervalInBackground: false`. **Do NOT use `queryClient.cancelQueries`** — the shared key `['session-detail', sessionId]` is also consumed by `useSessionDetail` on the history detail page; cancelling it would disrupt unrelated components. Expose `{ suggestion: string | null; timedOut: boolean; isPolling: boolean }` derived from the query state. Query key: `['session-detail', sessionId]` — same key as `useSessionDetail` so the cache is shared and the detail view benefits immediately from the polled data.
 
 ### Frontend — Post-Save UI (US1)
 
-- [ ] T014 [US1] Create `frontend/src/components/AiCoachingInsightCard.tsx` — accepts props `{ isPolling: boolean; suggestion: string | null; timedOut: boolean }`; renders:
+- [X] T014 [US1] Create `frontend/src/components/AiCoachingInsightCard.tsx` — accepts props `{ isPolling: boolean; suggestion: string | null; timedOut: boolean }`; renders:
   - Loading state: spinner + "Generating your coaching insight…" (while `isPolling && !suggestion`)
   - Success state: labelled card "AI Coaching Insight" with suggestion text
   - Timeout/absent state: neutral message "Coaching insight unavailable right now. Check back in session history." (when `timedOut && !suggestion`)
   - Uses same `card stack-sm` CSS class pattern as existing info cards; matches `eyebrow` label convention
-- [ ] T015 [US1] Update `frontend/src/pages/ProgramSessionPage.tsx` — after successful POST `/api/logged-sessions` (201): store returned `sessionId` in local state (`savedSessionId`); pass `savedSessionId` to `usePollSessionSuggestion` — the hook activates **reactively** (no `startPolling` call needed; `enabled` is `true` when `sessionId` is non-null); destructure `{ suggestion, timedOut, isPolling }` from the hook and pass as props to `<AiCoachingInsightCard />`; render the card in the post-save view; keep "Continue to History" button always enabled (never blocked by AI status); on button click navigate to `/history`
+- [X] T015 [US1] Update `frontend/src/pages/ProgramSessionPage.tsx` — after successful POST `/api/logged-sessions` (201): store returned `sessionId` in local state (`savedSessionId`); pass `savedSessionId` to `usePollSessionSuggestion` — the hook activates **reactively** (no `startPolling` call needed; `enabled` is `true` when `sessionId` is non-null); destructure `{ suggestion, timedOut, isPolling }` from the hook and pass as props to `<AiCoachingInsightCard />`; render the card in the post-save view; keep "Continue to History" button always enabled (never blocked by AI status); on button click navigate to `/history`
 
 ### Frontend — Unit Tests (US1)
 
-- [ ] T016 [P] [US1] Create `frontend/tests/AiCoachingInsightCard.test.tsx` — React Testing Library:
+- [X] T016 [P] [US1] Create `frontend/tests/AiCoachingInsightCard.test.tsx` — React Testing Library:
   - Loading state: spinner and loading text rendered when `isPolling=true, suggestion=null, timedOut=false`
   - Success state: suggestion text rendered when `suggestion="..."` provided
   - Timeout state: fallback message rendered when `timedOut=true, suggestion=null`
-- [ ] T017 [P] [US1] Create `frontend/tests/ProgramSessionPage.postSave.test.tsx` — mock `usePollSessionSuggestion`; after save:
+- [X] T017 [P] [US1] Create `frontend/tests/ProgramSessionPage.postSave.test.tsx` — mock `usePollSessionSuggestion`; after save:
   - Loading indicator shown while `isPolling=true`
   - Suggestion text shown when suggestion arrives
   - Fallback shown when `timedOut=true`
@@ -115,15 +115,15 @@
 
 ### Backend — Immutability Integration (US2)
 
-- [ ] T018 [P] [US2] Update `backend/src/test/java/com/gymtracker/integration/LoggedSessionServiceIT.java` — add immutability test: save program session → wait for suggestion → trigger `persistSuggestion` a second time with a different text → confirm DB row is unchanged (same suggestion text, `existsById` guard worked)
+- [X] T018 [P] [US2] Update `backend/src/test/java/com/gymtracker/integration/LoggedSessionServiceIT.java` — add immutability test: save program session → wait for suggestion → trigger `persistSuggestion` a second time with a different text → confirm DB row is unchanged (same suggestion text, `existsById` guard worked)
 
 ### Frontend — Session Detail View (US2)
 
-- [ ] T019 [P] [US2] Update `frontend/src/features/history/SessionDetailView.tsx` — add AI Coaching Insight section after the session info card: render `<AiCoachingInsightCard suggestion={data.aiSuggestion} isPolling={false} timedOut={false} />` only when `data.sessionType === 'PROGRAM' && data.aiSuggestion`; use `<section aria-label="AI Coaching Insight">`
+- [X] T019 [P] [US2] Update `frontend/src/features/history/SessionDetailView.tsx` — add AI Coaching Insight section after the session info card: render `<AiCoachingInsightCard suggestion={data.aiSuggestion} isPolling={false} timedOut={false} />` only when `data.sessionType === 'PROGRAM' && data.aiSuggestion`; use `<section aria-label="AI Coaching Insight">`
 
 ### Frontend — Unit Tests (US2)
 
-- [ ] T020 [P] [US2] Create `frontend/tests/SessionDetailView.suggestion.test.tsx` — React Testing Library:
+- [X] T020 [P] [US2] Create `frontend/tests/SessionDetailView.suggestion.test.tsx` — React Testing Library:
   - PROGRAM session + non-null `aiSuggestion` → "AI Coaching Insight" section and suggestion text rendered
   - PROGRAM session + `aiSuggestion: null` → suggestion section absent
   - PROGRAM session + `aiSuggestion: ""` (empty string) → suggestion section absent
@@ -131,7 +131,7 @@
 
 ### Backend — History List Regression (US2)
 
-- [ ] T021 [P] [US2] Update (or create) `backend/src/test/java/com/gymtracker/integration/SessionHistoryServiceIT.java` — confirm `GET /api/logged-sessions` list response items do NOT contain an `aiSuggestion` field (shape validation via JSON assertion)
+- [X] T021 [P] [US2] Update (or create) `backend/src/test/java/com/gymtracker/integration/SessionHistoryServiceIT.java` — confirm `GET /api/logged-sessions` list response items do NOT contain an `aiSuggestion` field (shape validation via JSON assertion)
 
 **Checkpoint**: User Story 2 functional — navigate to session history, open a session detail, see the same suggestion stored at save time; immutability guard confirmed by test.
 
@@ -149,10 +149,10 @@ _The existing gate in `AiHandoffService` already skips FREE sessions. No new bac
 
 ### Frontend — Free Session UI Guard (US3)
 
-- [ ] T022 [US3] Update `frontend/tests/SessionDetailView.suggestion.test.tsx` — add explicit test cases:
+- [X] T022 [US3] Update `frontend/tests/SessionDetailView.suggestion.test.tsx` — add explicit test cases:
   - FREE session + `aiSuggestion: null` → no suggestion section rendered
   - FREE session + `aiSuggestion: "some text"` (defensive) → no suggestion section rendered (guard is `sessionType === 'PROGRAM'`)
-- [ ] T023 [P] [US3] Update `frontend/tests/ProgramSessionPage.postSave.test.tsx` (or add `FreeSessionPage.test.tsx` if separate page exists) — confirm no `AiCoachingInsightCard` rendered after saving a free session
+- [X] T023 [P] [US3] Update `frontend/tests/ProgramSessionPage.postSave.test.tsx` (or add `FreeSessionPage.test.tsx` if separate page exists) — confirm no `AiCoachingInsightCard` rendered after saving a free session
 
 **Checkpoint**: User Story 3 verified — free sessions show no suggestion at any point.
 
