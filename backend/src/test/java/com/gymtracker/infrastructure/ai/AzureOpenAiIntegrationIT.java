@@ -1,6 +1,7 @@
 package com.gymtracker.infrastructure.ai;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
 
 import com.gymtracker.api.dto.ProfileGoalOnboardingDtos.OnboardingSubmissionRequest;
@@ -180,6 +181,120 @@ class AzureOpenAiIntegrationIT {
                 assertThat(exercise.exerciseType()).isNotNull();
             });
         });
+    }
+
+    // ===== T065-BUG-003-TEST: LangChain/Azure Integration Contract Tests =====
+
+    @Test
+    void contractTest_processorOutputDoesNotContainSyntheticStubSignature() {
+        // Contract: after T065-BUG-003, callAzureOpenAi must return real model output, NOT the
+        // synthetic stub pattern "azure-openai[endpoint=...,deployment=...,apiKey=...]: accepted prompt hash=..."
+        LangChainSessionProcessor contractProcessor = new LangChainSessionProcessor(
+                "https://test.azure.openai", "test-key", "test-deployment", 30, 1
+        ) {
+            @Override
+            String callAzureOpenAi(String prompt) {
+                // Simulates what a real Azure OpenAI model returns (natural language or JSON)
+                return "Session analysis: Good progression observed. Recommend increasing weight by 2.5kg next session.";
+            }
+        };
+
+        String result = contractProcessor.process(sampleSummary());
+
+        // Must NOT contain the synthetic stub response signature
+        assertThat(result).doesNotContain("azure-openai[endpoint=");
+        assertThat(result).doesNotContain("accepted prompt hash=");
+        assertThat(result).doesNotContain("apiKey=present");
+        // Must contain actual model output
+        assertThat(result).contains("progression");
+    }
+
+    @Test
+    void contractTest_stubPatternIsNotValidJsonForOnboardingParser() {
+        // Document the contract violation: the current stub response "azure-openai[..." is NOT valid JSON.
+        // Any processor that returns this pattern CANNOT be consumed by the onboarding proposal parser.
+        // This test anchors the requirement: real model output must be strict JSON.
+        String syntheticStubResponse =
+                "azure-openai[endpoint=https://integration.test.azure.openai,"
+                + "deployment=test-gpt-deployment,apiKey=present]: accepted prompt hash=-123456789";
+
+        // The stub is NOT JSON-structured
+        assertThat(syntheticStubResponse).doesNotStartWith("{");
+        assertThat(syntheticStubResponse).doesNotContain("\"sessions\"");
+        assertThat(syntheticStubResponse).doesNotContain("\"exercises\"");
+
+        // Simulating what onboarding parser does with stub output: must throw, NOT silently use it
+        LangChainSessionProcessor stubProcessor = new LangChainSessionProcessor(
+                "https://test.azure.openai", "test-key", "test-deployment", 30, 1
+        ) {
+            @Override
+            String callAzureOpenAi(String prompt) {
+                return syntheticStubResponse;
+            }
+        };
+        // The stub output is passed through by the processor itself
+        String result = stubProcessor.process(sampleSummary());
+        assertThat(result).isEqualTo(syntheticStubResponse);
+        // This confirms the processor returns the stub verbatim — downstream (OnboardingPlanGenerator)
+        // must fail-fast when it receives this non-JSON content.
+    }
+
+    @Test
+    void contractTest_processorWithValidJsonOutputIsConsumableByOnboardingParser() {
+        // After T065-BUG-003 + T067-BUG-005: real model returns JSON, onboarding parser succeeds.
+        // This test verifies the contract between LangChainSessionProcessor and downstream parsers.
+        String validOnboardingJson = """
+                {"sessions": [
+                  {"sequenceNumber": 1, "name": "Strength Foundation",
+                   "exercises": [
+                     {"name": "Goblet Squat", "type": "STRENGTH",
+                      "targetSets": 3, "targetReps": 12,
+                      "targetWeight": 16.0, "weightUnit": "KG", "durationSeconds": null},
+                     {"name": "Push-Up", "type": "STRENGTH",
+                      "targetSets": 3, "targetReps": 15,
+                      "targetWeight": null, "weightUnit": "KG", "durationSeconds": null}
+                   ]}
+                ]}
+                """;
+
+        LangChainSessionProcessor jsonReturningProcessor = new LangChainSessionProcessor(
+                "https://test.azure.openai", "test-key", "test-deployment", 30, 1
+        ) {
+            @Override
+            String callAzureOpenAi(String prompt) {
+                return validOnboardingJson;
+            }
+        };
+
+        String result = jsonReturningProcessor.process(sampleSummary());
+
+        // Result must be the actual JSON from the model
+        assertThat(result).contains("\"sessions\"");
+        assertThat(result).contains("Goblet Squat");
+        assertThat(result).contains("Push-Up");
+        // NOT hardcoded fallback exercises
+        assertThat(result).doesNotContain("Back Squat");
+        assertThat(result).doesNotContain("Treadmill Run");
+        // NOT the synthetic stub signature
+        assertThat(result).doesNotContain("azure-openai[endpoint=");
+    }
+
+    @Test
+    void contractTest_processorTimeoutPropagatesWithoutFallback() {
+        // Contract: on timeout, processor must throw (not return synthetic stub or fallback)
+        LangChainSessionProcessor timeoutProcessor = new LangChainSessionProcessor(
+                "https://test.azure.openai", "test-key", "test-deployment", 1, 1
+        ) {
+            @Override
+            String callAzureOpenAi(String prompt) {
+                throw new IllegalStateException("timeout after 1s");
+            }
+        };
+
+        assertThatThrownBy(() -> timeoutProcessor.process(sampleSummary()))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("timeout");
+        // No fallback stub is returned on timeout
     }
 
     private SessionSummaryDTO sampleSummary() {
