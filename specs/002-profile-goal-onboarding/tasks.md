@@ -199,7 +199,7 @@
   - Assert no hardcoded fallback proposal/session data is emitted on parse failure
   - Assert explicit error is surfaced for malformed and empty model output
 
-- [ ] T067-BUG-005-TEST [CRITICAL] Add onboarding generator integration tests for assistant prompt path in `backend/src/test/java/com/gymtracker/application/PlanProposalServiceIT.java`
+- [X] T067-BUG-005-TEST [CRITICAL] Add onboarding generator integration tests for assistant prompt path in `backend/src/test/java/com/gymtracker/application/PlanProposalServiceIT.java`
   - Assert onboarding generation uses assistant `chat` prompt path directly
   - Assert no fake `SessionSummaryDTO` bridge is used in onboarding generation flow
 

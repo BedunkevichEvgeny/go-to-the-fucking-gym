@@ -1,7 +1,10 @@
 package com.gymtracker.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 
 import com.gymtracker.api.dto.ProfileGoalOnboardingDtos.OnboardingAttemptResponse;
 import com.gymtracker.api.dto.ProfileGoalOnboardingDtos.OnboardingSubmissionRequest;
@@ -14,6 +17,8 @@ import com.gymtracker.domain.OnboardingEnums.ProposalStatus;
 import com.gymtracker.domain.PlanProposal;
 import com.gymtracker.domain.ProfileGoalOnboardingAttempt;
 import com.gymtracker.domain.WeightUnit;
+import com.gymtracker.infrastructure.ai.LangChainSessionProcessor;
+import com.gymtracker.infrastructure.ai.SessionSummaryDTO;
 import com.gymtracker.infrastructure.repository.AcceptedProgramActivationRepository;
 import com.gymtracker.infrastructure.repository.PlanProposalRepository;
 import com.gymtracker.infrastructure.repository.ProfileGoalOnboardingAttemptRepository;
@@ -24,6 +29,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -35,11 +41,16 @@ import org.springframework.transaction.annotation.Transactional;
  * 3. resolveAttemptSnapshot() loads actual user inputs (not hardcoded)
  * 4. getTrackingAccessGate() validates against real acceptance status
  * 5. Reject/revise cycle maintains proposal linkage
+ * 6. (T067-BUG-005-TEST) Onboarding generation uses direct assistant chat prompt, NOT SessionSummaryDTO bridge
  */
 @SpringBootTest
 @ActiveProfiles("test")
 @Transactional
 class PlanProposalServiceIT {
+
+    // ── T067-BUG-005-TEST spy: verify no SessionSummaryDTO bridge in onboarding path ──
+    @MockitoSpyBean
+    private LangChainSessionProcessor langChainSessionProcessorSpy;
 
     @Autowired
     private PlanProposalService planProposalService;
@@ -237,6 +248,94 @@ class PlanProposalServiceIT {
 
         assertThat(gate.canAccessProgramTracking()).isFalse();
         assertThat(gate.reasonCode()).isEqualTo("ONBOARDING_REQUIRED");
+    }
+
+    // ── T067-BUG-005-TEST: onboarding must use assistant chat prompt, not SessionSummaryDTO bridge ──
+
+    /**
+     * Valid onboarding JSON stub returned by the spy so that {@code createInitialProposal}
+     * can complete without throwing a JSON-parse error, letting the Mockito assertion run.
+     */
+    private static final String ONBOARDING_STUB_JSON =
+            "{\"sessions\":[{\"sequenceNumber\":1,\"name\":\"Strength Day\","
+            + "\"exercises\":[{\"name\":\"Squat\",\"type\":\"STRENGTH\","
+            + "\"targetSets\":3,\"targetReps\":8,\"targetWeight\":50.0,"
+            + "\"weightUnit\":\"KG\",\"durationSeconds\":null}]}]}";
+
+    /**
+     * T067-BUG-005-TEST: Assert that onboarding plan generation does NOT route through
+     * {@link LangChainSessionProcessor#process(SessionSummaryDTO)}.
+     *
+     * <p>The current bug in {@code OnboardingPlanGenerator.generateInitialProposal()}:
+     * it constructs a hollow {@code SessionSummaryDTO} (null sessionType, null sessionDate,
+     * empty exercises) and delegates to {@link LangChainSessionProcessor#process(SessionSummaryDTO)}.
+     * That delegate builds an "Analyze workout session…" prompt — not the onboarding prompt.
+     *
+     * <p>This test FAILS until the fix decouples onboarding from the session-summary processor
+     * and calls a direct chat/assistant path instead.
+     */
+    @Test
+    void createInitialProposal_DoesNotUseFakeSessionSummaryBridge() {
+        // Stub the spy so the JSON-parse step succeeds and the verify() can run.
+        doReturn(ONBOARDING_STUB_JSON).when(langChainSessionProcessorSpy).process(any(SessionSummaryDTO.class));
+
+        OnboardingSubmissionRequest request = new OnboardingSubmissionRequest(
+                30,
+                BigDecimal.valueOf(75),
+                WeightUnit.KG,
+                OnboardingPrimaryGoal.STRENGTH,
+                null
+        );
+
+        planProposalService.createInitialProposal(userId, request);
+
+        // BUG: current code calls process(SessionSummaryDTO) with a hollow DTO.
+        // This assertion documents the bug and FAILS until the fix removes the bridge.
+        verify(langChainSessionProcessorSpy, never()).process(any(SessionSummaryDTO.class));
+    }
+
+    /**
+     * T067-BUG-005-TEST: Assert that the {@link SessionSummaryDTO} forwarded to the processor
+     * during onboarding is NOT a hollow/fake bridge DTO — i.e., it must carry a real
+     * {@code sessionType} (not {@code null}).
+     *
+     * <p>The current implementation constructs the DTO with {@code null} sessionType and
+     * {@code null} sessionDate, exposing that the bridge is fake and the onboarding-specific
+     * prompt (built in {@code OnboardingPlanGenerator.buildPrompt}) is silently discarded.
+     *
+     * <p>This test FAILS until the fix removes the hollow {@code SessionSummaryDTO} bridge
+     * and routes onboarding through a direct chat/assistant prompt path.
+     */
+    @Test
+    void createInitialProposal_SessionSummaryPassedToProcessorIsNotHollowBridge() {
+        // Stub the spy so the JSON-parse step succeeds and the captor can inspect the argument.
+        doReturn(ONBOARDING_STUB_JSON).when(langChainSessionProcessorSpy).process(any(SessionSummaryDTO.class));
+
+        OnboardingSubmissionRequest request = new OnboardingSubmissionRequest(
+                30,
+                BigDecimal.valueOf(75),
+                WeightUnit.KG,
+                OnboardingPrimaryGoal.STRENGTH,
+                null
+        );
+
+        planProposalService.createInitialProposal(userId, request);
+
+        // Capture the SessionSummaryDTO handed to process() — current (buggy) code calls it once.
+        org.mockito.ArgumentCaptor<SessionSummaryDTO> dtoCaptor =
+                org.mockito.ArgumentCaptor.forClass(SessionSummaryDTO.class);
+        verify(langChainSessionProcessorSpy).process(dtoCaptor.capture());
+
+        SessionSummaryDTO capturedDto = dtoCaptor.getValue();
+
+        // BUG REVEALED: the DTO is hollow — sessionType is null (no real session context).
+        // A correct onboarding implementation would never call process(SessionSummaryDTO) at all,
+        // so this assertion documents the hollow-bridge bug and FAILS until the fix is applied.
+        assertThat(capturedDto.sessionType())
+                .as("BUG: OnboardingPlanGenerator passes a hollow SessionSummaryDTO "
+                    + "with null sessionType to LangChainSessionProcessor — "
+                    + "the onboarding prompt is silently discarded")
+                .isNotNull();
     }
 
     @Test
