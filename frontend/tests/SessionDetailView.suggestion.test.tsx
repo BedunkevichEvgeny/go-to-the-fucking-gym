@@ -1,32 +1,32 @@
 import { render, screen } from '@testing-library/react';
-import { vi, describe, it, expect } from 'vitest';
+import { vi } from 'vitest';
 
 const mockNavigate = vi.fn();
 
 vi.mock('react-router-dom', () => ({
   useNavigate: () => mockNavigate,
-  Link: ({ children, to }: { children: React.ReactNode; to: string }) => <a href={to}>{children}</a>,
+  Link: ({ children, to }: { children: unknown; to: string }) => <a href={to}>{children as string}</a>,
 }));
 
-vi.mock('../../src/components/ExerciseTable', () => ({
+vi.mock('../src/components/ExerciseTable', () => ({
   ExerciseTable: () => <div />,
 }));
 
-vi.mock('../../src/components/SessionTypeBadge', () => ({
+vi.mock('../src/components/SessionTypeBadge', () => ({
   SessionTypeBadge: ({ sessionType }: { sessionType: string }) => <span>{sessionType}</span>,
 }));
 
-vi.mock('../../src/features/history/ExerciseProgressionLink', () => ({
+vi.mock('../src/features/history/ExerciseProgressionLink', () => ({
   ExerciseProgressionLink: () => <div />,
 }));
 
 const mockUseSessionDetail = vi.fn();
 
-vi.mock('../../src/hooks/useSessionDetail', () => ({
+vi.mock('../src/hooks/useSessionDetail', () => ({
   useSessionDetail: (id: string) => mockUseSessionDetail(id),
 }));
 
-import { SessionDetailView } from '../../src/features/history/SessionDetailView';
+import { SessionDetailView } from '../src/features/history/SessionDetailView';
 
 const baseSession = {
   sessionId: 'session-1',
@@ -91,4 +91,11 @@ describe('SessionDetailView — AI Coaching Insight', () => {
     expect(screen.queryByText('AI Coaching Insight')).not.toBeInTheDocument();
   });
 });
+
+
+
+
+
+
+
 
