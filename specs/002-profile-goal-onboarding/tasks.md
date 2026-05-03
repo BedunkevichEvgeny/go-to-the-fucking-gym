@@ -182,6 +182,45 @@
 
 ---
 
+## Phaze 8 cricical bugs fixes for Azure Open AI iteraction
+
+**Purpose**: Replace stub-like onboarding AI paths with explicit LangChain abstractions and strict contract validation.
+
+**Status**: BLOCKING ROLLOUT - Must complete before release promotion.
+
+### Tests for Phase 8 Remediation (MANDATORY)
+
+- [ ] T065-BUG-003-TEST [CRITICAL] Add LangChain/Azure integration contract test for onboarding assistant chat path in `backend/src/test/java/com/gymtracker/infrastructure/ai/AzureOpenAiIntegrationIT.java`
+  - Assert `LangChainSessionProcessor` uses real `AzureOpenAiChatModel` execution path instead of stubbed provider output
+  - Assert returned content is strict JSON consumable by onboarding proposal parser
+  - Assert test fails for stub-like plain-text or non-JSON responses
+
+- [ ] T066-BUG-004-TEST [CRITICAL] Add fail-fast malformed/empty model-output tests in `backend/src/test/java/com/gymtracker/infrastructure/ai/LangChainSessionProcessorTest.java`
+  - Assert no hardcoded fallback proposal/session data is emitted on parse failure
+  - Assert explicit error is surfaced for malformed and empty model output
+
+- [ ] T067-BUG-005-TEST [CRITICAL] Add onboarding generator integration tests for assistant prompt path in `backend/src/test/java/com/gymtracker/application/PlanProposalServiceIT.java`
+  - Assert onboarding generation uses assistant `chat` prompt path directly
+  - Assert no fake `SessionSummaryDTO` bridge is used in onboarding generation flow
+
+### Implementation for Phase 8 Remediation
+
+- [ ] T065-BUG-003 [CRITICAL] Replace stubbed Azure call path with real LangChain/Azure execution in `backend/src/main/java/com/gymtracker/infrastructure/ai/LangChainSessionProcessor.java`
+  - Remove synthetic/default response branch and route calls through runtime model invocation
+  - Ensure the processing path consumes `ChatModel` backed by `AzureOpenAiChatModel`
+
+- [ ] T066-BUG-004 [CRITICAL] Implement explicit onboarding LangChain abstractions in `backend/src/main/java/com/gymtracker/infrastructure/ai/ChatMemoryProvider.java`
+  - Add `ChatMemoryProvider` contract
+  - Add onboarding assistant interface via `AiServices` with `chat` method
+  - Add `ChatModel` and `AzureOpenAiChatModel` wiring used by onboarding assistant
+
+- [ ] T067-BUG-005 [CRITICAL] Refactor onboarding proposal generation to assistant prompt path in `backend/src/main/java/com/gymtracker/infrastructure/ai/OnboardingPlanGenerator.java`
+  - Remove fake `SessionSummaryDTO` bridge usage from onboarding generation
+  - Keep fail-fast behavior: malformed/empty output surfaces explicit error
+  - Keep zero hardcoded fallback proposal payloads
+
+---
+
 ## Dependencies & Execution Order
 
 ### Phase Dependencies
@@ -195,6 +234,10 @@
 - **Phase 7 (CRITICAL BUG FIXES) -> BLOCKING all use until complete; must be prioritized immediately**
   - T063-BUG-001 must complete before smoke test acceptance
   - T064-BUG-002 must complete before T035 (reject endpoint), T052 (accept endpoint) can pass integration tests
+- **Phaze 8 cricical bugs fixes for Azure Open AI iteraction -> depends on Phase 7 and BLOCKS rollout**
+  - T065-BUG-003-TEST/T065-BUG-003 must pass before AI integration sign-off
+  - T066-BUG-004-TEST/T066-BUG-004 must pass before fail-fast behavior is compliant
+  - T067-BUG-005-TEST/T067-BUG-005 must pass before onboarding rollout approval
 
 ### User Story Dependency Graph
 
@@ -204,6 +247,7 @@
 ### Task-Level Critical Chain
 
 - `T004 -> T006/T007/T008/T009/T010 -> T020/T022 -> T033/T035 -> T046/T049/T050 -> T051/T052 -> T062`
+- `T063-BUG-001/T064-BUG-002 -> T065-BUG-003 -> T066-BUG-004 -> T067-BUG-005 -> rollout`
 - `T023` and `T028` must complete before US1 is considered done for mandatory new-user gating.
 
 ### Within Each User Story
@@ -222,6 +266,7 @@
 - US2 test tasks `T029-T032` can run in parallel.
 - US3 test tasks `T039-T050` can run in parallel.
 - Docs/ops polish tasks `T058-T060` can run in parallel.
+- Phase 8 test tasks `T065-BUG-003-TEST` and `T066-BUG-004-TEST` can run in parallel before implementation.
 
 ## Parallel Example: User Story 1
 
