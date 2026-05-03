@@ -1,10 +1,8 @@
 <!--
 Sync Impact Report
-- Version change: 1.0.0 -> 2.0.0
-- Modified principles:
-  - VII. Performance and Low Latency by Default -> removed
-  - VIII. English-Only Documentation and Specifications -> VII. English-Only Documentation and Specifications
-- Added sections: none
+- Version change: 2.0.0 -> 2.1.0
+- Modified principles: none
+- Added sections: VIII. Checkstyle Enforcement
 - Removed sections: none
 - Templates requiring updates:
   - ✅ updated: .specify/templates/plan-template.md
@@ -16,9 +14,7 @@ Sync Impact Report
   - ✅ updated: specs/001-workout-tracker/spec.md
   - ✅ updated: specs/001-workout-tracker/tasks.md
 - Follow-up TODOs: none
--->
-
-# Go To The Fucking Gym Constitution
+--> Constitution
 
 ## Core Principles
 
@@ -66,6 +62,13 @@ be written in English. User-facing localized content may vary by product needs, 
 engineering artifacts remain English-only. Rationale: one working language reduces
 ambiguity and supports collaboration.
 
+### VIII. Checkstyle Enforcement
+All new backend code MUST pass checkstyle validation before being committed or merged.
+Developers MUST run the checkstyle task locally before every commit. Pull requests that
+introduce checkstyle violations MUST NOT be merged. Rationale: automated style
+enforcement keeps the codebase consistent, reduces review friction, and prevents
+style debt accumulation over time.
+
 ## Technology and Quality Constraints
 
 - Backend runtime MUST target Java 21.
@@ -75,6 +78,7 @@ ambiguity and supports collaboration.
 - Every feature spec MUST include UX consistency expectations and any
   materially relevant non-functional constraints required to define done.
 - All specification artifacts MUST be authored in English.
+- All new backend code MUST pass checkstyle before commit and merge.
 
 ## Development Workflow and Quality Gates
 
@@ -92,6 +96,8 @@ ambiguity and supports collaboration.
 8. After merge, review each linked issue or task against acceptance criteria and close
    it when the delivered change satisfies the documented scope.
 9. Reject pull requests that violate English-only engineering documentation.
+10. Run the checkstyle task locally before every commit; MUST NOT commit code that
+    fails checkstyle validation.
 
 ## Governance
 
@@ -113,8 +119,8 @@ Versioning policy:
 Compliance review expectations:
 - Every implementation plan MUST pass a constitution check before design and again
   before implementation.
-- Every pull request MUST show evidence of testing, stack compliance, UX review, and
-  linked task or issue traceability.
+- Every pull request MUST show evidence of testing, stack compliance, UX review,
+  checkstyle compliance, and linked task or issue traceability.
 - Each planned task SHOULD be created as a GitHub issue so planning, review, and
   closure remain auditable; if a task is not created as an issue, the exception MUST
   be documented in the delivery record.
@@ -125,4 +131,4 @@ Compliance review expectations:
 - Maintainers MUST review this constitution at least once per quarter to confirm it
   still reflects project needs.
 
-**Version**: 2.0.0 | **Ratified**: 2026-04-26 | **Last Amended**: 2026-05-02
+**Version**: 2.1.0 | **Ratified**: 2026-04-26 | **Last Amended**: 2026-05-03

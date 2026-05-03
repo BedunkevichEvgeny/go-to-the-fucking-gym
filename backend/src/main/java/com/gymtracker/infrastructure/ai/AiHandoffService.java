@@ -3,10 +3,13 @@ package com.gymtracker.infrastructure.ai;
 import com.gymtracker.domain.ExerciseEntry;
 import com.gymtracker.domain.LoggedSession;
 import com.gymtracker.domain.ProgramExerciseTarget;
+import com.gymtracker.domain.SessionAiSuggestion;
 import com.gymtracker.domain.SessionType;
 import com.gymtracker.domain.StrengthSet;
 import com.gymtracker.domain.User;
+import com.gymtracker.infrastructure.repository.LoggedSessionRepository;
 import com.gymtracker.infrastructure.repository.ProgramExerciseTargetRepository;
+import com.gymtracker.infrastructure.repository.SessionAiSuggestionRepository;
 import com.gymtracker.infrastructure.repository.UserRepository;
 import java.math.BigDecimal;
 import java.util.HashMap;
@@ -27,15 +30,21 @@ public class AiHandoffService {
     private final LangChainSessionProcessor processor;
     private final ProgramExerciseTargetRepository programExerciseTargetRepository;
     private final UserRepository userRepository;
+    private final SessionAiSuggestionRepository sessionAiSuggestionRepository;
+    private final LoggedSessionRepository loggedSessionRepository;
 
     public AiHandoffService(
             LangChainSessionProcessor processor,
             ProgramExerciseTargetRepository programExerciseTargetRepository,
-            UserRepository userRepository
+            UserRepository userRepository,
+            SessionAiSuggestionRepository sessionAiSuggestionRepository,
+            LoggedSessionRepository loggedSessionRepository
     ) {
         this.processor = processor;
         this.programExerciseTargetRepository = programExerciseTargetRepository;
         this.userRepository = userRepository;
+        this.sessionAiSuggestionRepository = sessionAiSuggestionRepository;
+        this.loggedSessionRepository = loggedSessionRepository;
     }
 
     /**
@@ -65,8 +74,20 @@ public class AiHandoffService {
                 log.error("AI handoff failed for session {}", summary.sessionId(), exception);
                 return;
             }
-            log.info("AI handoff finished for session {} with response: {}", summary.sessionId(), response);
+            persistSuggestion(summary.sessionId(), response);
         });
+    }
+
+    private void persistSuggestion(UUID sessionId, String suggestion) {
+        if (sessionAiSuggestionRepository.existsById(sessionId)) {
+            log.debug("Suggestion already stored for session {}; skipping.", sessionId);
+            return;
+        }
+        SessionAiSuggestion entity = new SessionAiSuggestion();
+        entity.setSession(loggedSessionRepository.getReferenceById(sessionId));
+        entity.setSuggestion(suggestion);
+        sessionAiSuggestionRepository.save(entity);
+        log.info("AI suggestion stored for session {}", sessionId);
     }
 
     /**

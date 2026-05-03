@@ -83,7 +83,8 @@ class FreeSessionServiceTest {
                                 entry.exerciseType(),
                                 List.of(),
                                 List.of()))
-                        .toList());
+                        .toList(),
+                null);
 
         when(loggedSessionService.saveLoggedSession(userId, request)).thenReturn(detail);
 

@@ -97,7 +97,8 @@ class LoggedSessionServiceTest {
                 null,
                 null,
                 request.feelings(),
-                List.of()));
+                List.of(),
+                null));
 
         service.saveLoggedSession(userId, request);
 
@@ -152,7 +153,8 @@ class LoggedSessionServiceTest {
                 null,
                 null,
                 request.feelings(),
-                List.of()));
+                List.of(),
+                null));
 
         service.saveLoggedSession(userId, request);
 
@@ -207,7 +209,8 @@ class LoggedSessionServiceTest {
                 null,
                 null,
                 request.feelings(),
-                List.of()));
+                List.of(),
+                null));
 
         service.saveLoggedSession(userId, request);
 

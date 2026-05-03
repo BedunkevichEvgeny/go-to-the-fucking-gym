@@ -17,7 +17,9 @@ import com.gymtracker.domain.SessionFeelings;
 import com.gymtracker.domain.SessionType;
 import com.gymtracker.domain.User;
 import com.gymtracker.domain.WeightUnit;
+import com.gymtracker.infrastructure.repository.LoggedSessionRepository;
 import com.gymtracker.infrastructure.repository.ProgramExerciseTargetRepository;
+import com.gymtracker.infrastructure.repository.SessionAiSuggestionRepository;
 import com.gymtracker.infrastructure.repository.UserRepository;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -43,9 +45,16 @@ class AiHandoffServiceTest {
     @Mock
     private UserRepository userRepository;
 
+    @Mock
+    private SessionAiSuggestionRepository sessionAiSuggestionRepository;
+
+    @Mock
+    private LoggedSessionRepository loggedSessionRepository;
+
     @Test
     void enqueueSessionForAiAnalysisQueuesProgramSessionWithoutBlockingCaller() throws Exception {
-        AiHandoffService service = new AiHandoffService(processor, programExerciseTargetRepository, userRepository);
+        AiHandoffService service = new AiHandoffService(processor, programExerciseTargetRepository, userRepository,
+                sessionAiSuggestionRepository, loggedSessionRepository);
         LoggedSession session = programSession();
         UUID userId = UUID.randomUUID();
 
@@ -78,7 +87,8 @@ class AiHandoffServiceTest {
 
     @Test
     void buildSessionSummaryIncludesActualVsTargetFeelingsAndUserPreferences() {
-        AiHandoffService service = new AiHandoffService(processor, programExerciseTargetRepository, userRepository);
+        AiHandoffService service = new AiHandoffService(processor, programExerciseTargetRepository, userRepository,
+                sessionAiSuggestionRepository, loggedSessionRepository);
         LoggedSession session = programSession();
         UUID userId = UUID.randomUUID();
 
@@ -116,7 +126,8 @@ class AiHandoffServiceTest {
 
     @Test
     void enqueueSessionForAiAnalysisHandlesProcessorErrorsGracefully() {
-        AiHandoffService service = new AiHandoffService(processor, programExerciseTargetRepository, userRepository);
+        AiHandoffService service = new AiHandoffService(processor, programExerciseTargetRepository, userRepository,
+                sessionAiSuggestionRepository, loggedSessionRepository);
         LoggedSession session = programSession();
 
         when(programExerciseTargetRepository.findByProgramSession_IdOrderBySortOrderAsc(session.getProgramSessionId()))
@@ -131,7 +142,8 @@ class AiHandoffServiceTest {
 
     @Test
     void enqueueSessionForAiAnalysisSkipsFreeSessions() {
-        AiHandoffService service = new AiHandoffService(processor, programExerciseTargetRepository, userRepository);
+        AiHandoffService service = new AiHandoffService(processor, programExerciseTargetRepository, userRepository,
+                sessionAiSuggestionRepository, loggedSessionRepository);
         LoggedSession freeSession = LoggedSession.builder()
                 .id(UUID.randomUUID())
                 .sessionType(SessionType.FREE)
