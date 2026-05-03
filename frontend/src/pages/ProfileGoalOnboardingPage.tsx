@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ProposalReviewCard } from '../features/profile-goals/ProposalReviewCard';
 import {
@@ -12,27 +12,16 @@ import type {
   GoalTargetBucket,
   OnboardingPrimaryGoal,
   OnboardingSubmissionRequest,
-  PlanProposalResponse,
 } from '../types/onboarding';
 
 const GOAL_OPTIONS: OnboardingPrimaryGoal[] = ['LOSE_WEIGHT', 'BUILD_HEALTHY_BODY', 'STRENGTH', 'BUILD_MUSCLES'];
 const TARGET_OPTIONS: GoalTargetBucket[] = ['LOSS_5', 'LOSS_10', 'LOSS_15', 'LOSS_20_PLUS'];
 const FORM_STORAGE_KEY = 'profile-goals.form';
-const PROPOSAL_STORAGE_KEY = 'profile-goals.proposal';
 
 function readStoredForm(): OnboardingSubmissionRequest | null {
   try {
     const raw = localStorage.getItem(FORM_STORAGE_KEY);
     return raw ? (JSON.parse(raw) as OnboardingSubmissionRequest) : null;
-  } catch {
-    return null;
-  }
-}
-
-function readStoredProposal(): PlanProposalResponse | null {
-  try {
-    const raw = localStorage.getItem(PROPOSAL_STORAGE_KEY);
-    return raw ? (JSON.parse(raw) as PlanProposalResponse) : null;
   } catch {
     return null;
   }
@@ -45,6 +34,11 @@ export function ProfileGoalOnboardingPage() {
   const acceptProposal = useAcceptProposal();
   const { data: currentAttempt } = useCurrentOnboardingAttempt();
   const { data: gate } = useTrackingAccessGate();
+  const [acceptError, setAcceptError] = useState<string | null>(null);
+
+  // Server is the source of truth for proposals (NFR-004: state is server-persisted).
+  // Do NOT fall back to localStorage for proposals — stale cached IDs cause 404 on accept.
+  const proposal = currentAttempt?.latestProposal ?? createInitialProposal.data ?? null;
 
   const [form, setForm] = useState<OnboardingSubmissionRequest>(
     () =>
@@ -56,26 +50,17 @@ export function ProfileGoalOnboardingPage() {
         goalTargetBucket: null,
       },
   );
-  const [storedProposal, setStoredProposal] = useState<PlanProposalResponse | null>(() => readStoredProposal());
-
-  const proposal = useMemo(
-    () => currentAttempt?.latestProposal ?? createInitialProposal.data ?? storedProposal,
-    [createInitialProposal.data, currentAttempt?.latestProposal, storedProposal],
-  );
 
   useEffect(() => {
     localStorage.setItem(FORM_STORAGE_KEY, JSON.stringify(form));
   }, [form]);
 
+  // Remove any previously cached proposal from localStorage on mount.
+  // Proposals must come from the server; stale cached IDs cause 404 on accept after restarts.
   useEffect(() => {
-    if (proposal) {
-      localStorage.setItem(PROPOSAL_STORAGE_KEY, JSON.stringify(proposal));
-      setStoredProposal(proposal);
-      return;
-    }
-    localStorage.removeItem(PROPOSAL_STORAGE_KEY);
-    setStoredProposal(null);
-  }, [proposal]);
+    localStorage.removeItem('profile-goals.proposal');
+  }, []);
+
 
   return (
     <section className="stack-lg">
@@ -175,13 +160,17 @@ export function ProfileGoalOnboardingPage() {
           isBusy={rejectReview.isRejecting || acceptProposal.isPending}
           onReject={(requestedChanges) => rejectReview.rejectProposal({ proposalId: proposal.proposalId, requestedChanges })}
           onAccept={async () => {
-            await acceptProposal.mutateAsync(proposal.proposalId);
-            localStorage.removeItem(PROPOSAL_STORAGE_KEY);
-            setStoredProposal(null);
-            navigate('/program-session');
+            setAcceptError(null);
+            try {
+              await acceptProposal.mutateAsync(proposal.proposalId);
+              navigate('/program-session');
+            } catch {
+              setAcceptError('Failed to accept the plan. Please try again.');
+            }
           }}
         />
       )}
+      {acceptError && <p className="card" style={{ color: 'var(--color-error, red)' }}>{acceptError}</p>}
     </section>
   );
 }

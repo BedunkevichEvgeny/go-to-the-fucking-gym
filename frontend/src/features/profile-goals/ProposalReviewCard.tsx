@@ -25,7 +25,21 @@ export function ProposalReviewCard({ proposal, isBusy, onReject, onAccept }: Pro
           </strong>
           <ul>
             {session.exercises.map((exercise) => (
-              <li key={`${session.sequenceNumber}-${exercise.exerciseName}`}>{exercise.exerciseName}</li>
+              <li key={`${session.sequenceNumber}-${exercise.exerciseName}`}>
+                <strong>{exercise.exerciseName}</strong>
+                {exercise.targetSets != null && exercise.targetReps != null && (
+                  <span> — {exercise.targetSets}×{exercise.targetReps} reps</span>
+                )}
+                {exercise.targetWeight != null && (
+                  <span> @ {exercise.targetWeight} {exercise.targetWeightUnit ?? ''}</span>
+                )}
+                {exercise.targetDurationSeconds != null && (
+                  <span> — {exercise.targetDurationSeconds}s</span>
+                )}
+                {exercise.targetDistance != null && (
+                  <span> / {exercise.targetDistance} {exercise.targetDistanceUnit ?? ''}</span>
+                )}
+              </li>
             ))}
           </ul>
         </article>

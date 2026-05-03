@@ -66,6 +66,37 @@ class OnboardingPlanGeneratorPromptTest {
         String prompt = generator.buildPrompt(SAMPLE_REQUEST);
         assertThat(prompt).doesNotContainIgnoringCase("flexibility work");
     }
+
+    // ===== T071: buildRevisionPrompt contains requestedChanges text =====
+
+    @Test
+    void buildRevisionPrompt_ContainsRequestedChangesText() {
+        String feedback = "Add more cardio and remove leg day";
+        String prompt = generator.buildRevisionPrompt(SAMPLE_REQUEST, feedback);
+        assertThat(prompt).contains(feedback);
+    }
+
+    @Test
+    void buildRevisionPrompt_ContainsFeedbackKeyword() {
+        String prompt = generator.buildRevisionPrompt(SAMPLE_REQUEST, "less volume");
+        assertThat(prompt).containsIgnoringCase("feedback");
+    }
+
+    @Test
+    void buildRevisionPrompt_ContainsBasePromptContent() {
+        String basePrompt = generator.buildPrompt(SAMPLE_REQUEST);
+        String revisionPrompt = generator.buildRevisionPrompt(SAMPLE_REQUEST, "reduce sets");
+        assertThat(revisionPrompt).contains(basePrompt.trim());
+    }
+
+    @Test
+    void buildRevisionPrompt_WithDifferentFeedbackTexts_EachAppearsInPrompt() {
+        String feedback1 = "More upper body compound lifts";
+        String feedback2 = "Replace running with cycling";
+
+        assertThat(generator.buildRevisionPrompt(SAMPLE_REQUEST, feedback1)).contains(feedback1);
+        assertThat(generator.buildRevisionPrompt(SAMPLE_REQUEST, feedback2)).contains(feedback2);
+    }
 }
 
 

@@ -80,6 +80,58 @@ public class OnboardingPlanGenerator {
         }
     }
 
+    public PlanProposalResponse generateRevision(UUID userId, OnboardingSubmissionRequest request, String requestedChanges) {
+        UUID attemptId = UUID.randomUUID();
+        UUID proposalId = UUID.randomUUID();
+
+        String prompt = buildRevisionPrompt(request, requestedChanges);
+        logger.debug("Generating revision with feedback prompt: {}", prompt);
+
+        try {
+            OnboardingPlanDto planDto = langChainProcessor.processOnboarding(userId.toString(), prompt);
+
+            if (planDto == null || planDto.sessions() == null || planDto.sessions().isEmpty()) {
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_GATEWAY,
+                        "AI returned no usable sessions for revised proposal");
+            }
+
+            List<ProposedSession> sessions = mapSessions(planDto, request);
+            if (sessions.isEmpty()) {
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_GATEWAY,
+                        "AI returned no usable sessions for revised proposal");
+            }
+
+            return new PlanProposalResponse(
+                    attemptId,
+                    proposalId,
+                    1,
+                    ProposalStatus.PROPOSED,
+                    new GeneratedBy(ProposalProvider.AZURE_OPENAI, properties.getDeployment()),
+                    sessions);
+        } catch (ResponseStatusException responseStatusException) {
+            throw responseStatusException;
+        } catch (Exception exception) {
+            logger.error("Failed to generate revised onboarding proposal from AI", exception);
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_GATEWAY,
+                    "Failed to generate revised onboarding plan from AI service",
+                    exception);
+        }
+    }
+
+    // package-private for testing
+    String buildRevisionPrompt(OnboardingSubmissionRequest request, String requestedChanges) {
+        return buildPrompt(request) + String.format("""
+                
+                IMPORTANT — the user reviewed a previous proposal and provided the following feedback:
+                "%s"
+                
+                You MUST incorporate this feedback into the new plan. Do not repeat elements the user asked to remove or change.
+                """, requestedChanges);
+    }
+
     // package-private for testing
     String buildPrompt(OnboardingSubmissionRequest request) {
         return String.format("""

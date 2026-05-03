@@ -104,6 +104,54 @@ frontend/
 
 **Task decomposition implications for `/speckit.tasks`**: Enforce one issue per task and one task per commit, with separate tasks for migration, API, AI integration, frontend UX, and test matrix completion.
 
+## Gap Fixes (Post-Smoke-Test)
+
+Identified during smoke test analysis on 2026-05-03. Two gaps (B1, B2) were found and partially fixed; this section records the remaining test-coverage work and spec tightening required to close them.
+
+### B1 — Critical Bug: `requestedChanges` silently dropped in Reject & Revise flow
+
+**Root cause (fixed)**: `PlanProposalService.createRevision()` always called `generateInitialProposal()` instead of forwarding user feedback to the AI.
+
+**Code fixes already applied**:
+- `backend/src/main/java/com/gymtracker/infrastructure/ai/OnboardingPlanGenerator.java` — added `generateRevision()` and `buildRevisionPrompt()` methods
+- `backend/src/main/java/com/gymtracker/application/PlanProposalService.java` — `createRevision()` now branches on feedback presence
+
+**Remaining work — Integration test**:
+- Add an integration test (e.g. `PlanProposalServiceIT#revisionPromptContainsFeedback`) that:
+  - Uses a spy or mock on `LangChainSessionProcessor` or `OnboardingPlanGenerator`
+  - Calls `createRevision()` with a non-blank `requestedChanges` value
+  - Asserts the captured prompt string contains the feedback text
+- Constitution §III mandates this: all business logic must be covered by tests.
+- Suggested location: `backend/src/test/java/com/gymtracker/application/PlanProposalServiceIT.java`
+
+**Spec update required**: FR-007 tightened — see spec.md.
+
+---
+
+### B2 — High Priority UI Gap: Proposal review card shows only exercise names
+
+**Root cause (fixed)**: `ProposalReviewCard.tsx` only rendered `exercise.exerciseName`, ignoring all target fields.
+
+**Code fixes already applied**:
+- `frontend/src/features/profile-goals/ProposalReviewCard.tsx` — now renders sets×reps, weight, duration, distance
+
+**Remaining work — Frontend component test**:
+- Add a Vitest + React Testing Library test (e.g. `ProposalReviewCard.test.tsx`) that:
+  - Renders `ProposalReviewCard` with a mock proposal containing at least one strength exercise (sets, reps, weight) and one cardio exercise (duration, distance)
+  - Asserts that sets, reps, weight, duration, and distance values are visible in the rendered output
+- Suggested location: `frontend/tests/features/profile-goals/ProposalReviewCard.test.tsx`
+
+**Spec update required**: FR-005 tightened — see spec.md.
+
+---
+
+### Task additions for `/speckit.tasks`
+
+These tasks must be added to the task list in addition to the original Phase 2 Planning Outlook groups:
+
+- **Task B1-TEST**: Write `PlanProposalServiceIT#revisionPromptContainsFeedback` integration test (backend)
+- **Task B2-TEST**: Write `ProposalReviewCard.test.tsx` component test covering exercise detail rendering (frontend)
+
 ## Complexity Tracking
 
 No constitution violations or elevated complexity justifications are required at plan stage.

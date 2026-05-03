@@ -346,6 +346,56 @@ prompt/enum mismatch and unguarded raw-string LLM parsing. `buildPrompt()` lists
 
 ---
 
+## Phase 7: Smoke-Test Gap Fixes (Bug Fixes)
+
+**Purpose**: Close two Constitution §III violations identified during smoke testing — missing test coverage for implemented business logic.
+
+### B1 — Integration test: `requestedChanges` reaches AI prompt
+
+- [ ] T071-BUG-B1 [US2] Add integration test asserting `requestedChanges` is forwarded to the AI revision prompt in `backend/src/test/java/com/gymtracker/application/PlanRevisionFeedbackIT.java`
+  - Use a `@SpyBean` or `@MockBean` on `OnboardingPlanGenerator` (or `LangChainSessionProcessor`) to capture the prompt argument
+  - Call `POST /api/onboarding/{attemptId}/proposals/{proposalId}/reject` with a non-blank `requestedChanges` value via `MockMvc` or `TestRestTemplate`
+  - Assert the captured prompt string **contains** the exact feedback text submitted
+  - Verify `PlanProposalService.createRevision()` takes the feedback-present branch (not the blank branch)
+  - Test must run against the embedded H2 test database — no real Azure calls
+  - **Acceptance criteria**: Test goes red without the `buildRevisionPrompt()` method and green with it; CI pipeline stays green
+
+### B2 — Frontend component test: exercise detail rendering in `ProposalReviewCard`
+
+- [ ] T072-BUG-B2 [P] [US2] Add Vitest/RTL component tests for exercise detail fields in `frontend/tests/ProposalReviewCard.exercise-details.test.tsx`
+  - Render `ProposalReviewCard` with a proposal fixture containing `targetSets`, `targetReps`, `targetWeight`, and `targetWeightUnit`; assert all four values appear in the DOM
+  - Render with `targetDurationSeconds` set; assert the formatted duration string is visible
+  - Render with `targetDistance` and `targetDistanceUnit` set; assert both appear in the DOM
+  - Render with none of the optional fields set; assert no empty/broken detail rows are shown
+  - Use `@testing-library/react` `render` + `screen.getByText` / `screen.queryByText` patterns consistent with existing frontend tests
+  - **Acceptance criteria**: All four cases pass; component must not regress when any single optional field is absent
+
+---
+
+### B3 — Frontend test: no stale localStorage proposal rendered when backend returns 204
+
+- [ ] T073-BUG-B3 [P] Add Vitest/RTL page-level test asserting stale localStorage proposal is NOT rendered when `useCurrentOnboardingAttempt` returns `null` in `frontend/tests/ProfileGoalOnboardingPage.stale-localStorage.test.tsx`
+  - Before rendering, seed `localStorage` with key `profile-goals.proposal` containing a serialised proposal fixture
+  - Mock `useCurrentOnboardingAttempt` to return `{ data: null, isLoading: false }` (simulates 204 from backend)
+  - Mock `useCreateInitialProposal` to return `{ data: undefined, isPending: false, mutateAsync: vi.fn() }`
+  - Assert that NO proposal card / proposal content is visible in the DOM after render
+  - Assert that `localStorage.getItem('profile-goals.proposal')` returns `null` after mount (cleanup side-effect ran)
+  - **Acceptance criteria**: Test goes red if the stale `storedProposal` fallback path is re-introduced; test goes green with the current server-only derivation; CI pipeline stays green
+
+---
+
+### B4 — Frontend test: accept-button error message shown and navigation suppressed on 404
+
+- [ ] T074-BUG-B4 [P] Add Vitest/RTL page-level test asserting error message is displayed and navigation does NOT occur when `acceptProposal.mutateAsync` rejects in `frontend/tests/ProfileGoalOnboardingPage.accept-error.test.tsx`
+  - Render page with a valid in-progress attempt fixture (proposal visible, Accept button enabled)
+  - Mock `acceptProposal.mutateAsync` to reject with a simulated 404 error
+  - Fire a click on the Accept button
+  - Assert the text `"Failed to accept the plan. Please try again."` appears in the DOM
+  - Assert that `useNavigate`'s mock function was NOT called (navigation suppressed)
+  - **Acceptance criteria**: Test goes red if the `try/catch` error handler or `acceptError` render path is removed; test goes green with the current implementation; CI pipeline stays green
+
+---
+
 
 
 ### MVP First (US1)

@@ -140,15 +140,16 @@ public class PlanProposalService {
             throw new RuntimeException("User does not own this proposal");
         }
 
-        // Keep for prompt-context extension in later iterations.
-        if (requestedChanges != null && !requestedChanges.isBlank()) {
-            logger.debug("Revision requested for proposal {}: {}", proposalId, requestedChanges);
-        }
-
         UUID attemptId = parentProposal.getAttempt().getId();
         OnboardingSubmissionRequest originalRequest = resolveAttemptSnapshot(userId, attemptId);
 
-        PlanProposalResponse revised = onboardingPlanGenerator.generateInitialProposal(userId, originalRequest);
+        PlanProposalResponse revised;
+        if (requestedChanges != null && !requestedChanges.isBlank()) {
+            logger.debug("Revision requested for proposal {} with feedback: {}", proposalId, requestedChanges);
+            revised = onboardingPlanGenerator.generateRevision(userId, originalRequest, requestedChanges);
+        } else {
+            revised = onboardingPlanGenerator.generateInitialProposal(userId, originalRequest);
+        }
 
         try {
             String payload = proposalMapper.toPayloadJson(
