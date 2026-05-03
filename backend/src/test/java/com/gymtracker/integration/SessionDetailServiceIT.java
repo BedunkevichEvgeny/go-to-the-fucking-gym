@@ -1,34 +1,44 @@
 package com.gymtracker.integration;
 
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.nullValue;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import com.gymtracker.domain.LoggedSession;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.gymtracker.api.dto.ExerciseEntryInput;
+import com.gymtracker.api.dto.LoggedSessionCreateRequest;
+import com.gymtracker.api.dto.LoggedSessionDetail;
+import com.gymtracker.api.dto.SessionFeelingsInput;
+import com.gymtracker.api.dto.StrengthSetInput;
+import com.gymtracker.domain.ExerciseType;
 import com.gymtracker.domain.SessionAiSuggestion;
 import com.gymtracker.domain.SessionType;
+import com.gymtracker.domain.WeightUnit;
 import com.gymtracker.infrastructure.repository.LoggedSessionRepository;
 import com.gymtracker.infrastructure.repository.SessionAiSuggestionRepository;
+import java.math.BigDecimal;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
-import java.util.ArrayList;
+import java.util.Base64;
+import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.web.servlet.MockMvc;
 
-@SpringBootTest
-@AutoConfigureMockMvc
+@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class SessionDetailServiceIT {
 
-    @Autowired
-    private MockMvc mockMvc;
+    @LocalServerPort
+    private int port;
+
+    private final ObjectMapper objectMapper = new ObjectMapper().findAndRegisterModules();
 
     @Autowired
     private LoggedSessionRepository loggedSessionRepository;
@@ -36,42 +46,78 @@ class SessionDetailServiceIT {
     @Autowired
     private SessionAiSuggestionRepository sessionAiSuggestionRepository;
 
-    private LoggedSession savedProgramSession(UUID userId) {
-        LoggedSession session = new LoggedSession();
-        session.setId(UUID.randomUUID());
-        session.setUserId(userId);
-        session.setSessionType(SessionType.PROGRAM);
-        session.setProgramSessionId(UUID.randomUUID());
-        session.setSessionDate(LocalDate.now());
-        session.setExerciseEntries(new ArrayList<>());
-        return loggedSessionRepository.save(session);
-    }
-
     @Test
     void getSessionDetail_withSuggestionInDb_responseContainsAiSuggestion() throws Exception {
-        UUID userId = UUID.randomUUID();
-        LoggedSession session = savedProgramSession(userId);
+        LoggedSessionDetail created = postFreeSession(LocalDate.of(2026, 5, 1), "Bench Press", "Morning push");
+        UUID sessionId = created.sessionId();
 
         SessionAiSuggestion suggestion = new SessionAiSuggestion();
-        suggestion.setSession(session);
+        suggestion.setSession(loggedSessionRepository.getReferenceById(sessionId));
         suggestion.setSuggestion("Excellent form today!");
         sessionAiSuggestionRepository.save(suggestion);
 
-        mockMvc.perform(get("/api/logged-sessions/{id}", session.getId())
-                        .with(jwt().jwt(jwt -> jwt.subject(userId.toString()))))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.aiSuggestion", is("Excellent form today!")));
+        HttpResponse<String> response = getSessionDetail(sessionId);
+        LoggedSessionDetail detail = objectMapper.readValue(response.body(), LoggedSessionDetail.class);
+
+        assertThat(response.statusCode()).isEqualTo(200);
+        assertThat(detail.aiSuggestion()).isEqualTo("Excellent form today!");
     }
 
     @Test
     void getSessionDetail_withoutSuggestionRow_responseAiSuggestionIsNull() throws Exception {
-        UUID userId = UUID.randomUUID();
-        LoggedSession session = savedProgramSession(userId);
+        LoggedSessionDetail created = postFreeSession(LocalDate.of(2026, 5, 1), "Deadlift", "Evening pull");
 
-        mockMvc.perform(get("/api/logged-sessions/{id}", session.getId())
-                        .with(jwt().jwt(jwt -> jwt.subject(userId.toString()))))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.aiSuggestion", nullValue()));
+        HttpResponse<String> response = getSessionDetail(created.sessionId());
+        LoggedSessionDetail detail = objectMapper.readValue(response.body(), LoggedSessionDetail.class);
+
+        assertThat(response.statusCode()).isEqualTo(200);
+        assertThat(detail.aiSuggestion()).isNull();
+    }
+
+    private LoggedSessionDetail postFreeSession(LocalDate date, String exerciseName, String sessionName) throws Exception {
+        LoggedSessionCreateRequest request = new LoggedSessionCreateRequest(
+                SessionType.FREE,
+                null,
+                date,
+                sessionName,
+                null,
+                1200,
+                new SessionFeelingsInput(7, "Good effort"),
+                List.of(new ExerciseEntryInput(
+                        null,
+                        exerciseName,
+                        exerciseName,
+                        ExerciseType.STRENGTH,
+                        List.of(new StrengthSetInput(10, false, new BigDecimal("80"), WeightUnit.KG)),
+                        List.of())));
+
+        HttpRequest httpRequest = HttpRequest.newBuilder()
+                .uri(URI.create(baseUrl("/api/logged-sessions")))
+                .header("Authorization", basicAuth("user1", "password1"))
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(objectMapper.writeValueAsString(request)))
+                .build();
+        HttpResponse<String> response = HttpClient.newHttpClient().send(httpRequest, HttpResponse.BodyHandlers.ofString());
+        assertThat(response.statusCode()).isEqualTo(201);
+        return objectMapper.readValue(response.body(), LoggedSessionDetail.class);
+    }
+
+    private HttpResponse<String> getSessionDetail(UUID sessionId) throws Exception {
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(baseUrl("/api/logged-sessions/" + sessionId)))
+                .header("Authorization", basicAuth("user1", "password1"))
+                .header("Accept", "application/json")
+                .GET()
+                .build();
+        return HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
+    }
+
+    private String basicAuth(String username, String password) {
+        String value = username + ":" + password;
+        return "Basic " + Base64.getEncoder().encodeToString(value.getBytes(StandardCharsets.UTF_8));
+    }
+
+    private String baseUrl(String path) {
+        return "http://localhost:" + port + path;
     }
 }
-
