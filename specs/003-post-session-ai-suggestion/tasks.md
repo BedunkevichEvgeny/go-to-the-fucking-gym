@@ -166,7 +166,19 @@ _The existing gate in `AiHandoffService` already skips FREE sessions. No new bac
 - [X] T025 [P] Run `npm run lint` in `frontend/`; fix any lint errors in new/modified files (`api.ts`, `usePollSessionSuggestion.ts`, `AiCoachingInsightCard.tsx`, `ProgramSessionPage.tsx`, `SessionDetailView.tsx`)
 - [X] T026 [P] Verify all backend tests pass: `./mvnw test` in `backend/` — confirm `AiHandoffServiceTest`, `DtoMapperTest`, `LoggedSessionServiceIT`, `SessionDetailServiceIT`, `SessionHistoryServiceIT` are green
 - [X] T027 [P] Verify all frontend tests pass: `npm run test` in `frontend/` — confirm `AiCoachingInsightCard.test.tsx`, `ProgramSessionPage.postSave.test.tsx`, `SessionDetailView.suggestion.test.tsx` are green
-- [ ] T028 Execute manual smoke test per `specs/003-post-session-ai-suggestion/quickstart.md` — save a program session end-to-end in local dev, verify suggestion appears, navigate to history, verify suggestion visible in detail view
+- [X] T028 Execute manual smoke test per `specs/003-post-session-ai-suggestion/quickstart.md` — save a program session end-to-end in local dev, verify suggestion appears, navigate to history, verify suggestion visible in detail view
+  - ~~**FAILED**: `suggestion CHARACTER VARYING(255)` truncation error — AI response exceeds 255 chars; see T029/T030 for fix.~~
+  - **PASSED** after T029/T030 hotfix applied.
+
+---
+
+## Phase 7: Hotfix — Suggestion Column Truncation (T028 Smoke Test Failure)
+
+**Root Cause**: `String suggestion` in `SessionAiSuggestion.java` lacked `columnDefinition = "TEXT"`. Hibernate's `ddl-auto=update` silently maps unmapped `String` fields to `CHARACTER VARYING(255)`, overriding the Flyway `TEXT` DDL on any environment where Hibernate ran first or `ddl-auto` mutated the schema. Real AI responses routinely exceed 255 characters.
+
+**Fix**:
+- [X] T029 Create `backend/src/main/resources/db/migration/V004__fix_suggestion_column_text.sql` — `ALTER TABLE session_ai_suggestions ALTER COLUMN suggestion TYPE TEXT;` (idempotent in PostgreSQL; repairs all existing deployed DBs where the column was downgraded to `VARCHAR(255)`)
+- [X] T030 Update `backend/src/main/java/com/gymtracker/domain/SessionAiSuggestion.java` — change `@Column(nullable = false)` to `@Column(nullable = false, columnDefinition = "TEXT")` on the `suggestion` field; prevents Hibernate from ever inferring `VARCHAR(255)` regardless of `ddl-auto` setting
 
 ---
 
