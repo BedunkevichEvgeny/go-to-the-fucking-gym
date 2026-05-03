@@ -10,8 +10,12 @@ import com.gymtracker.api.dto.ProfileGoalOnboardingDtos.PlanProposalResponse;
 import com.gymtracker.domain.OnboardingEnums.OnboardingPrimaryGoal;
 import com.gymtracker.domain.OnboardingEnums.ProposalProvider;
 import com.gymtracker.domain.WeightUnit;
+import com.gymtracker.infrastructure.ai.dto.ExerciseDto;
+import com.gymtracker.infrastructure.ai.dto.OnboardingPlanDto;
+import com.gymtracker.infrastructure.ai.dto.SessionDto;
 import dev.langchain4j.model.chat.ChatModel;
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,7 +30,7 @@ import org.springframework.web.server.ResponseStatusException;
 /**
  * Integration tests verifying that {@link LangChainSessionProcessor} (backed by
  * {@code AiServices}) routes through the real {@link ChatModel} bean and that the
- * downstream {@link OnboardingPlanGenerator} correctly consumes the model's JSON output.
+ * downstream {@link OnboardingPlanGenerator} correctly consumes the model's structured output.
  *
  * <p>The {@link ChatModel} is replaced with a {@link MockitoBean} so no actual Azure
  * OpenAI network calls are made, yet the full LangChain4j {@code AiServices} proxy
@@ -107,7 +111,7 @@ class AzureOpenAiIntegrationIT {
         assertThat(result).contains("progression");
     }
 
-    // ── contract: valid JSON output is consumable by onboarding parser ───────
+    // ── contract: valid structured output is consumable by onboarding generator ──
 
     @Test
     void contractTest_ValidJsonOutputIsConsumableByOnboardingParser() {
@@ -186,11 +190,12 @@ class AzureOpenAiIntegrationIT {
         });
     }
 
-    // ── fail-fast: empty model output throws ─────────────────────────────────
+    // ── fail-fast: null/empty DTO from structured output throws BAD_GATEWAY ──
 
     @Test
     void onboardingGenerateInitialProposal_ThrowsOnEmptyModelOutput() {
-        when(chatModel.chat(anyString())).thenReturn("");
+        // When the model returns empty JSON, processOnboarding() returns a DTO with null/empty sessions
+        when(chatModel.chat(anyString())).thenReturn("{\"sessions\": []}");
 
         UUID userId = UUID.randomUUID();
         OnboardingSubmissionRequest request = new OnboardingSubmissionRequest(

@@ -35,7 +35,7 @@ class OnboardingPlanGeneratorPromptTest {
 
     private static final OnboardingSubmissionRequest SAMPLE_REQUEST =
             new OnboardingSubmissionRequest(28, BigDecimal.valueOf(70), WeightUnit.KG,
-                    OnboardingPrimaryGoal.WEIGHT_LOSS, null);
+                    OnboardingPrimaryGoal.LOSE_WEIGHT, null);
 
     @Test
     void buildPrompt_ContainsStrengthType() {
@@ -67,4 +67,5 @@ class OnboardingPlanGeneratorPromptTest {
         assertThat(prompt).doesNotContainIgnoringCase("flexibility work");
     }
 }
+
 
