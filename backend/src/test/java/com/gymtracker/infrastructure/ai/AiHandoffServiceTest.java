@@ -3,6 +3,7 @@ package com.gymtracker.infrastructure.ai;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -23,7 +24,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -54,17 +54,15 @@ class AiHandoffServiceTest {
 
         CountDownLatch started = new CountDownLatch(1);
         CountDownLatch finished = new CountDownLatch(1);
-        when(processor.processAsync(any(SessionSummaryDTO.class))).thenAnswer(invocation -> {
+        when(processor.process(anyString(), anyString())).thenAnswer(invocation -> {
             started.countDown();
-            return CompletableFuture.supplyAsync(() -> {
-                try {
-                    Thread.sleep(200);
-                } catch (InterruptedException interruptedException) {
-                    Thread.currentThread().interrupt();
-                }
-                finished.countDown();
-                return "ok";
-            });
+            try {
+                Thread.sleep(200);
+            } catch (InterruptedException interruptedException) {
+                Thread.currentThread().interrupt();
+            }
+            finished.countDown();
+            return "ok";
         });
 
         long start = System.nanoTime();
@@ -74,7 +72,7 @@ class AiHandoffServiceTest {
         assertThat(elapsedMillis).isLessThan(100);
         assertThat(started.await(1, TimeUnit.SECONDS)).isTrue();
         assertThat(finished.await(2, TimeUnit.SECONDS)).isTrue();
-        verify(processor).processAsync(any(SessionSummaryDTO.class));
+        verify(processor).process(anyString(), anyString());
     }
 
     @Test
@@ -123,8 +121,8 @@ class AiHandoffServiceTest {
         when(programExerciseTargetRepository.findByProgramSession_IdOrderBySortOrderAsc(session.getProgramSessionId()))
                 .thenReturn(List.of());
         when(userRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
-        when(processor.processAsync(any(SessionSummaryDTO.class)))
-                .thenReturn(CompletableFuture.failedFuture(new IllegalStateException("boom")));
+        when(processor.process(anyString(), anyString()))
+                .thenThrow(new IllegalStateException("boom"));
 
         assertThatCode(() -> service.enqueueSessionForAiAnalysis(UUID.randomUUID(), session)).doesNotThrowAnyException();
     }
@@ -141,7 +139,7 @@ class AiHandoffServiceTest {
 
         service.enqueueSessionForAiAnalysis(UUID.randomUUID(), freeSession);
 
-        verify(processor, never()).processAsync(any(SessionSummaryDTO.class));
+        verify(processor, never()).process(anyString(), anyString());
     }
 
     private LoggedSession programSession() {
@@ -166,6 +164,4 @@ class AiHandoffServiceTest {
                 .build();
     }
 }
-
-
 
