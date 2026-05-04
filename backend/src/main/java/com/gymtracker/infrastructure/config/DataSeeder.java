@@ -45,6 +45,8 @@ public class DataSeeder implements ApplicationRunner {
             SecurityUsersProperties.UserDefinition definition = entry.getValue();
             userRepository.findById(definition.getId()).orElseGet(() -> userRepository.save(User.builder()
                     .id(definition.getId())
+                    .username(entry.getKey())
+                    .password(definition.getPassword())
                     .preferredWeightUnit(definition.getPreferredWeightUnit())
                     .build()));
         }
