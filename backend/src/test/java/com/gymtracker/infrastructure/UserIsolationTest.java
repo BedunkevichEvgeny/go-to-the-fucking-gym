@@ -15,12 +15,14 @@ import com.gymtracker.domain.LoggedSession;
 import com.gymtracker.domain.ProgramSession;
 import com.gymtracker.domain.ProgramStatus;
 import com.gymtracker.domain.SessionType;
+import com.gymtracker.domain.User;
+import com.gymtracker.domain.WeightUnit;
 import com.gymtracker.domain.WorkoutProgram;
-import com.gymtracker.infrastructure.config.SecurityUsersProperties;
 import com.gymtracker.infrastructure.mapper.DtoMapper;
 import com.gymtracker.infrastructure.repository.LoggedSessionRepository;
 import com.gymtracker.infrastructure.repository.ProgramExerciseTargetRepository;
 import com.gymtracker.infrastructure.repository.ProgramSessionRepository;
+import com.gymtracker.infrastructure.repository.UserRepository;
 import com.gymtracker.infrastructure.repository.WorkoutProgramRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
@@ -133,16 +135,28 @@ class UserIsolationTest {
                 .hasMessageContaining("does not belong");
     }
 
+    @Mock
+    private UserRepository userRepository;
+
     @Test
     void authenticationContextIsExtractedAndValidatedForDataAccess() {
-        AuthenticationService authenticationService = new AuthenticationService(new SecurityUsersProperties());
+        final UUID user1Id = UUID.fromString("11111111-1111-1111-1111-111111111111");
+        final User user1 = User.builder()
+            .id(user1Id)
+            .username("user1")
+            .password("password1")
+            .preferredWeightUnit(WeightUnit.KG)
+            .build();
+        when(userRepository.findByUsername("user1")).thenReturn(Optional.of(user1));
+        when(userRepository.findByUsername("unknown-user")).thenReturn(Optional.empty());
+
+        final AuthenticationService authenticationService = new AuthenticationService(userRepository);
 
         SecurityContextHolder.getContext().setAuthentication(new TestingAuthenticationToken("user1", "password1"));
-        assertThat(authenticationService.getCurrentUserId())
-                .isEqualTo(UUID.fromString("11111111-1111-1111-1111-111111111111"));
+        assertThat(authenticationService.getCurrentUserId()).isEqualTo(user1Id);
 
         SecurityContextHolder.getContext().setAuthentication(new TestingAuthenticationToken("unknown-user", "password"));
         assertThatThrownBy(authenticationService::getCurrentUserId)
-                .isInstanceOf(UnauthorizedException.class);
+            .isInstanceOf(UnauthorizedException.class);
     }
 }

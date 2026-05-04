@@ -1,38 +1,45 @@
 package com.gymtracker.application.security;
 
 import com.gymtracker.api.exception.UnauthorizedException;
-import com.gymtracker.infrastructure.config.SecurityUsersProperties;
+import com.gymtracker.infrastructure.repository.UserRepository;
 import java.util.UUID;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Service;
+import org.springframework.security.core.context.SecurityContextHolder;import org.springframework.stereotype.Service;
 
+/**
+ * Resolves the currently authenticated user's UUID from Spring Security context.
+ */
 @Service
-public class AuthenticationService {
+public final class AuthenticationService {
 
-    private final SecurityUsersProperties securityUsersProperties;
+    /** Repository used to look up the user by username. */
+    private final UserRepository userRepository;
 
-    public AuthenticationService(SecurityUsersProperties securityUsersProperties) {
-        this.securityUsersProperties = securityUsersProperties;
+    /**
+     * Constructs the service with the given repository.
+     *
+     * @param repo the user repository
+     */
+    public AuthenticationService(final UserRepository repo) {
+        this.userRepository = repo;
     }
 
     /**
-     * Resolves the authenticated application's user identifier from Spring Security context.
+     * Returns the UUID of the currently authenticated user.
      *
-     * @return mapped user UUID for the current principal
-     * @throws UnauthorizedException when no principal exists or mapping is missing
+     * @return the authenticated user's UUID
+     * @throws UnauthorizedException when no principal exists or user not in DB
      */
     public UUID getCurrentUserId() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        final Authentication authentication =
+            SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || authentication.getName() == null) {
             throw new UnauthorizedException("No authenticated user present");
         }
-        SecurityUsersProperties.UserDefinition userDefinition = securityUsersProperties.definitions().get(authentication.getName());
-        if (userDefinition == null || userDefinition.getId() == null) {
-            throw new UnauthorizedException("Authenticated user is not mapped to a workout tracker account");
-        }
-        return userDefinition.getId();
+        return userRepository.findByUsername(authentication.getName())
+            .map(com.gymtracker.domain.User::getId)
+            .orElseThrow(() -> new UnauthorizedException(
+                "Authenticated user is not mapped to a workout tracker account"
+            ));
     }
 }
-
-

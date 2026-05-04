@@ -27,6 +27,12 @@ public class User {
     @Column(nullable = false, updatable = false)
     private UUID id;
 
+    @Column(nullable = false, unique = true, length = 120)
+    private String username;
+
+    @Column(nullable = false, length = 255)
+    private String password;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "preferred_weight_unit", nullable = false, length = 10)
     private WeightUnit preferredWeightUnit;
